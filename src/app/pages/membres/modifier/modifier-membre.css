@@ -1,0 +1,2 @@
+.titre { display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+.dispo { padding: 14px 16px; border-radius: 10px; background: var(--lime-bg); color: var(--lime-text); }

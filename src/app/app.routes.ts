@@ -182,6 +182,13 @@ export const routes: Routes = [
         title: 'Profil du membre · SNJPro',
         loadComponent: () => import('./pages/membres/profil/profil-membre').then(m => m.ProfilMembre),
       },
+      {
+        path: 'membres/:id/modifier',
+        title: 'Modifier le profil · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: GESTION_MEMBRES },
+        loadComponent: () => import('./pages/membres/modifier/modifier-membre').then(m => m.ModifierMembre),
+      },
     ],
   },
 

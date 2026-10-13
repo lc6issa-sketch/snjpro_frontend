@@ -1,0 +1,82 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <a class="link" routerLink="/membres">← Retour</a>
+      <h1>Modifier le profil</h1>
+      <p class="sub">{{ nom() }} · {{ original()?.identifiantSnj }} · dernière mise à jour {{ original()?.dateModification || original()?.dateCreation | relatif }}</p>
+    </div>
+    <div class="actions">
+      <a [routerLink]="['/membres', id()]" class="btn btn-ghost">Annuler</a>
+      <button type="button" class="btn btn-primary" [disabled]="envoi() || !m" (click)="enregistrer()">{{ envoi() ? 'Enregistrement…' : 'Enregistrer' }}</button>
+    </div>
+  </div>
+
+  @if (m) {
+    <div class="grid grid-2">
+      <section class="card card-pad">
+        <h3 class="titre">Identité</h3>
+        <div class="form-grid">
+          <div class="field"><label for="nom">Nom<span class="req">*</span></label><input id="nom" class="input" [(ngModel)]="m.nom" /></div>
+          <div class="field"><label for="pre">Prénom(s)<span class="req">*</span></label><input id="pre" class="input" [(ngModel)]="m.prenom" /></div>
+          <div class="field"><label for="dn">Date de naissance</label><input id="dn" type="date" class="input" [(ngModel)]="m.dateNaissance" /></div>
+          <div class="field"><label for="ln">Lieu de naissance</label><input id="ln" class="input" [(ngModel)]="m.lieuNaissance" /></div>
+          <div class="field"><span class="label">Sexe</span>
+            <div class="segmented block">
+              <button type="button" [class.active]="m.sexe === 'MASCULIN'" (click)="m.sexe = 'MASCULIN'">Homme</button>
+              <button type="button" [class.active]="m.sexe === 'FEMININ'" (click)="m.sexe = 'FEMININ'">Femme</button>
+            </div></div>
+          <div class="field"><label for="gs">Groupe sanguin</label>
+            <select id="gs" class="select" [(ngModel)]="m.groupeSanguin"><option [ngValue]="undefined">Non renseigné</option>
+              @for (g of groupes(); track g) { <option [value]="g">{{ g }}</option> }</select></div>
+        </div>
+      </section>
+
+      <section class="card card-pad">
+        <h3 class="titre">Contact & localisation</h3>
+        <div class="form-grid">
+          <div class="field"><label for="tel">Téléphone</label><input id="tel" class="input" inputmode="tel" [(ngModel)]="m.numeroTelephone" placeholder="+223 76 12 34 12" /></div>
+          <div class="field"><label for="em">Adresse e-mail</label>
+            <div class="input-icon"><app-icon name="mail" [size]="17" /><input id="em" type="email" class="input" [(ngModel)]="m.email" /></div></div>
+          <div class="field"><label for="reg">Région</label>
+            <select id="reg" class="select" [(ngModel)]="loc.region"><option [ngValue]="undefined">Choisir…</option>
+              @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }</select></div>
+          <div class="field"><label for="cer">Cercle</label><input id="cer" class="input" [(ngModel)]="loc.cercle" /></div>
+          <div class="field"><label for="com">Commune</label><input id="com" class="input" [(ngModel)]="loc.commune" /></div>
+          <div class="field"><label for="qua">Quartier</label><input id="qua" class="input" [(ngModel)]="loc.quartier" /></div>
+        </div>
+      </section>
+
+      <section class="card card-pad">
+        <h3 class="titre">Situation professionnelle</h3>
+        <div class="form-grid">
+          <div class="field"><label for="st">Statut</label>
+            <select id="st" class="select" [(ngModel)]="sit.statut"><option [ngValue]="undefined">Non renseigné</option>
+              @for (s of statutsPro; track s.cle) { <option [value]="s.cle">{{ s.libelle }}</option> }</select></div>
+          <div class="field"><label for="po">Poste</label><input id="po" class="input" [(ngModel)]="sit.profession" /></div>
+          <div class="field"><label for="emp">Employeur</label><input id="emp" class="input" [(ngModel)]="sit.nomEmployeur" /></div>
+          <div class="field"><label for="dep">Depuis</label><input id="dep" type="date" class="input" [(ngModel)]="sit.dateDebutActivite" /></div>
+        </div>
+      </section>
+
+      <section class="card card-pad">
+        <h3 class="titre">Statut dans le SNJ</h3>
+        <div class="stack" style="gap: 18px">
+          <div class="field"><label for="coh">Cohorte</label>
+            <select id="coh" class="select" [(ngModel)]="m.cohorteId">
+              @for (c of cohortes(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}{{ c.centre ? ' · ' + c.centre : '' }}</option> }</select></div>
+          <div class="field"><span class="label">Statut du membre</span>
+            <div class="segmented block">
+              @for (s of statuts; track s.cle) { <button type="button" [class.active]="m.statut === s.cle" (click)="m.statut = s.cle">{{ s.libelle }}</button> }
+            </div></div>
+          <div class="row-between dispo">
+            <span><strong>Disponible pour les mobilisations</strong></span>
+            <label class="switch"><input type="checkbox" [(ngModel)]="m.disponibleMobilisation" aria-label="Disponible pour les mobilisations" /></label>
+          </div>
+        </div>
+      </section>
+    </div>
+    <p class="row muted small mt-24"><app-icon name="history" [size]="16" />Chaque modification est enregistrée dans l'historique du membre et dans le journal des opérations.</p>
+  } @else {
+    <p class="muted">Chargement…</p>
+  }
+</div>
