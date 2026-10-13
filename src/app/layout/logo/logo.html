@@ -1,0 +1,9 @@
+<span class="embleme" [class.disque]="fond() === 'sombre'" [style.width.px]="taille()" [style.height.px]="taille()">
+  <img src="logo_snj.png" alt="" />
+</span>
+@if (avecNom()) {
+  <div class="txt">
+    <img class="nom" [src]="fond() === 'sombre' ? 'logo_nom_app_blanc.png' : 'logo_nom_app.png'" alt="SNJPro" [style.height.px]="taille() * 0.46" />
+    @if (sousTitre()) { <span>{{ sousTitre() }}</span> }
+  </div>
+}

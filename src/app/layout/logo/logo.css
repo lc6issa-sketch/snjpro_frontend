@@ -1,0 +1,8 @@
+:host { display: flex; align-items: center; gap: 11px; color: inherit; }
+.embleme { display: grid; place-items: center; flex: none; border-radius: 50%; }
+.embleme img { width: 100%; height: 100%; object-fit: contain; }
+.embleme.disque { background: #fff; padding: 3px; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+.txt { display: flex; flex-direction: column; gap: 4px; line-height: 1.2; min-width: 0; }
+/* align-self : sans lui, la colonne flex étire l'image en largeur et déforme le logo */
+.nom { width: auto; max-width: none; display: block; align-self: flex-start; }
+span { font-size: 12px; opacity: .8; }

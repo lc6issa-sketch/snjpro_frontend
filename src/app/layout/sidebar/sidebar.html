@@ -1,0 +1,46 @@
+<a routerLink="/tableau-de-bord" class="brand">
+  <app-logo [taille]="38" [avecNom]="true" sousTitre="Service National des Jeunes" />
+</a>
+<nav>
+  @for (e of menu(); track e.libelle) {
+    @if (e.enfants) {
+      <button type="button" class="item groupe" [class.parent-actif]="groupeActif(e)" [class.ouvert]="estOuvert(e)"
+              [attr.aria-expanded]="estOuvert(e)" (click)="cliquerGroupe(e)">
+        <span class="ico"><app-icon [name]="e.icone" [size]="17" /></span>
+        <span class="libelle">{{ e.libelle }}</span>
+        @if (!estOuvert(e) && totalBadges(e)) {
+          <span class="badge" [class.alerte]="alerteGroupe(e)">{{ texteNombre(totalBadges(e)) }}</span>
+        }
+        <app-icon class="chevron" name="chevron-down" [size]="15" />
+      </button>
+      @if (estOuvert(e)) {
+        <div class="enfants">
+          @for (l of e.enfants; track l.lien) {
+            <a [routerLink]="l.lien" class="item enfant" [class.active]="estActif(l.lien)">
+              <span class="libelle">{{ l.libelle }}</span>
+              @if (l.badge && compte(l.badge)) { <span class="badge" [class.alerte]="l.alerte">{{ texte(l.badge) }}</span> }
+            </a>
+          }
+        </div>
+      }
+    } @else {
+      <a [routerLink]="e.lien!" class="item" [class.active]="estActif(e.lien!)">
+        <span class="ico"><app-icon [name]="e.icone" [size]="17" /></span>
+        <span class="libelle">{{ e.libelle }}</span>
+        @if (e.badge && compte(e.badge)) {
+          <span class="badge" [class.alerte]="e.alerte" [class.plein]="e.badge === 'membres'">{{ texte(e.badge) }}</span>
+        }
+      </a>
+    }
+  }
+</nav>
+
+<div class="moi">
+  <app-avatar [nom]="auth.nomComplet()" [photo]="shell.photo()" [size]="32" />
+  <div class="grow identite">
+    <div class="nom ellipsis">{{ auth.nomComplet() }}</div>
+    <div class="role ellipsis">{{ auth.libelleRole() }}{{ auth.utilisateur()?.region ? ' · ' + auth.utilisateur()?.region : '' }}</div>
+  </div>
+  <button type="button" (click)="auth.logout()" title="Se déconnecter" aria-label="Se déconnecter"><app-icon name="log-out" [size]="18" /></button>
+</div>
+

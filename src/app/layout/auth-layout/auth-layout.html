@@ -1,0 +1,16 @@
+<aside class="hero">
+  <i class="cercle c1"></i><i class="cercle c2"></i><i class="cercle c3"></i><i class="disque"></i>
+  <app-logo [taille]="48" sousTitre="Service National des Jeunes · Mali" class="logo" />
+  <div class="milieu">
+    <span class="badge"><i></i>Plateforme officielle de gestion des cohortes</span>
+    <h1>Tous les éléments du SNJ,<br /><em>réunis au même endroit.</em></h1>
+    <p>Centralisez les profils, suivez les cohortes et mobilisez<br />les compétences disponibles en quelques clics.</p>
+    <div class="atouts">
+      <div><app-icon name="users" [size]="18" /><strong>Profils</strong><span>membres centralisés</span></div>
+      <div><app-icon name="layers" [size]="18" /><strong>Cohortes</strong><span>suivies de bout en bout</span></div>
+      <div><app-icon name="map-pin" [size]="18" /><strong>Régions</strong><span>toutes couvertes</span></div>
+    </div>
+  </div>
+  <p class="pied"><app-icon name="shield-check" [size]="16" />Données protégées · Accès réservé aux utilisateurs autorisés</p>
+</aside>
+<main><div class="formulaire"><app-logo [taille]="44" fond="clair" class="logo-mobile" /><router-outlet /></div></main>

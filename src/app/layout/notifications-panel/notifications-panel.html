@@ -1,0 +1,24 @@
+<section class="panneau card" (click)="$event.stopPropagation()">
+  <header class="row-between">
+    <h3>Notifications</h3>
+    <button type="button" class="link" (click)="toutLu()">Tout marquer comme lu</button>
+  </header>
+  <div class="segmented sm">
+    <button type="button" [class.active]="!nonLues()" (click)="filtrer(false)">Toutes</button>
+    <button type="button" [class.active]="nonLues()" (click)="filtrer(true)">Non lues <span class="counter">{{ shell.alertesNonLues() }}</span></button>
+  </div>
+  <div class="liste">
+    @for (a of alertes(); track a.id) {
+      <button type="button" class="alerte" [class.non-lue]="!a.lu" (click)="ouvrir(a)">
+        <span class="grow">
+          <span class="t">{{ a.titre }}</span>
+          <span class="m">{{ a.message }}</span>
+        </span>
+        <span class="col fin"><span class="faint xs">{{ a.date | relatif: true }}</span>@if (!a.lu) { <i class="point"></i> }</span>
+      </button>
+    } @empty {
+      <div class="empty small">Aucune notification{{ nonLues() ? ' non lue' : '' }}.</div>
+    }
+  </div>
+  <footer><button type="button" class="link" (click)="toutVoir()">Voir toute l'activité</button></footer>
+</section>

@@ -1,0 +1,26 @@
+<div class="overlay" (click)="fermer()"></div>
+<section class="palette" role="dialog" aria-label="Recherche globale">
+  <div class="saisie">
+    <app-icon name="search" [size]="20" />
+    <input #champ [ngModel]="texte()" (ngModelChange)="saisir($event)" placeholder="Rechercher un membre, un identifiant, une cohorte…" />
+  </div>
+  <div class="resultats">
+    @for (g of groupes(); track g.titre) {
+      <div class="groupe">{{ g.titre }}</div>
+      @for (r of g.items; track r.lien + r.titre) {
+        <button type="button" class="ligne" [class.actif]="index(r) === curseur()" (mouseenter)="curseur.set(index(r))" (click)="ouvrir(r)">
+          @if (r.type === 'action') { <app-icon [name]="r.icone!" [size]="18" class="muted" /> }
+          @else if (r.type === 'cohorte') { <span class="ico"><app-icon name="layers" [size]="16" /></span> }
+          @else { <app-avatar [nom]="r.titre" [size]="32" /> }
+          <span class="grow">
+            <span class="t">{{ r.titre }}</span>
+            @if (r.detail) { <span class="d">{{ r.detail }}</span> }
+          </span>
+          @if (r.statut) { <span class="pill dot" [class]="'pill dot ' + r.statut.teinte">{{ r.statut.libelle }}</span> }
+        </button>
+      }
+    }
+    @if (chargement()) { <div class="vide">Recherche…</div> }
+    @else if (texte().length >= 2 && !total()) { <div class="vide">Aucun résultat pour « {{ texte() }} ».</div> }
+  </div>
+</section>

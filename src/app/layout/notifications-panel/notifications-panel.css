@@ -1,0 +1,14 @@
+:host { position: fixed; top: 64px; right: 28px; z-index: 40; }
+.panneau { width: 356px; box-shadow: var(--shadow-lg); border-radius: 16px; overflow: hidden; }
+header { padding: 18px 18px 12px; }
+h3 { font-size: 15px; font-weight: 700; }
+.segmented { margin: 0 18px 10px; }
+.liste { max-height: 420px; overflow-y: auto; padding: 0 8px 8px; }
+.alerte { width: 100%; display: flex; gap: 12px; align-items: flex-start; text-align: left; padding: 12px 10px; margin-top: 6px; border: 0; border-radius: 12px; background: none; cursor: pointer; }
+.alerte.non-lue { background: var(--surface-selected); }
+.alerte:hover { background: var(--tint); }
+.t { display: block; font-weight: 600; font-size: 13.5px; color: var(--text); }
+.m { display: block; font-size: 12.5px; color: var(--text-2); margin-top: 2px; }
+.fin { align-items: flex-end; gap: 10px; }
+.point { width: 7px; height: 7px; border-radius: 50%; background: var(--secondary); }
+footer { border-top: 1px solid var(--border); padding: 14px; text-align: center; }

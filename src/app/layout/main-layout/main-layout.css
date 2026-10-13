@@ -1,0 +1,3 @@
+:host { display: block; min-height: 100vh; }
+.contenu { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; min-width: 0; }
+main { flex: 1; }

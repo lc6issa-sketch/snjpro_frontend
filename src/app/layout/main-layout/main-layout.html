@@ -1,0 +1,7 @@
+<app-sidebar />
+<div class="contenu">
+  <app-topbar />
+  <main><router-outlet /></main>
+</div>
+@if (shell.panneauNotifications()) { <app-notifications-panel /> }
+@if (shell.recherche()) { <app-recherche-globale /> }
