@@ -1,0 +1,19 @@
+.mise { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.entete { padding: 16px; border-bottom: 1px solid var(--border); }
+.permissions { padding: 18px; }
+.tete { display: flex; gap: 12px; align-items: center; }
+.tete h3, .role h3 { font-size: 16px; font-weight: 700; }
+.description { margin: 16px 0 6px; padding-bottom: 16px; border-bottom: 1px solid var(--border); line-height: 1.55; }
+.matrice { margin: 8px 0 16px; }
+.ligne { display: grid; grid-template-columns: 1fr repeat(4, 44px); align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); justify-items: center; }
+.ligne > span:first-child { justify-self: start; }
+.entete-matrice { font-size: 11.5px; color: var(--text-2); font-weight: 600; border-bottom: 0; padding-bottom: 4px; }
+.role { display: flex; flex-direction: column; }
+.role .corps { padding: 20px; flex: 1; }
+.desc { line-height: 1.55; }
+.pied { text-align: left; padding: 16px 20px; border-top: 1px solid var(--border); font-size: 14px; }
+.label { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.option { display: flex; gap: 12px; align-items: center; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+.option.choisie { border: 1.5px solid var(--primary); background: var(--surface-selected); }
+.actif { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; background: var(--bg); }
+@media (max-width: 1100px) { .mise { grid-template-columns: minmax(0, 1fr); } }

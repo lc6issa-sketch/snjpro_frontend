@@ -81,6 +81,13 @@ export const routes: Routes = [
         data: { roles: REDACTEURS_ACTUALITES },
         loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
       },
+
+      // ----- Utilisateurs & rôles -----
+      {
+        path: 'utilisateurs',
+        title: 'Utilisateurs & rôles · SNJPro',
+        loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs),
+      },
     ],
   },
 
