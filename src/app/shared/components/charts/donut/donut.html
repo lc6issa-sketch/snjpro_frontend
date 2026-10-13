@@ -1,0 +1,9 @@
+<svg [attr.width]="taille()" [attr.height]="taille()" viewBox="0 0 120 120" role="img">
+  <circle cx="60" cy="60" r="48" fill="none" style="stroke: var(--muted-bg)" [attr.stroke-width]="epaisseur()" />
+  @for (s of arcs(); track s.libelle) {
+    <circle cx="60" cy="60" r="48" fill="none" [style.stroke]="s.couleur" [attr.stroke-width]="epaisseur()"
+            [attr.stroke-dasharray]="s.longueur + ' ' + (C - s.longueur)" [attr.stroke-dashoffset]="-s.debut"
+            transform="rotate(-90 60 60)" />
+  }
+</svg>
+<div class="centre"><strong>{{ centre() }}</strong><span>{{ legende() }}</span></div>

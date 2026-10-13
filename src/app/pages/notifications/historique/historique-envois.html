@@ -1,0 +1,44 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <a class="link" routerLink="/notifications">← Retour</a>
+      <h1>Historique des envois</h1><p class="sub">Toutes les communications envoyées aux membres</p>
+    </div>
+    <div class="actions"><a routerLink="/notifications" class="btn btn-primary">Nouvelle notification</a></div>
+  </div>
+  <div class="grid grid-3">
+    <div class="card kpi-inline"><div><p class="kpi-label">Envoyées ce mois</p><p class="kpi-value">{{ stats()?.envoyeesCeMois | nombre }}</p></div></div>
+    <div class="card kpi-inline"><div><p class="kpi-label">Taux de lecture moyen</p><p class="kpi-value">{{ stats()?.tauxLectureMoyen | nombre }} %</p></div></div>
+    <div class="card kpi-inline"><div><p class="kpi-label">SMS envoyés</p><p class="kpi-value">{{ stats()?.smsEnvoyesCeMois | nombre }}</p></div></div>
+  </div>
+  <div class="card mt-20">
+    <table class="table">
+      <thead><tr><th>Titre</th><th>Type</th><th>Destinataires</th><th>Canaux</th><th>Envoyée le</th><th>Lecture</th><th></th></tr></thead>
+      <tbody>
+        @for (n of page()?.content; track n.id) {
+          <tr>
+            <td class="strong">{{ n.titre }}</td>
+            <td><span class="pill" [class]="'pill ' + teinte(n.type)">{{ libelle(n.type) }}</span></td>
+            <td>{{ n.destinatairesLibelle || (n.nombreDestinataires | nombre) + ' membres' }}</td>
+            <td class="muted">{{ canaux(n) }}</td>
+            <td class="muted">
+              @switch (n.statut) {
+                @case ('BROUILLON') { <span class="pill gold">Brouillon</span> }
+                @case ('PROGRAMMEE') { Programmée · {{ n.programmeLe | dateCourte }} }
+                @default { {{ n.dateEnvoi | dateCourte }} }
+              }
+            </td>
+            <td><div class="row"><div class="progress lime" style="width: 60px"><span [style.width.%]="n.tauxLecture ?? 0"></span></div><strong class="xs">{{ n.tauxLecture ?? 0 | nombre }} %</strong></div></td>
+            <td class="text-right">
+              @if (n.statut !== 'ENVOYEE') {
+                <button type="button" class="btn btn-soft btn-sm" (click)="envoyer(n)">Envoyer</button>
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="supprimer(n)" aria-label="Supprimer"><app-icon name="trash" [size]="15" /></button>
+              }
+            </td>
+          </tr>
+        } @empty { <tr><td colspan="7"><div class="empty">Aucune notification envoyée.</div></td></tr> }
+      </tbody>
+    </table>
+    @if ((page()?.totalElements ?? 0) > taille) { <app-pagination [page]="numero()" [taille]="taille" [total]="page()?.totalElements ?? 0" libelle="envois" (aller)="charger($event)" /> }
+  </div>
+</div>

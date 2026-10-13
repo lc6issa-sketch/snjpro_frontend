@@ -1,0 +1,39 @@
+<div class="haut">
+  <a routerLink="/connexion" class="retour"><app-icon name="chevron-left" [size]="16" />Retour à la connexion</a>
+  <div class="pastille"><app-icon [name]="invitation ? 'user-plus' : 'lock'" [size]="22" /></div>
+  <h1>{{ invitation ? 'Activez votre compte' : 'Nouveau mot de passe' }}</h1>
+  @if (invitation && info(); as i) {
+    <p class="intro">Bienvenue {{ i.prenom }} ! Vous avez été invité(e) comme <strong>{{ role(i.role) }}</strong>{{ i.perimetre ? ' · ' + i.perimetre : '' }}. Choisissez votre mot de passe pour accéder à SNJPro.</p>
+  } @else {
+    <p class="intro">Choisissez un mot de passe d'au moins 8 caractères, avec des lettres et des chiffres.</p>
+  }
+  @if (!jeton) {
+    <div class="notice error mt-20"><app-icon name="alert-circle" [size]="16" />Lien incomplet : ouvrez le lien reçu par e-mail.</div>
+  } @else {
+    <form (ngSubmit)="valider()" #f="ngForm">
+      @if (invitation) {
+        <div class="field">
+          <label for="u">Nom d'utilisateur</label>
+          <input id="u" name="u" class="input" [(ngModel)]="username" required minlength="3" />
+        </div>
+      }
+      <div class="field">
+        <label for="p1">Nouveau mot de passe</label>
+        <div class="input-icon"><app-icon name="lock" [size]="17" />
+          <input id="p1" name="p1" type="password" class="input" [ngModel]="motDePasse()" (ngModelChange)="motDePasse.set($event)" required minlength="8" autocomplete="new-password" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="p2">Confirmer le mot de passe</label>
+        <div class="input-icon"><app-icon name="lock" [size]="17" />
+          <input id="p2" name="p2" type="password" class="input" [(ngModel)]="confirmation" required autocomplete="new-password" />
+        </div>
+      </div>
+      @if (erreur()) { <div class="notice error"><app-icon name="alert-circle" [size]="16" />{{ erreur() }}</div> }
+      <button class="btn btn-primary btn-lg btn-block" type="submit" [disabled]="f.invalid || chargement() || !valide()">
+        {{ chargement() ? 'Enregistrement…' : invitation ? 'Activer mon compte' : 'Enregistrer le mot de passe' }}
+      </button>
+    </form>
+  }
+</div>
+<p class="bas">Ce lien est personnel et ne peut servir qu'une seule fois.</p>

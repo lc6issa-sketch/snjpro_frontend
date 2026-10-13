@@ -1,0 +1,19 @@
+<div class="zone" aria-live="polite">
+  @for (t of toasts.toasts(); track t.id) {
+    <div class="toast" [class]="'toast ' + t.type">
+      <app-icon [name]="t.type === 'success' ? 'check-circle' : t.type === 'error' ? 'alert-circle' : 'info'" [size]="18" />
+      <span class="grow">{{ t.message }}</span>
+      <button type="button" (click)="toasts.fermer(t.id)" aria-label="Fermer"><app-icon name="x" [size]="14" /></button>
+    </div>
+  }
+</div>
+@if (confirmation.demande(); as d) {
+  <app-modal [titre]="d.titre" [sousTitre]="d.message" [icone]="d.danger ? 'alert-triangle' : 'info'"
+             [teinte]="d.danger ? 'red' : 'green'" [largeur]="460" (fermer)="confirmation.repondre(false)">
+    <div pied>
+      <button class="btn btn-ghost" type="button" (click)="confirmation.repondre(false)">Annuler</button>
+      <button class="btn" type="button" [class.btn-danger]="d.danger" [class.btn-primary]="!d.danger"
+              (click)="confirmation.repondre(true)">{{ d.action }}</button>
+    </div>
+  </app-modal>
+}

@@ -1,0 +1,133 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Demandes des membres</h1>
+      <p class="sub">{{ stats()?.enAttente ?? 0 }} demandes en attente · délai moyen de traitement : {{ stats()?.delaiMoyenJours ?? 0 | nombre: 1 }} jours</p></div>
+    <div class="actions"><button type="button" class="btn btn-secondary" (click)="exporter()">Exporter</button></div>
+  </div>
+
+  <div class="mise">
+    <section class="card liste">
+      <div class="haut">
+        <div class="pill-tabs bloc">
+          <button type="button" [class.active]="onglet() === 'attente'" (click)="changerOnglet('attente')">En attente <span class="counter">{{ compte().attente }}</span></button>
+          <button type="button" [class.active]="onglet() === 'cours'" (click)="changerOnglet('cours')">En cours <span class="counter">{{ compte().cours }}</span></button>
+          <button type="button" [class.active]="onglet() === 'traitees'" (click)="changerOnglet('traitees')">Traitées <span class="counter">{{ compte().traitees }}</span></button>
+        </div>
+        <div class="search mt-12"><app-icon name="search" [size]="16" />
+          <input class="input" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" placeholder="Nom, objet ou numéro de suivi…" /></div>
+      </div>
+      <div class="items">
+        @for (d of filtrees(); track d.id) {
+          <button type="button" class="item" [class.active]="selection()?.resume?.id === d.id" (click)="ouvrir(d)">
+            <app-avatar [nom]="d.membre" [size]="30" />
+            <span class="grow">
+              <span class="row-between"><strong>{{ d.membre }}</strong><span class="faint xs">{{ d.dateCreation | relatif: true }}</span></span>
+              <span class="objet">{{ d.objet }}</span>
+              <span class="row"><app-pill [dico]="TYPE" [valeur]="d.type" [point]="false" /><span class="faint xs">{{ d.numeroSuivi }}</span>
+                @if (d.statut === 'EN_ATTENTE') { <i class="nouveau"></i> }</span>
+            </span>
+          </button>
+        } @empty { <div class="empty small">Aucune demande dans cette catégorie.</div> }
+      </div>
+    </section>
+
+    <section class="card detail">
+      @if (selection(); as s) {
+        <div class="corps">
+          <h2>{{ s.resume?.objet }}</h2>
+          <div class="row wrap mt-8">
+            <app-pill [dico]="STATUT" [valeur]="s.resume?.statut" />
+            <app-pill [dico]="TYPE" [valeur]="s.resume?.type" />
+            <span class="faint small">{{ s.resume?.numeroSuivi }} · {{ soumise(s.resume!) }}</span>
+          </div>
+
+          <div class="membre mt-20">
+            <app-avatar [nom]="s.resume?.membre" [size]="38" />
+            <div class="grow"><strong>{{ s.resume?.membre }}</strong><p class="muted small">{{ s.resume?.identifiantSnj }}{{ s.cohorte ? ' · ' + s.cohorte : '' }}</p></div>
+            <a [routerLink]="['/membres', s.resume?.membreId]" class="link">Voir le profil</a>
+          </div>
+
+          <h4>Message du membre</h4>
+          <p class="message">{{ s.description || 'Aucun message.' }}</p>
+          @if (s.pieceJointeId) {
+            <button type="button" class="file-chip piece" (click)="piece()">
+              <span class="grow"><strong class="small">{{ s.pieceJointeNom }}</strong><span class="faint xs"> · {{ s.pieceJointeTaille | taille }}</span></span>
+              <app-icon name="download" [size]="17" />
+            </button>
+          }
+
+          @if (s.modifications?.length) {
+            <h4>Modification demandée</h4>
+            <div class="modifs">
+              @for (m of s.modifications; track m.champ) {
+                <div class="modif"><span class="muted">{{ libelleChamp(m.champ) }}</span>
+                  <span class="avant">{{ m.ancienne || '—' }}</span><app-icon name="arrow-right" [size]="15" class="faint" /><span class="apres">{{ m.nouvelle }}</span></div>
+              }
+            </div>
+          }
+
+          @if (s.elementsDemandes?.length) {
+            <div class="notice info mt-16"><app-icon name="info" [size]="16" /><div>Complément demandé : {{ s.elementsDemandes?.join(', ') }}</div></div>
+          }
+          @if (s.motifRejet) { <div class="notice error mt-16"><app-icon name="x-circle" [size]="16" /><div>Motif du rejet : {{ s.motifRejet }}</div></div> }
+
+          @if (!traitee()) {
+            <h4>Réponse au membre</h4>
+            <div class="zone"><textarea class="textarea" rows="3" maxlength="500" [(ngModel)]="reponse" aria-label="Réponse au membre"></textarea><span class="faint xs">{{ reponse.length }} / 500</span></div>
+            @if (s.modifications?.length) { <label class="checkbox mt-12"><input type="checkbox" [(ngModel)]="appliquer" />Appliquer automatiquement la modification au profil</label> }
+          } @else {
+            <h4>Réponse envoyée</h4><p class="message">{{ s.resume?.reponse || '—' }}</p>
+          }
+
+          @if (s.suivi?.length) {
+            <h4>Suivi</h4>
+            <ol class="suivi">@for (e of s.suivi; track $index) { <li><strong class="small">{{ e.libelle }}</strong><span class="faint xs"> · {{ e.auteur }} · {{ e.date | dateHeure }}</span>@if (e.commentaire) { <p class="muted xs">{{ e.commentaire }}</p> }</li> }</ol>
+          }
+        </div>
+        @if (!traitee()) {
+          <div class="action-bar pied">
+            <button type="button" class="btn btn-danger-soft" [disabled]="envoi()" (click)="ouvrirRejet()">Rejeter</button>
+            <span class="row">
+              <button type="button" class="btn btn-secondary" [disabled]="envoi()" (click)="ouvrirComplement()">Demander un complément</button>
+              <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="valider()">Valider la demande</button>
+            </span>
+          </div>
+        }
+      } @else {
+        <div class="empty"><app-icon name="file-text" [size]="32" /><p class="title">Aucune demande sélectionnée</p><p>Choisissez une demande dans la liste.</p></div>
+      }
+    </section>
+  </div>
+</div>
+
+@if (rejet() && selection(); as s) {
+  <app-modal titre="Rejeter la demande" [sousTitre]="s.resume?.numeroSuivi + ' · ' + s.resume?.membre" icone="x" teinte="red" [largeur]="532" (fermer)="rejet.set(false)">
+    <p class="label">Motif du rejet</p>
+    <div class="stack" style="gap: 8px">
+      @for (m of motifs; track m) {
+        <label class="option" [class.choisie]="motif === m"><span class="radio"><input type="radio" name="motif" [value]="m" [(ngModel)]="motif" /></span>{{ m }}</label>
+      }
+    </div>
+    <div class="field mt-20"><label for="mr">Message au membre</label><textarea id="mr" class="textarea" rows="3" [(ngModel)]="messageRejet"></textarea></div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="rejet.set(false)">Annuler</button>
+      <button type="button" class="btn btn-danger-soft" [disabled]="envoi()" (click)="rejeter()">Rejeter la demande</button>
+    </div>
+  </app-modal>
+}
+
+@if (complement()) {
+  <app-modal titre="Demander un complément" sousTitre="Le membre recevra une notification pour compléter sa demande" icone="message-square" [largeur]="532" (fermer)="complement.set(false)">
+    <p class="label">Éléments à fournir</p>
+    <div class="stack" style="gap: 12px">
+      @for (e of elementsPossibles; track e) { <label class="checkbox"><input type="checkbox" [checked]="elements.has(e)" (change)="basculerElement(e)" />{{ e }}</label> }
+    </div>
+    <div class="field mt-20"><label for="mc">Message au membre</label><textarea id="mc" class="textarea" rows="3" [(ngModel)]="messageComplement"></textarea></div>
+    <div class="field mt-16" style="max-width: 232px"><label for="dl">Délai de réponse</label>
+      <select id="dl" class="select" [(ngModel)]="delai"><option [ngValue]="3">3 jours</option><option [ngValue]="7">7 jours</option><option [ngValue]="15">15 jours</option><option [ngValue]="30">30 jours</option></select></div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="complement.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="demanderComplement()">Envoyer la demande</button>
+    </div>
+  </app-modal>
+}

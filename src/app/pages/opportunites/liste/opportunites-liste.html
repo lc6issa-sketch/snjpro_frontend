@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Opportunités</h1><p class="sub">Offres d'emploi, de stage et de formation proposées aux membres</p></div>
+    @if (peutGerer()) { <div class="actions"><a routerLink="/opportunites/nouvelle" class="btn btn-primary">Nouvelle opportunité</a></div> }
+  </div>
+  <div class="row-between wrap">
+    <div class="pill-tabs">
+      @for (o of onglets(); track o.libelle) {
+        <button type="button" [class.active]="type() === o.cle" (click)="type.set(o.cle)">{{ o.libelle }} <span class="counter">{{ o.nombre }}</span></button>
+      }
+    </div>
+    <div class="search" style="width: 268px"><app-icon name="search" [size]="17" />
+      <input class="input" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" placeholder="Rechercher une opportunité…" /></div>
+  </div>
+  <div class="grid grid-2 mt-20">
+    @for (o of filtrees(); track o.id) {
+      <a class="card offre" [routerLink]="['/opportunites', o.id]">
+        <div class="row" style="align-items: flex-start; gap: 14px">
+          <app-avatar [nom]="o.organisation" [size]="46" class="carre" />
+          <div class="grow"><h3>{{ o.intitule }}</h3><p class="muted small">{{ o.organisation }}{{ o.lieu ? ' · ' + o.lieu : '' }}</p></div>
+          <app-pill [dico]="STATUT" [valeur]="o.statut" />
+        </div>
+        <div class="row wrap mt-20">
+          <app-pill [dico]="TYPE" [valeur]="o.type" [point]="false" />
+          @if (o.typeContrat) { <span class="pill">{{ o.typeContrat }}</span> }
+          @if (o.dateLimite) { <span class="row muted small"><app-icon name="calendar" [size]="14" />Limite : {{ o.dateLimite | dateCourte }}</span> }
+        </div>
+        <div class="row wrap mt-16">
+          <span class="muted small">Compétences :</span>
+          @for (c of o.competences; track c) { <span class="tag">{{ c }}</span> } @empty { <span class="faint small">Tous profils</span> }
+        </div>
+        <div class="pied row-between">
+          <span class="row small strong"><app-icon name="users" [size]="15" class="faint" />{{ o.nombreCandidatures | nombre }} candidatures</span>
+          <span class="link">Voir les candidats →</span>
+        </div>
+      </a>
+    } @empty {
+      <div class="card empty plein"><app-icon name="briefcase" [size]="32" /><p class="title">Aucune opportunité</p><p>Publiez une offre pour la proposer aux membres concernés.</p></div>
+    }
+  </div>
+</div>

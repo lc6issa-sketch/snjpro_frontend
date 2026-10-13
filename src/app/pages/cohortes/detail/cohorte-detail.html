@@ -1,0 +1,124 @@
+<div class="page">
+  @if (t(); as t) {
+    <a class="link" routerLink="/cohortes">← Retour</a>
+    <div class="page-head" style="align-items: center">
+      <div class="row" style="gap: 16px">
+        <div><h1>{{ c()?.nom }}</h1>
+          <div class="row wrap mt-4"><app-pill [dico]="STATUT_COHORTE" [valeur]="c()?.statut" />
+            @if (c()?.centre) { <span class="pill dark">{{ c()?.centre }}</span> }
+            @if (periode()) { <span class="pill">{{ periode() }}</span> }</div></div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" (click)="exporter.set(true)">Exporter la liste</button>
+        @if (peutGerer()) {
+          <button type="button" class="btn btn-secondary" (click)="ouvrirStatut()">Changer le statut</button>
+          <button type="button" class="btn btn-primary" (click)="modifier.set(true)">Modifier</button>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-4">
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Recrues initiales</p><p class="kpi-value">{{ (t.recruesInitiales ?? t.membres) | nombre }}</p>
+          <p class="faint xs mt-12">{{ c()?.dateDebut ? 'Incorporées le ' + (c()?.dateDebut | dateCourte) : t.membres + ' fiches enregistrées' }}</p></div></div>
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Membres actifs</p><p class="kpi-value">{{ t.membresActifs | nombre }}</p>
+          <p class="faint xs mt-12">{{ t.pourcentageActifs ?? 0 }} % des recrues</p></div></div>
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Profils à jour</p><p class="kpi-value">{{ t.pourcentageProfilsAJour }} %</p>
+          <div class="progress blue mt-12"><span [style.width.%]="t.pourcentageProfilsAJour"></span></div></div></div>
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Mobilisés en {{ annee }}</p><p class="kpi-value">{{ t.mobilisesAnnee | nombre }}</p>
+          <p class="faint xs mt-12">sur {{ t.mobilisationsAnnee }} mobilisation{{ t.mobilisationsAnnee > 1 ? 's' : '' }}</p></div></div>
+    </div>
+
+    <div class="grille mt-20">
+      <div class="card">
+        <div class="card-head bord">
+          <div><h3>Membres de la cohorte</h3><p class="sub">{{ t.membresActifs | nombre }} membres actifs · {{ t.membresInactifs | nombre }} inactifs</p></div>
+          <div class="row">
+            <div class="search" style="width: 196px"><app-icon name="search" [size]="16" />
+              <input class="input input-sm" [ngModel]="recherche()" (ngModelChange)="rechercher($event)" placeholder="Rechercher…" /></div>
+          </div>
+        </div>
+        <table class="table">
+          <thead><tr><th>Membre</th><th>Identifiant</th><th>Compagnie</th><th>Situation</th><th>Statut</th></tr></thead>
+          <tbody>
+            @for (m of membres()?.content; track m.id) {
+              <tr class="clickable" [routerLink]="['/membres', m.id]">
+                <td><span class="cell-person"><app-avatar [nom]="m.prenom + ' ' + m.nom" [size]="28" /><span class="name">{{ m.prenom }} {{ m.nom }}</span></span></td>
+                <td class="strong">{{ m.identifiantSnj }}</td>
+                <td class="muted">{{ m.compagnie || '—' }}{{ m.section ? ' · ' + m.section : '' }}</td>
+                <td>{{ situation(m) }}</td>
+                <td>@if ((m.tauxCompletude ?? 100) < 50 && m.statut === 'ACTIF') { <span class="pill red dot">Incomplet</span> } @else { <app-pill [dico]="STATUT_MEMBRE" [valeur]="m.statut" /> }</td>
+              </tr>
+            } @empty { <tr><td colspan="5"><div class="empty">Aucun membre dans cette cohorte.</div></td></tr> }
+          </tbody>
+        </table>
+        <div class="card-foot"><span>Affichage de {{ debut() }} à {{ fin() }} sur {{ membres()?.totalElements | nombre }}</span>
+          <span class="row">
+            @if ((membres()?.totalPages ?? 0) > 1) {
+              <button type="button" class="btn btn-ghost btn-sm" [disabled]="page() === 0" (click)="allerA(page() - 1)">‹ Précédents</button>
+              <button type="button" class="btn btn-ghost btn-sm" [disabled]="membres()?.last" (click)="allerA(page() + 1)">Suivants ›</button>
+            }
+            <a routerLink="/membres" [queryParams]="{ cohorteId: c()?.id }" class="link">Voir tous les membres →</a>
+          </span></div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h3>Informations</h3></div>
+          <div class="card-body infos">
+            <div class="row"><app-icon name="building" [size]="17" class="faint" /><div><p class="faint xs">Centre</p><p class="strong">{{ c()?.centre || '—' }}</p></div></div>
+            <div class="row"><app-icon name="calendar" [size]="17" class="faint" /><div><p class="faint xs">Période</p><p class="strong">{{ c()?.dateDebut | dateCourte }} – {{ c()?.dateFin | dateCourte }}</p></div></div>
+            <div class="row"><app-icon name="clock" [size]="17" class="faint" /><div><p class="faint xs">Durée</p><p class="strong">{{ t.dureeMois ? t.dureeMois + ' mois' : '—' }}</p></div></div>
+            <div class="row"><app-icon name="layers" [size]="17" class="faint" /><div><p class="faint xs">Organisation</p>
+              <p class="strong">{{ c()?.nombreCompagnies ?? t.compagnies.length }} compagnies{{ c()?.nombreSections ? ' · ' + c()?.nombreSections + ' sections' : '' }}</p></div></div>
+          </div>
+          <div class="card-foot" style="flex-direction: column; align-items: stretch; gap: 10px">
+            <span class="faint xs">Responsable</span>
+            @if (c()?.responsableNom || c()?.responsable) {
+              <div class="row"><app-avatar [nom]="c()?.responsableNom || c()?.responsable" [size]="34" />
+                <div class="grow"><p class="strong" style="color: var(--text)">{{ c()?.responsableNom || c()?.responsable }}</p><p class="xs">Responsable de cohorte</p></div>
+                @if (c()?.responsableId) { <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="ecrire()" aria-label="Écrire au responsable"><app-icon name="mail" [size]="17" /></button> }</div>
+            } @else { <p class="small">Aucun responsable désigné.</p> }
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Situation actuelle des membres</h3><p class="sub">Sur {{ t.membresActifs | nombre }} membres actifs</p></div></div>
+          <div class="card-body">
+            <div class="barre-situation">@for (s of situations(); track s.libelle) { <span [style.flex]="s.valeur" [style.background]="s.couleur"></span> }</div>
+            <div class="stack mt-16" style="gap: 12px">
+              @for (s of situations(); track s.libelle) {
+                <div class="row-between small"><span class="row"><i class="carre" [style.background]="s.couleur"></i>{{ s.libelle }}</span><strong>{{ s.pourcentage }} %</strong></div>
+              } @empty { <p class="muted small">Aucune donnée.</p> }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else { <p class="muted">Chargement…</p> }
+</div>
+
+@if (modifier() && c()) { <app-cohorte-form [cohorte]="c()" (fermer)="modifier.set(false)" (enregistre)="modifiee()" /> }
+@if (exporter() && c()) { <app-export-membres [filtres]="{ cohorteId: c()!.id }" [etiquettes]="['Cohorte : ' + c()!.nom]" (fermer)="exporter.set(false)" /> }
+@if (changement()) {
+  <app-modal titre="Changer le statut" [sousTitre]="c()?.nom + ' · statut actuel : ' + libelleStatut()" icone="refresh" [largeur]="532" (fermer)="changement.set(false)">
+    <p class="label">Nouveau statut</p>
+    <div class="stack" style="gap: 10px">
+      @for (s of statuts; track s.cle) {
+        <label class="option" [class.choisie]="nouveauStatut === s.cle">
+          <span class="radio"><input type="radio" name="statut" [value]="s.cle" [(ngModel)]="nouveauStatut" /></span>
+          <span class="col"><strong>{{ s.libelle }}</strong><span class="muted small">{{ s.cle === c()?.statut ? 'Statut actuel de la cohorte' : s.detail }}</span></span>
+        </label>
+      }
+    </div>
+    <div class="form-grid mt-20">
+      <div class="field"><label for="de">Date d'effet</label><input id="de" type="date" class="input" [(ngModel)]="dateEffet" /></div>
+      <div class="field"><label for="mo">Motif</label>
+        <select id="mo" class="select" [(ngModel)]="motif">@for (m of motifs; track m) { <option [value]="m">{{ m }}</option> }</select></div>
+    </div>
+    <label class="checkbox mt-20"><input type="checkbox" [(ngModel)]="notifier" />Notifier les membres de la cohorte</label>
+    <div pied>
+      <span class="row muted small grow"><app-icon name="users" [size]="15" />{{ notifier ? nombreTexte() + ' membres seront notifiés' : 'Aucune notification envoyée' }}</span>
+      <button type="button" class="btn btn-ghost" (click)="changement.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="nouveauStatut === c()?.statut || envoi()" (click)="confirmerStatut()">Confirmer</button>
+    </div>
+  </app-modal>
+}

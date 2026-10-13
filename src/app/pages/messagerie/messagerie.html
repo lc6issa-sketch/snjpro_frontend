@@ -1,0 +1,78 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Messagerie</h1><p class="sub">Échangez avec les membres et les directions régionales</p></div>
+    <div class="actions"><button type="button" class="btn btn-primary" (click)="ouvrirNouvelle()">Nouvelle conversation</button></div>
+  </div>
+  <div class="mise">
+    <section class="card liste">
+      <div class="haut"><div class="search"><app-icon name="search" [size]="16" /><input class="input" [ngModel]="recherche()" (ngModelChange)="chercher($event)" placeholder="Rechercher une conversation…" /></div></div>
+      <div class="items">
+        @for (c of conversations(); track c.id) {
+          <button type="button" class="item" [class.active]="active()?.id === c.id" (click)="ouvrir(c)">
+            @if (c.type === 'DIRECTE' && c.membreId) { <app-avatar [nom]="c.titre" [size]="38" /> }
+            @else { <span class="rond" [class.groupe]="c.type === 'GROUPE'"><app-icon [name]="c.type === 'GROUPE' ? 'users' : c.type === 'SERVICE' ? 'building' : 'user'" [size]="17" /></span> }
+            <span class="grow"><span class="row-between"><strong class="ellipsis">{{ c.titre }}</strong><span class="xs" [class.vert]="c.nonLus" [class.faint]="!c.nonLus">{{ c.dernierMessageLe | relatif: true }}</span></span>
+              <span class="row-between"><span class="apercu ellipsis">{{ c.dernierMessage || c.sousTitre }}</span>@if (c.nonLus) { <span class="badge">{{ c.nonLus }}</span> }</span></span>
+          </button>
+        } @empty { <div class="empty small">Aucune conversation.</div> }
+      </div>
+    </section>
+
+    <section class="card fil">
+      @if (active(); as c) {
+        <header class="row-between">
+          <div class="row">
+            @if (c.membreId) { <app-avatar [nom]="c.titre" [size]="36" /> } @else { <span class="rond"><app-icon [name]="c.type === 'GROUPE' ? 'users' : 'building'" [size]="16" /></span> }
+            <div><strong>{{ c.titre }}</strong><p class="muted xs">{{ c.sousTitre }}{{ c.enLigne ? ' · en ligne' : '' }}</p></div>
+          </div>
+          @if (c.membreId) { <button type="button" class="btn btn-secondary btn-sm" (click)="voirProfil(c.membreId)">Voir le profil</button> }
+        </header>
+        <div class="messages" #zone>
+          @for (m of messages(); track m.id) {
+            <div class="bulle" [class.moi]="m.deMoi">
+              @if (!m.deMoi && c.type !== 'DIRECTE') { <span class="auteur">{{ m.auteur }}</span> }
+              @if (m.contenu) { <p>{{ m.contenu }}</p> }
+              @if (m.pieceJointeNom) {
+                <button type="button" class="piece" (click)="telecharger(m)"><app-icon name="paperclip" [size]="14" />{{ m.pieceJointeNom }} · {{ m.pieceJointeTaille | taille }}</button>
+              }
+              <span class="heure">{{ m.dateEnvoi | heure }}</span>
+            </div>
+          } @empty { <div class="empty small">Aucun message. Écrivez le premier.</div> }
+        </div>
+        <footer class="row">
+          <div class="saisie grow">
+            <label class="joindre" title="Joindre un fichier"><app-icon name="plus" [size]="18" /><input type="file" hidden (change)="joindre($event)" /></label>
+            @if (fichier(); as f) { <span class="tag soft">{{ f.name }}<button type="button" (click)="fichier.set(null)" aria-label="Retirer"><app-icon name="x" [size]="12" /></button></span> }
+            <input class="grow" [(ngModel)]="texte" (keydown.enter)="envoyer()" placeholder="Écrire une réponse…" aria-label="Message" />
+          </div>
+          <button type="button" class="btn btn-primary" [disabled]="(!texte.trim() && !fichier()) || envoi()" (click)="envoyer()">Envoyer</button>
+        </footer>
+      } @else {
+        <div class="empty vide"><app-icon name="message-square" [size]="34" /><p class="title">Sélectionnez une conversation</p><p>ou démarrez-en une nouvelle.</p></div>
+      }
+    </section>
+  </div>
+</div>
+
+@if (nouvelle()) {
+  <app-modal titre="Nouvelle conversation" sousTitre="Écrivez à un membre, un collègue ou une direction" icone="message-square" [largeur]="532" (fermer)="nouvelle.set(false)">
+    <div class="search"><app-icon name="search" [size]="16" /><input class="input" [ngModel]="rechercheContact" (ngModelChange)="chercherContact($event)" placeholder="Nom, identifiant SNJ, service…" /></div>
+    <div class="contacts">
+      @for (c of contacts(); track $index) {
+        <label class="contact" [class.choisi]="contact() === c">
+          <span class="radio"><input type="radio" name="contact" [checked]="contact() === c" (change)="contact.set(c)" /></span>
+          @if (c.membreId || c.userId) { <app-avatar [nom]="c.nom" [size]="30" /> } @else { <span class="rond petit"><app-icon name="building" [size]="15" /></span> }
+          <span class="grow"><strong class="small">{{ c.nom }}</strong><br /><span class="muted xs">{{ c.detail }}{{ c.delaiReponse ? ' · répond ' + c.delaiReponse : '' }}</span></span>
+          @if (c.enLigne) { <i class="en-ligne"></i> }
+        </label>
+      } @empty { <p class="muted small">Aucun contact trouvé.</p> }
+    </div>
+    <div class="field mt-16"><label for="pm">Premier message</label><textarea id="pm" class="textarea" rows="3" [(ngModel)]="premierMessage"></textarea></div>
+    <div pied>
+      <button type="button" class="btn btn-secondary" (click)="groupeCohorte()">Groupe de ma cohorte</button>
+      <span class="grow"></span>
+      <button type="button" class="btn btn-ghost" (click)="nouvelle.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="!contact()" (click)="creer()">Démarrer</button>
+    </div>
+  </app-modal>
+}

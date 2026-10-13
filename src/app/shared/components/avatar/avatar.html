@@ -1,0 +1,6 @@
+@if (photo()) {
+  <img [src]="photo()" [alt]="nom()" [style.width.px]="size()" [style.height.px]="size()" />
+} @else {
+  <span [style.width.px]="size()" [style.height.px]="size()" [style.background]="teinte().bg"
+        [style.color]="teinte().fg" [style.font-size.px]="size() * 0.36">{{ lettres() }}</span>
+}

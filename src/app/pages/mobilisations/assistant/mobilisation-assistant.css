@@ -1,0 +1,40 @@
+.mise { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.mise.inverse { grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr); }
+.entete { display: flex; gap: 14px; align-items: center; margin-bottom: 24px; }
+.entete h2 { font-size: 18px; font-weight: 700; }
+.etapes { padding: 20px; }
+.etapes h3, .conseils h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.etape { display: flex; gap: 12px; padding: 10px 0; }
+.etape strong { font-size: 14px; color: var(--text-2); font-weight: 600; }
+.etape.courante strong, .etape.faite strong { color: var(--text); }
+.puce { width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 12px; font-weight: 700; border: 1.5px solid var(--border-strong); color: var(--text-3); }
+.courante .puce { background: var(--primary); border-color: var(--primary); color: #fff; }
+.faite .puce { background: var(--secondary); border-color: var(--secondary); color: #fff; }
+.conseils p { display: flex; gap: 8px; font-size: 13px; color: var(--text-2); margin-top: 10px; }
+.conseils app-icon { color: var(--secondary); }
+.bloc-titre { padding: 20px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; }
+.criteres { padding: 18px 20px; display: flex; flex-direction: column; gap: 20px; }
+.ajout { height: 28px; border: 1px dashed var(--border-strong); border-radius: 6px; background: var(--surface); padding: 0 8px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--text-2); width: 110px; }
+.ages input { flex: 1; accent-color: var(--secondary); }
+.interrupteurs { border-top: 1px solid var(--border); padding: 18px 20px; display: flex; flex-direction: column; gap: 18px; font-size: 14px; }
+.resultat { display: flex; gap: 14px; align-items: center; padding: 20px 20px 14px; }
+.resultat h2 { font-size: 19px; font-weight: 700; }
+.grand { width: 44px; height: 44px; border-radius: 12px; }
+.puces { padding: 0 20px 18px; gap: 8px; border-bottom: 1px solid var(--border); }
+.selection { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+.membre { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.link-autres { color: var(--primary); font-size: 13px; margin-top: 10px; }
+.message { padding: 18px 20px 20px; }
+.recap { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.recap:last-child { border-bottom: 0; }
+.recap h4 { font-size: 14px; font-weight: 700; }
+.dl-gauche { display: grid; grid-template-columns: 170px 1fr; gap: 10px; margin: 14px 0 0; font-size: 13.5px; }
+.dl-gauche dt { color: var(--text-2); }
+.dl-gauche dd { margin: 0; font-weight: 600; }
+.pile { display: inline-flex; }
+.pile app-avatar { margin-left: -6px; border: 2px solid var(--surface); border-radius: 50%; }
+.pile app-avatar:first-child { margin-left: 0; }
+.bulle { padding: 14px 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; }
+.canal { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.ok { color: var(--secondary); }
+@media (max-width: 1100px) { .mise, .mise.inverse { grid-template-columns: minmax(0, 1fr); } }

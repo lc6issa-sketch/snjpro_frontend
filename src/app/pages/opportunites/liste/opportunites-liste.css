@@ -1,0 +1,6 @@
+.offre { padding: 18px 18px 0; color: inherit; display: flex; flex-direction: column; }
+.offre:hover { border-color: var(--border-strong); }
+.carre ::ng-deep span { border-radius: 10px; }
+h3 { font-size: 16px; font-weight: 700; margin-top: 2px; }
+.pied { margin: 18px -18px 0; padding: 14px 18px; border-top: 1px solid var(--border); }
+.plein { grid-column: 1 / -1; }

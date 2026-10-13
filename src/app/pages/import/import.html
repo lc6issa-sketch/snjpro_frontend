@@ -1,0 +1,216 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Import de données</h1><p class="sub">{{ sousTitre() }}</p></div>
+    <div class="actions">
+      @if (etape() === 2) { <button type="button" class="btn btn-secondary" (click)="nouveau()">Changer de fichier</button> }
+    </div>
+  </div>
+
+  <!-- Étapes -->
+  <div class="card steps-h">
+    @for (e of [['Fichier', 'Excel ou CSV'], ['Correspondance', 'Colonnes et champs'], ['Vérification', 'Erreurs et doublons'], ['Import', 'Validation finale']]; track e[0]; let i = $index) {
+      @if (i) { <span class="line" [class.done]="etape() > i"></span> }
+      <div class="step" [class.done]="etape() > i + 1 || (etape() === 4 && i === 3)" [class.current]="etape() === i + 1 && etape() !== 4">
+        <span class="step-dot">@if (etape() > i + 1 || (etape() === 4 && i === 3)) { <app-icon name="check" [size]="15" [stroke]="3" /> } @else { {{ i + 1 }} }</span>
+        <div><p class="t">{{ e[0] }}</p><p class="s">{{ i === 0 && session() ? session()?.nomFichier : i === 1 && etape() > 2 ? resume().auto + resume().verifier + ' colonnes associées' : i === 3 && etape() === 4 ? 'Terminé' : e[1] }}</p></div>
+      </div>
+    }
+  </div>
+
+  @switch (etape()) {
+    <!-- ======================================== 1. Fichier -->
+    @case (1) {
+      <div class="card mt-20 depot-carte">
+        <div class="row cohorte"><label for="coh" class="label">Cohorte de destination</label>
+          <select id="coh" class="select" style="max-width: 340px" [(ngModel)]="cohorteId">@for (c of cohortes(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}</option> }</select></div>
+        <label class="depot" [class.over]="survol()" (dragover)="$event.preventDefault(); survol.set(true)" (dragleave)="survol.set(false)" (drop)="deposer($event)">
+          <span class="rond"><app-icon name="upload" [size]="26" /></span>
+          <strong>{{ chargement() ? 'Analyse du fichier…' : 'Glissez-déposez votre fichier ici' }}</strong>
+          <span class="muted small">Excel (.xlsx, .xls) ou CSV · 20 Mo maximum · 1 feuille par cohorte</span>
+          <span class="btn btn-secondary mt-8">Parcourir les fichiers</span>
+          <input type="file" hidden accept=".xlsx,.xls,.csv" (change)="choisir($event)" [disabled]="chargement()" />
+        </label>
+      </div>
+    }
+
+    <!-- ======================================== 2. Correspondance -->
+    @case (2) {
+      <div class="mise mt-20">
+        <section class="card">
+          <div class="card-head"><div><h3>Correspondance des colonnes</h3><p class="sub">Associez chaque colonne du fichier à un champ SNJPro</p></div></div>
+          <table class="table mt-12">
+            <thead><tr><th>Colonne du fichier</th><th>Exemple</th><th></th><th>Champ SNJPro</th><th>État</th></tr></thead>
+            <tbody>
+              @for (c of colonnes(); track c.entete) {
+                <tr>
+                  <td><span class="tag">{{ c.entete }}</span></td>
+                  <td class="muted ellipsis" style="max-width: 150px">{{ c.exemple || '—' }}</td>
+                  <td><app-icon name="arrow-right" [size]="15" class="faint" /></td>
+                  <td><select class="select select-sm" [class.a-verifier]="c.etat === 'A_VERIFIER'" style="width: 200px" [ngModel]="c.champ ?? null" (ngModelChange)="changerChamp(c.entete!, $event)" [attr.aria-label]="'Champ pour ' + c.entete">
+                    <option [ngValue]="null">Ne pas importer</option>
+                    @for (ch of analyse()?.champsDisponibles; track ch.cle) { <option [ngValue]="ch.cle">{{ ch.libelle }}{{ ch.obligatoire ? ' *' : '' }}</option> }</select></td>
+                  <td>
+                    @switch (c.etat) {
+                      @case ('AUTO') { <span class="pill green dot">Auto</span> }
+                      @case ('A_VERIFIER') { <span class="pill gold dot">À vérifier</span> }
+                      @default { <span class="pill dot">Ignorée</span> }
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="card-foot"><span>{{ colonnes().length }} colonnes affichées sur {{ analyse()?.colonnes?.length }}</span>
+            @if ((analyse()?.colonnes?.length ?? 0) > 8) { <button type="button" class="link" (click)="toutesColonnes.set(!toutesColonnes())">{{ toutesColonnes() ? 'Afficher moins' : 'Afficher toutes les colonnes' }}</button> }</div>
+        </section>
+        <aside class="stack">
+          <div class="card card-pad">
+            <h3 class="mb">Résumé</h3>
+            <div class="resume"><div><strong>{{ resume().auto }} colonnes</strong><p class="muted small">associées automatiquement</p></div></div>
+            <div class="resume"><div><strong>{{ resume().verifier }} colonnes</strong><p class="muted small">à vérifier</p></div></div>
+            <div class="resume"><div><strong>{{ resume().ignorees }} colonne{{ resume().ignorees > 1 ? 's' : '' }}</strong><p class="muted small">ignorée{{ resume().ignorees > 1 ? 's' : '' }}</p></div></div>
+            @if (analyse()?.champsObligatoiresManquants?.length) {
+              <div class="notice error mt-12">Champs obligatoires non associés : {{ analyse()?.champsObligatoiresManquants?.join(', ') }}</div>
+            } @else if (resume().verifier) {
+              <div class="notice warn mt-12">Vérifiez les colonnes marquées « À vérifier » : leur correspondance a été devinée à partir de leur nom.</div>
+            }
+          </div>
+          <div class="card card-pad">
+            <h3 class="mb">Aperçu de la ligne 1</h3>
+            <dl class="dl">@for (a of apercu(); track a.libelle) { <dt>{{ a.libelle }}</dt><dd>{{ a.valeur || '—' }}</dd> }</dl>
+          </div>
+        </aside>
+      </div>
+      <div class="card action-bar mt-20">
+        <button type="button" class="btn btn-ghost" (click)="annuler()">Précédent</button>
+        <button type="button" class="btn btn-primary" [disabled]="chargement()" (click)="verifier()">{{ chargement() ? 'Vérification…' : 'Lancer la vérification' }}</button>
+      </div>
+    }
+
+    <!-- ======================================== 3. Vérification -->
+    @case (3) {
+      <div class="mise inverse mt-20">
+        <aside class="stack">
+          <div class="card fichier">
+            <div class="grow"><strong>{{ session()?.nomFichier }}</strong><p class="muted small">{{ session()?.taille | taille }} · {{ session()?.totalLignes | nombre }} lignes · {{ analyse()?.colonnes?.length }} colonnes</p></div>
+            <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="etape.set(2)" title="Revoir la correspondance"><app-icon name="refresh" [size]="16" /></button>
+          </div>
+          <div class="card card-pad">
+            <h3>Résultat de la vérification</h3>
+            <p class="muted small">{{ verification()?.totalLignes | nombre }} lignes analysées{{ duree() ? ' en ' + duree() + ' seconde' + (duree()! > 1 ? 's' : '') : '' }}</p>
+            <div class="barre-resultat mt-16"><span class="vert" [style.flex]="verification()?.lignesValides ?? 0"></span><span class="rouge" [style.flex]="verification()?.lignesEnErreur ?? 0"></span><span class="or" [style.flex]="verification()?.doublonsDetectes ?? 0"></span></div>
+            <div class="resume mt-16"><div class="grow"><p class="muted small">Lignes valides</p><strong>{{ verification()?.lignesValides | nombre }}</strong></div><span class="faint small">{{ part().valides }} %</span></div>
+            <div class="resume"><div class="grow"><p class="muted small">Erreurs à corriger</p><strong>{{ verification()?.lignesEnErreur | nombre }}</strong></div><span class="faint small">{{ part().erreurs }} %</span></div>
+            <div class="resume"><div class="grow"><p class="muted small">Doublons potentiels</p><strong>{{ verification()?.doublonsDetectes | nombre }}</strong></div><span class="faint small">{{ part().doublons }} %</span></div>
+            @if (verification()?.lignesEnErreur) { <div class="notice warn mt-12"><app-icon name="alert-triangle" [size]="16" />Les lignes en erreur ne seront pas importées. Corrigez-les ou exportez-les.</div> }
+          </div>
+          <div class="card card-pad">
+            <h3 class="mb">Critères de détection</h3>
+            <div class="stack small" style="gap: 10px">
+              <div class="row-between"><span class="row"><app-icon name="check" [size]="15" class="vert" />Téléphone identique</span><span class="faint">Fort</span></div>
+              <div class="row-between"><span class="row"><app-icon name="check" [size]="15" class="vert" />Adresse e-mail identique</span><span class="faint">Fort</span></div>
+              <div class="row-between"><span class="row"><app-icon name="check" [size]="15" class="vert" />Nom, prénom et naissance</span><span class="faint">Fort</span></div>
+              <div class="row-between"><span class="row"><app-icon name="check" [size]="15" class="vert" />Doublons internes au fichier</span><span class="faint">Moyen</span></div>
+            </div>
+          </div>
+        </aside>
+        <section class="card">
+          <div class="tabs onglets">
+            <button type="button" [class.active]="ongletVerif() === 'doublons'" (click)="ongletVerif.set('doublons')">Doublons potentiels <span class="counter or-fond">{{ verification()?.doublonsDetectes }}</span></button>
+            <button type="button" [class.active]="ongletVerif() === 'erreurs'" (click)="ongletVerif.set('erreurs')">Erreurs <span class="counter">{{ verification()?.lignesEnErreur }}</span></button>
+          </div>
+          @if (ongletVerif() === 'doublons') {
+            <div class="corps-verif">
+              @if (doublonActif(); as d) {
+                <div class="doublon-ouvert">
+                  <div class="row wrap entete-doublon">
+                    <span class="pill gold dot">Correspondance {{ d.score }} %</span>
+                    <strong class="small">Ligne {{ d.ligne }} du fichier</strong><app-icon name="arrow-right" [size]="15" class="faint" />
+                    <strong class="small">{{ d.identifiantSnj ? 'Fiche existante ' + d.identifiantSnj : 'Doublon interne au fichier' }}</strong>
+                    @if (d.decision) { <span class="pill green">Décision : {{ decisionTexte(d.decision) }}</span> }
+                  </div>
+                  @if (d.comparaison?.length) {
+                    <table class="table comparaison">
+                      <thead><tr><th>Champ</th><th>Fichier importé</th><th>Fiche existante</th><th></th></tr></thead>
+                      <tbody>@for (c of d.comparaison; track c.champ) {
+                        <tr><td class="muted">{{ c.champ }}</td>
+                          <td><span [class.diff]="!c.identique && c.valeurFichier && c.valeurExistante" class="valeur nouveau">{{ c.valeurFichier || '—' }}</span></td>
+                          <td><span [class.diff]="!c.identique && c.valeurFichier && c.valeurExistante" class="valeur ancien">{{ c.valeurExistante || '—' }}</span></td>
+                          <td class="text-right">@if (c.identique) { <app-icon name="check" [size]="16" class="vert" /> } @else if (c.valeurFichier && c.valeurExistante) { <app-icon name="alert-triangle" [size]="16" class="or" /> }</td></tr>
+                      }</tbody>
+                    </table>
+                  } @else { <p class="muted small motifs">{{ d.motifs?.join(' · ') }}</p> }
+                  <div class="row-between actions-doublon">
+                    <span class="muted small">{{ d.motifs?.join(' · ') }}</span>
+                    <span class="row">
+                      <button type="button" class="btn btn-ghost btn-sm" (click)="decider(d, 'IGNORER')">Ignorer</button>
+                      <button type="button" class="btn btn-secondary btn-sm" (click)="decider(d, 'CONSERVER_LES_DEUX')">Conserver les deux</button>
+                      @if (d.membreExistantId) { <button type="button" class="btn btn-primary btn-sm" (click)="decider(d, 'FUSIONNER')">Fusionner</button> }
+                    </span>
+                  </div>
+                </div>
+              }
+              @for (d of verification()?.doublons; track d.ligne) {
+                @if (d.ligne !== ligneActive()) {
+                  <button type="button" class="doublon-ligne" (click)="ouvert.set(d.ligne!)">
+                    <app-icon name="copy" [size]="16" class="or" />
+                    <strong class="small">Ligne {{ d.ligne }} · {{ d.nomFichier }}</strong>
+                    <app-icon name="arrow-right" [size]="14" class="faint" /><span class="muted small">{{ d.identifiantSnj || 'dans le fichier' }}</span>
+                    <span class="grow"></span>
+                    @if (d.decision) { <span class="pill green">{{ decisionTexte(d.decision) }}</span> }
+                    <strong class="small or">{{ d.score }} %</strong><app-icon name="chevron-right" [size]="16" class="faint" />
+                  </button>
+                }
+              } @empty { <div class="empty">Aucun doublon détecté.</div> }
+              @if ((verification()?.doublons?.length ?? 0) > 1) {
+                <div class="row tous"><span class="muted small">Pour tous les doublons restants :</span>
+                  <button type="button" class="link" (click)="deciderTous('IGNORER')">Ignorer</button>
+                  <button type="button" class="link" (click)="deciderTous('FUSIONNER')">Fusionner</button>
+                  <button type="button" class="link" (click)="deciderTous('CONSERVER_LES_DEUX')">Conserver</button></div>
+              }
+            </div>
+          } @else {
+            <table class="table">
+              <thead><tr><th>Ligne</th><th>Colonne</th><th>Valeur</th><th>Problème</th><th>Suggestion</th></tr></thead>
+              <tbody>
+                @for (e of verification()?.erreurs?.slice(0, 50); track $index) {
+                  <tr><td class="strong">{{ e.ligne }}</td><td><span class="tag">{{ libelleChamp(e.champ) }}</span></td><td class="muted">{{ e.valeur || '—' }}</td>
+                    <td><span class="pill red dot">{{ e.message }}</span></td><td>{{ e.suggestion || '—' }}</td></tr>
+                } @empty { <tr><td colspan="5"><div class="empty">Aucune erreur : toutes les lignes sont valides.</div></td></tr> }
+              </tbody>
+            </table>
+            <div class="card-foot"><span>{{ (verification()?.erreurs?.length ?? 0) > 50 ? 50 : verification()?.erreurs?.length }} erreurs affichées sur {{ verification()?.erreurs?.length }}</span>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="exporterErreurs()">Exporter les erreurs</button></div>
+          }
+        </section>
+      </div>
+      <div class="card action-bar mt-20">
+        <span class="row muted small">@if (verification()?.doublonsSansDecision) { <app-icon name="alert-triangle" [size]="16" class="or" />{{ verification()?.doublonsSansDecision }} doublons restent à traiter avant l'import définitif. } @else { <app-icon name="check-circle" [size]="16" class="vert" />Tous les doublons ont été traités. }</span>
+        <span class="row">
+          <button type="button" class="btn btn-ghost" (click)="annuler()">Annuler</button>
+          <button type="button" class="btn btn-primary" [disabled]="chargement()" (click)="importer()">{{ chargement() ? 'Import en cours…' : 'Importer ' + nombre(aImporter()) + ' lignes valides' }}</button>
+        </span>
+      </div>
+    }
+
+    <!-- ======================================== 4. Terminé -->
+    @case (4) {
+      <div class="card mt-20 fin">
+        <div class="succes"><span><i><app-icon name="check" [size]="28" [stroke]="3" /></i></span></div>
+        <h2>Import terminé avec succès</h2>
+        <p class="muted">Les membres importés sont maintenant disponibles dans SNJPro.</p>
+        <div class="chiffres">
+          <div><strong class="vert">{{ session()?.importes | nombre }}</strong><span>membres importés</span></div>
+          <div><strong class="or">{{ session()?.fusionnes | nombre }}</strong><span>doublons fusionnés</span></div>
+          <div><strong class="rouge">{{ session()?.ignores | nombre }}</strong><span>lignes ignorées</span></div>
+          <div><strong>{{ duree() ?? 1 }} s</strong><span>durée du traitement</span></div>
+        </div>
+        <div class="row" style="justify-content: center">
+          <button type="button" class="btn btn-secondary" (click)="nouveau()">Nouvel import</button>
+          <button type="button" class="btn btn-primary" (click)="voirMembres()">Voir les membres importés</button>
+        </div>
+        <button type="button" class="link mt-20" (click)="rapport()">Télécharger le rapport d'import (PDF)</button>
+      </div>
+    }
+  }
+</div>

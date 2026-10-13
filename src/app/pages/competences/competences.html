@@ -1,0 +1,86 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Compétences</h1><p class="sub">{{ total() | nombre }} compétences référencées dans {{ categories().length }} catégories</p></div>
+    @if (peutGerer()) {
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" (click)="synchroniser()" title="Ajoute au référentiel les compétences saisies dans les profils">Synchroniser</button>
+        <button type="button" class="btn btn-primary" (click)="ouvrir(null)">Nouvelle compétence</button>
+      </div>
+    }
+  </div>
+  <div class="mise">
+    <aside class="card cat">
+      <h3>Catégories</h3>
+      <button type="button" class="ligne" [class.active]="!categorie()" (click)="choisir(null)">
+        <span class="grow">Toutes</span><span class="muted small">{{ total() }}</span></button>
+      @for (c of categories(); track c.nom) {
+        <button type="button" class="ligne" [class.active]="categorie() === c.nom" (click)="choisir(c.nom!)">
+          <span class="grow ellipsis">{{ c.nom }}</span><span class="muted small">{{ c.nombreCompetences }}</span></button>
+      }
+    </aside>
+    <section class="card">
+      <div class="row-between entete">
+        <div class="search" style="width: 286px"><app-icon name="search" [size]="17" />
+          <input class="input" [ngModel]="recherche()" (ngModelChange)="recherche.set($event); page.set(0)" placeholder="Rechercher une compétence…" /></div>
+        <select class="select" style="width: 220px; font-weight: 600" [ngModel]="tri()" (ngModelChange)="trier($event)">
+          <option value="MEMBRES">Trier : plus représentées</option><option value="NOM">Trier : ordre alphabétique</option><option value="RECENTES">Trier : plus récentes</option>
+        </select>
+      </div>
+      <table class="table">
+        <thead><tr><th>Compétence</th><th>Catégorie</th><th>Membres</th><th>Niveau moyen</th><th>Ajout</th>@if (peutGerer()) { <th></th> }</tr></thead>
+        <tbody>
+          @for (c of pageCourante(); track c.id) {
+            <tr class="clickable" (click)="detenteurs(c)">
+              <td class="strong">{{ c.nom }}</td>
+              <td>@if (c.categorie) { <span class="pill" [class]="'pill ' + style(c.categorie).pill">{{ c.categorie }}</span> } @else { <span class="faint">—</span> }</td>
+              <td><div class="membres"><strong class="small">{{ c.nombreMembres | nombre }}</strong><div class="progress lime thin"><span [style.width.%]="(c.nombreMembres ?? 0) / max() * 100"></span></div></div></td>
+              <td><span class="niveau">@for (n of [1, 2, 3, 4]; track n) { <i [class.on]="n <= (c.niveauMoyen ?? 0) + 0.25"></i> }</span></td>
+              <td class="muted">{{ c.anneeAjout ?? '—' }}</td>
+              @if (peutGerer()) {
+                <td class="text-right" (click)="$event.stopPropagation()">
+                  <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="ouvrir(c)" aria-label="Modifier"><app-icon name="pencil" [size]="15" /></button>
+                  <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="supprimer(c)" aria-label="Supprimer"><app-icon name="trash" [size]="15" /></button>
+                </td>
+              }
+            </tr>
+          } @empty { <tr><td colspan="6"><div class="empty">Aucune compétence trouvée.</div></td></tr> }
+        </tbody>
+      </table>
+      <app-pagination [page]="page()" [taille]="taille" [total]="filtrees().length" libelle="compétences" (aller)="page.set($event)" />
+    </section>
+  </div>
+</div>
+
+@if (edition()) {
+  <app-modal [titre]="enCours() ? 'Modifier la compétence' : 'Nouvelle compétence'" sousTitre="Ajoutez une compétence au référentiel SNJPro" icone="award" [largeur]="532" (fermer)="edition.set(false)">
+    <div class="stack" style="gap: 18px">
+      <div class="field"><label for="nom">Nom de la compétence<span class="req">*</span></label><input id="nom" class="input" [(ngModel)]="form.nom" /></div>
+      <div class="field"><label for="cat">Catégorie</label>
+        <div class="input-icon"><app-icon name="building" [size]="16" />
+          <input id="cat" class="input" list="liste-cat" [(ngModel)]="form.categorie" placeholder="Bâtiment & travaux" />
+          <datalist id="liste-cat">@for (c of categories(); track c.nom) { <option [value]="c.nom"></option> }</datalist></div></div>
+      <div class="field"><div class="row-between"><label for="desc">Description</label><span class="hint">Facultatif</span></div>
+        <textarea id="desc" class="textarea" rows="3" [(ngModel)]="form.description"></textarea></div>
+      <div class="notice neutral"><app-icon name="info" [size]="16" />Les membres pourront l'ajouter à leur profil avec un niveau.</div>
+    </div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="edition.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="!form.nom?.trim()" (click)="enregistrer()">{{ enCours() ? 'Enregistrer' : 'Créer la compétence' }}</button>
+    </div>
+  </app-modal>
+}
+
+@if (selection(); as s) {
+  <app-modal [titre]="s.nom ?? ''" [sousTitre]="(s.nombreMembres ?? 0) + ' membre(s) détiennent cette compétence'" icone="users" [largeur]="560" (fermer)="selection.set(null)">
+    <div class="stack" style="gap: 4px">
+      @for (d of liste(); track d.membreId) {
+        <button type="button" class="detenteur" (click)="voirMembre(d.membreId!)">
+          <app-avatar [nom]="d.prenom + ' ' + d.nom" [size]="32" />
+          <span class="grow"><strong>{{ d.prenom }} {{ d.nom }}</strong><span class="muted xs"> · {{ d.identifiantSnj }}</span><br /><span class="muted xs">{{ d.cohorte }}{{ d.region ? ' · ' + d.region : '' }}</span></span>
+          @if (d.niveau) { <span class="pill green">{{ d.niveau }}</span> }
+        </button>
+      } @empty { <p class="muted small">Aucun membre.</p> }
+    </div>
+    <div pied><button type="button" class="btn btn-secondary" (click)="tousLesMembres(s)">Voir dans la liste des membres</button></div>
+  </app-modal>
+}

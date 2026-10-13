@@ -1,0 +1,19 @@
+.mise { display: block; }
+.bloc-titre { padding: 20px; border-bottom: 1px solid var(--border); font-size: 16px; font-weight: 700; }
+.corps { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+.compteur-champ { position: relative; }
+.compteur-champ .input { padding-right: 64px; }
+.compteur-champ > span { position: absolute; right: 12px; bottom: 12px; }
+.compteur-champ.zone .textarea { padding-bottom: 28px; }
+.cibles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cible { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); cursor: pointer; text-align: left; font: inherit; color: var(--text); }
+.cible .grow { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.cible.active { border: 1.5px solid var(--primary); background: var(--surface-selected); }
+.choix-valeurs { gap: 8px; margin-top: 10px; }
+.choix-valeurs .tag { cursor: pointer; }
+.selection { position: relative; }
+.selection .menu { position: absolute; left: 0; right: 0; top: 50px; z-index: 5; padding: 6px; box-shadow: var(--shadow-lg); }
+.selection .menu button { width: 100%; display: flex; justify-content: space-between; padding: 9px 10px; border: 0; background: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.selection .menu button:hover { background: var(--bg); }
+.pied { border-top: 1px solid var(--border); flex-wrap: wrap; }
+@media (max-width: 1100px) { .cibles { grid-template-columns: 1fr; } }

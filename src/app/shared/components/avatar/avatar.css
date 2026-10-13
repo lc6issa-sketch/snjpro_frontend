@@ -1,0 +1,2 @@
+:host { display: inline-flex; flex: none; }
+span, img { border-radius: 50%; display: grid; place-items: center; font-weight: 600; letter-spacing: .02em; object-fit: cover; }

@@ -1,0 +1,25 @@
+<header><app-logo [taille]="40" fond="clair" /></header>
+<main>
+  <div class="illustration">
+    <span class="anneau a1"></span><span class="anneau a2"></span>
+    <span class="coeur"><app-icon name="lock" [size]="40" [stroke]="1.6" /></span>
+    <span class="croix"><app-icon name="x" [size]="16" [stroke]="3" /></span>
+    <i class="p1"></i><i class="p2"></i>
+  </div>
+  <p class="code">Erreur 403</p>
+  <h1>{{ membre ? 'Espace réservé au personnel' : 'Accès non autorisé' }}</h1>
+  @if (membre) {
+    <p class="muted">Votre compte est un compte membre. Utilisez l'application mobile SNJPro<br />pour consulter votre profil, vos mobilisations et vos documents.</p>
+  } @else {
+    <p class="muted">Votre rôle ne vous permet pas de consulter cette page.<br />Si vous pensez qu'il s'agit d'une erreur, contactez votre administrateur.</p>
+  }
+  <div class="row actions">
+    @if (membre) {
+      <button type="button" class="btn btn-primary btn-lg" (click)="auth.logout()">Se déconnecter</button>
+    } @else {
+      <a routerLink="/tableau-de-bord" class="btn btn-primary btn-lg">Retour au tableau de bord</a>
+      <a routerLink="/messagerie" class="btn btn-secondary btn-lg">Contacter l'admin</a>
+    }
+  </div>
+</main>
+<footer>Code de référence : SNJ-403 · {{ quand }}</footer>

@@ -1,0 +1,56 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Mobilisation</h1><p class="sub">Identifiez, contactez et suivez les membres mobilisés</p></div>
+    @if (peutGerer()) { <div class="actions"><a routerLink="/mobilisations/nouvelle" class="btn btn-primary">Nouvelle mobilisation</a></div> }
+  </div>
+
+  @if (stats(); as s) {
+    <div class="grid grid-4">
+      <div class="card kpi-inline"><div><p class="kpi-label">Mobilisations en cours</p><p class="kpi-value">{{ s.enCours | nombre }}</p><p class="faint xs mt-12">{{ s.planifiees }} planifiée{{ (s.planifiees ?? 0) > 1 ? 's' : '' }}</p></div></div>
+      <div class="card kpi-inline"><div><p class="kpi-label">Membres sollicités</p><p class="kpi-value">{{ s.membresSollicitesAnnee | nombre }}</p><p class="faint xs mt-12">depuis janvier</p></div></div>
+      <div class="card kpi-inline"><div><p class="kpi-label">Taux de réponse</p><p class="kpi-value">{{ s.tauxReponse | nombre }} %</p><p class="faint xs mt-12">délai moyen : {{ s.delaiMoyenReponseHeures | nombre }} h</p></div></div>
+      <div class="card kpi-inline"><div><p class="kpi-label">Disponibles confirmés</p><p class="kpi-value">{{ s.disponiblesConfirmes | nombre }}</p><p class="faint xs mt-12">{{ s.pourcentageDisponibles | nombre }} % des sollicités</p></div></div>
+    </div>
+  }
+
+  <div class="row-between wrap mt-24">
+    <div class="pill-tabs">
+      @for (o of onglets(); track o.libelle) {
+        <button type="button" [class.active]="statut() === o.cle" (click)="statut.set(o.cle)">{{ o.libelle }} <span class="counter">{{ o.nombre }}</span></button>
+      }
+    </div>
+    <div class="search" style="width: 268px"><app-icon name="search" [size]="17" />
+      <input class="input" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" placeholder="Rechercher une mobilisation…" /></div>
+  </div>
+
+  <div class="stack mt-20" style="gap: 14px">
+    @for (m of filtrees(); track m.id) {
+      <a class="card ligne" [routerLink]="m.statut === 'BROUILLON' ? ['/mobilisations', m.id, 'edition'] : ['/mobilisations', m.id]">
+        <div class="titre">
+          <strong>{{ m.titre }}</strong>
+          <p class="muted small">{{ sousTitre(m) }}</p>
+        </div>
+        <app-pill [dico]="STATUT" [valeur]="m.statut" />
+        <div class="suivi">
+          @if (m.statut === 'PLANIFIEE' || m.statut === 'BROUILLON') {
+            <div class="programme"><app-icon name="clock" [size]="16" />
+              {{ m.statut === 'BROUILLON' ? 'Brouillon · ' + (m.nombreCibles ?? 0) + ' membres ciblés' : 'Envoi programmé le ' + date(m.envoiProgrammeLe) + ' · ' + (m.nombreCibles ?? 0) + ' membres ciblés' }}</div>
+          } @else {
+            <div class="barre">
+              <span class="vert" [style.flex]="m.compteurs?.disponibles ?? 0"></span><span class="rouge" [style.flex]="m.compteurs?.indisponibles ?? 0"></span><span class="gris" [style.flex]="m.compteurs?.sansReponse ?? 0"></span>
+            </div>
+            <div class="row wrap legende small">
+              <strong>{{ m.compteurs?.sollicites | nombre }} sollicités</strong>
+              <span><i class="vert"></i>{{ m.compteurs?.disponibles | nombre }} disponibles</span>
+              <span><i class="rouge"></i>{{ m.compteurs?.indisponibles | nombre }} indisponibles</span>
+              <span><i class="gris"></i>{{ m.compteurs?.sansReponse | nombre }} sans réponse</span>
+            </div>
+          }
+        </div>
+        <span class="fleche"><app-icon name="chevron-right" [size]="18" /></span>
+      </a>
+    } @empty {
+      <div class="card empty"><app-icon name="megaphone" [size]="32" /><p class="title">Aucune mobilisation</p><p>Lancez une mobilisation pour solliciter les membres selon leurs compétences.</p></div>
+    }
+  </div>
+</div>

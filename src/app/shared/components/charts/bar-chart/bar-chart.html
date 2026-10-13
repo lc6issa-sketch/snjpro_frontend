@@ -1,0 +1,16 @@
+<svg [attr.viewBox]="'0 0 ' + L + ' ' + H" preserveAspectRatio="none" class="chart" role="img" [attr.aria-label]="titre()">
+  @for (t of graduations(); track t.v) {
+    <line [attr.x1]="G" [attr.x2]="L" [attr.y1]="t.y" [attr.y2]="t.y" class="grille" />
+    <text [attr.x]="G - 10" [attr.y]="t.y + 4" text-anchor="end" class="axe">{{ t.texte }}</text>
+  }
+  @for (b of barres(); track b.libelle; let i = $index) {
+    <rect [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" rx="4"
+          [style.fill]="i === actif() ? 'var(--primary)' : 'var(--lime-200)'" (mouseenter)="survol.set(i)" (mouseleave)="survol.set(null)" />
+    <text [attr.x]="b.x + b.w / 2" [attr.y]="H - 6" text-anchor="middle" class="axe" [class.fort]="i === actif()">{{ b.libelle }}</text>
+  }
+</svg>
+@if (bulle(); as b) {
+  <div class="bulle" [style.left.%]="b.gauche" [style.top.%]="b.haut">
+    <span>{{ b.libelle }}</span><strong>{{ b.texte }}</strong>
+  </div>
+}

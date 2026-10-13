@@ -1,0 +1,240 @@
+<div class="page">
+  <a class="link" routerLink="/membres">← Retour</a>
+
+  @if (m(); as m) {
+    <!-- En-tête du profil -->
+    <section class="card entete">
+      <div class="bandeau"><i class="c1"></i><i class="c2"></i></div>
+      <div class="identite">
+        <label class="photo" [class.modifiable]="peutModifier()" title="Changer la photo">
+          @if (photo()) { <img [src]="photo()" [alt]="nomComplet()" /> } @else { <app-avatar [nom]="nomComplet()" [size]="88" /> }
+          <i class="en-ligne" [class.off]="m.statut !== 'ACTIF'"></i>
+          @if (peutModifier()) { <input type="file" accept="image/png,image/jpeg" hidden (change)="changerPhoto($event)" /> }
+        </label>
+        <div class="grow infos">
+          <div class="row wrap"><h1>{{ nomComplet() }}</h1><span class="tag">{{ m.identifiantSnj }}</span></div>
+          <div class="row wrap mt-8">
+            <app-pill [dico]="STATUT" [valeur]="m.statut" />
+            @if (m.cohorteNom) { <a [routerLink]="['/cohortes', m.cohorteId]" class="pill blue dot">{{ m.cohorteNom }}</a> }
+            @if (m.telephoneVerifie) { <span class="pill teal dot">Téléphone vérifié</span> }
+            @if (cohorte()?.statut; as s) { <app-pill [dico]="STATUT_COHORTE" [valeur]="s" /> }
+            @if (m.disponibleMobilisation === false) { <span class="pill gold dot">Non mobilisable</span> }
+          </div>
+          <div class="row wrap meta">
+            @if (m.localisation?.region) { <span><app-icon name="map-pin" [size]="15" />{{ m.localisation?.cercle || m.localisation?.region }}, Mali</span> }
+            @if (m.situationProfessionnelle?.profession) { <span><app-icon name="briefcase" [size]="15" />{{ m.situationProfessionnelle?.profession }}</span> }
+            @if (m.numeroTelephone) { <span><app-icon name="smartphone" [size]="15" />{{ m.numeroTelephone | telMasque }}</span> }
+            @if (m.dateIncorporation) { <span><app-icon name="calendar" [size]="15" />Incorporé{{ m.sexe === 'FEMININ' ? 'e' : '' }} le {{ m.dateIncorporation | dateCourte }}</span> }
+          </div>
+        </div>
+        <div class="row boutons">
+          <button type="button" class="btn btn-secondary" (click)="contacter()">Contacter</button>
+          @if (peutModifier()) { <a [routerLink]="['/membres', m.id, 'modifier']" class="btn btn-primary">Modifier le profil</a> }
+        </div>
+      </div>
+    </section>
+
+    <!-- Onglets -->
+    <div class="tabs mt-24">
+      <button type="button" [class.active]="onglet() === 'apercu'" (click)="onglet.set('apercu')">Aperçu</button>
+      <button type="button" [class.active]="onglet() === 'documents'" (click)="onglet.set('documents')">Documents <span class="counter">{{ nbDocuments() }}</span></button>
+      <button type="button" [class.active]="onglet() === 'historique'" (click)="onglet.set('historique')">Historique <span class="counter">{{ totalHistorique() }}</span></button>
+    </div>
+
+    @switch (onglet()) {
+      @case ('apercu') {
+        <div class="grille mt-20">
+          <div class="stack">
+            <div class="card">
+              <div class="card-head bord"><h3>Informations personnelles</h3>
+                @if (peutModifier()) { <a [routerLink]="['/membres', m.id, 'modifier']" class="btn btn-soft btn-sm">Modifier</a> }</div>
+              <div class="card-body info-grid">
+                <div><p class="k">Date de naissance</p><p class="v">{{ m.dateNaissance | dateCourte }}</p></div>
+                <div><p class="k">Lieu de naissance</p><p class="v">{{ m.lieuNaissance || '—' }}</p></div>
+                <div><p class="k">Nationalité</p><p class="v">{{ m.nationalite || '—' }}</p></div>
+                <div><p class="k">Sexe</p><p class="v">{{ m.sexe === 'FEMININ' ? 'Femme' : 'Homme' }}</p></div>
+                <div><p class="k">Groupe sanguin</p><p class="v">{{ m.groupeSanguin || '—' }}</p></div>
+                <div><p class="k">Taille · Poids</p><p class="v">{{ m.taille ? (m.taille + ' m') : '—' }} · {{ m.poids ? (m.poids + ' kg') : '—' }}</p></div>
+                <div><p class="k">Dernier diplôme</p><p class="v">{{ m.dernierDiplome || '—' }}</p></div>
+                <div><p class="k">Catégorie</p><p class="v">{{ m.categorie === 'FONCTIONNAIRE' ? 'Fonctionnaire' : m.categorie ? 'Non fonctionnaire' : '—' }}</p></div>
+                <div><p class="k">E-mail</p><p class="v ellipsis">{{ m.email || '—' }}</p></div>
+                @if (m.compagnie || m.section) { <div><p class="k">Compagnie · Section</p><p class="v">{{ m.compagnie || '—' }} · {{ m.section || '—' }}</p></div> }
+                @if (m.personneAPrevenir) { <div><p class="k">Personne à prévenir</p><p class="v">{{ m.personneAPrevenir }}</p></div> }
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><div><h3>Parcours SNJ</h3><p class="sub">Historique au sein du Service National des Jeunes</p></div>
+                @if (peutModifier()) { <button type="button" class="link" (click)="ajoutParcours.set(true)">+ Ajouter une étape</button> }</div>
+              <div class="card-body">
+                <ol class="frise">
+                  @for (p of parcours(); track p.id; let premier = $first) {
+                    <li [class.actuel]="premier && !p.dateFin">
+                      <div class="row-between">
+                        <strong>{{ p.intitule }}</strong>
+                        <span class="row"><span class="faint small">{{ p.dateDebut | dateMoyenne }}{{ p.dateFin ? ' – ' + (p.dateFin | dateMoyenne) : (premier ? ' – aujourd\'hui' : '') }}</span>
+                          @if (peutModifier()) { <button type="button" class="suppr" (click)="supprimerParcours(p)" aria-label="Supprimer l'étape"><app-icon name="trash" [size]="14" /></button> }</span>
+                      </div>
+                      <p class="muted small">{{ p.type ? (p.type.charAt(0) + p.type.slice(1).toLowerCase()) : 'Étape' }}{{ p.lieu ? ' · ' + p.lieu : '' }}{{ p.description ? ' · ' + p.description : '' }}</p>
+                    </li>
+                  } @empty { <p class="muted small">Aucune étape enregistrée.</p> }
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack">
+            @if (completude(); as c) {
+              <div class="card">
+                <div class="card-body row">
+                  <app-ring [valeur]="c.taux" [taille]="60" [epaisseur]="11" [couleur]="c.complet ? 'var(--secondary)' : 'var(--primary)'" />
+                  <div><strong>Profil complété à {{ c.taux }} %</strong>
+                    <p class="muted small">{{ c.elementsManquants?.length ? 'Il manque ' + c.elementsManquants?.length + ' élément' + ((c.elementsManquants?.length ?? 0) > 1 ? 's' : '') : 'Profil complet' }}</p></div>
+                </div>
+                @if (c.elementsManquants?.length) {
+                  <div class="manquants">
+                    @for (e of c.elementsManquants; track e) {
+                      <div class="row-between"><span class="row small"><app-icon name="alert-circle" [size]="16" class="or" />{{ e }}</span>
+                        @if (peutModifier()) { <button type="button" class="link" (click)="completer(e)">Ajouter</button> }</div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="card">
+              <div class="card-head"><h3>Situation professionnelle</h3>
+                @if (m.situationProfessionnelle?.statut; as s) { <app-pill [dico]="STATUT_PRO" [valeur]="s" /> }</div>
+              <div class="card-body">
+                @if (m.situationProfessionnelle; as sp) {
+                  <dl class="dl">
+                    <dt>Poste</dt><dd>{{ sp.profession || '—' }}</dd>
+                    <dt>Employeur</dt><dd>{{ sp.nomEmployeur || '—' }}</dd>
+                    <dt>Secteur</dt><dd>{{ sp.secteurActivite || '—' }}</dd>
+                    <dt>Depuis</dt><dd>{{ sp.dateDebutActivite ? (sp.dateDebutActivite | dateMoyenne) : '—' }}</dd>
+                  </dl>
+                } @else { <p class="muted small">Situation non renseignée.</p> }
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>Compétences</h3>
+                @if (peutModifier()) { <button type="button" class="link" (click)="gestionCompetences.set(true)">Gérer</button> }</div>
+              <div class="card-body row wrap competences">
+                @for (c of profil()?.competences; track c.id) {
+                  <span class="tag" [title]="c.niveau ? NIVEAU[c.niveau].libelle : ''">{{ c.intitule }}
+                    <span class="points">@for (p of points(c.niveau); track $index) { <i [class.on]="p"></i> }</span></span>
+                } @empty { <p class="muted small">Aucune compétence renseignée.</p> }
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-secondary btn-block" (click)="cv()">Télécharger le CV (PDF)</button>
+          </div>
+        </div>
+      }
+
+      @case ('documents') {
+        <div class="card mt-20">
+          <div class="card-head bord">
+            <div><h3>Documents du membre</h3>
+              <p class="sub">{{ documents()?.documents?.length ?? 0 }} document(s) disponible(s) · {{ documents()?.piecesManquantes?.length ?? 0 }} pièce(s) manquante(s)</p></div>
+            @if (peutModifier()) {
+              <div class="row">
+                <button type="button" class="btn btn-secondary" (click)="attestation()">Générer l'attestation</button>
+                <button type="button" class="btn btn-primary" (click)="ouvrirTeleversement('AUTRE')">Ajouter un document</button>
+              </div>
+            }
+          </div>
+          <table class="table">
+            <thead><tr><th>Document</th><th>Type</th><th>Ajouté le</th><th>État</th><th></th></tr></thead>
+            <tbody>
+              @for (d of documents()?.documents; track d.id) {
+                <tr>
+                  <td><span class="row"><strong>{{ d.titre || d.nomFichier }}</strong></span></td>
+                  <td class="muted">{{ d.typeDocument === 'ATTESTATION' ? 'Généré par SNJPro' : typesDocument[d.typeDocument ?? 'AUTRE'] }}</td>
+                  <td class="muted">{{ d.dateAjout | dateCourte }}</td>
+                  <td>@if (d.verifie) { <span class="pill green dot">Vérifié</span> } @else { <span class="pill green dot">Disponible</span> }</td>
+                  <td class="text-right"><button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="telecharger(d)" aria-label="Télécharger"><app-icon name="download" [size]="17" /></button></td>
+                </tr>
+              }
+              @for (t of documents()?.piecesManquantes; track t) {
+                <tr>
+                  <td><span class="row"><strong>{{ typesDocument[t] }}</strong></span></td>
+                  <td class="muted">{{ typesDocument[t] }}</td><td class="muted">—</td>
+                  <td><span class="pill red dot">Manquant</span></td>
+                  <td class="text-right">@if (peutModifier()) { <button type="button" class="btn btn-soft btn-sm" (click)="ouvrirTeleversement(t)">Téléverser</button> }</td>
+                </tr>
+              }
+              @if (!documents()?.documents?.length && !documents()?.piecesManquantes?.length) {
+                <tr><td colspan="5"><div class="empty">Aucun document.</div></td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @case ('historique') {
+        <div class="card mt-20">
+          <div class="card-head"><div><h3>Historique du membre</h3><p class="sub">Toutes les modifications et opérations concernant ce profil</p></div>
+            @if (auth.peutVoir('HISTORIQUE')) { <a routerLink="/historique" [queryParams]="{ entite: 'MEMBRE', entiteId: m.id }" class="link">Voir le journal complet</a> }</div>
+          <div class="card-body">
+            <ol class="frise">
+              @for (h of historique(); track h.id; let premier = $first) {
+                <li [class.actuel]="premier">
+                  <div class="row-between">
+                    <span><strong>{{ h.utilisateur || 'Système' }}</strong>&nbsp; {{ phrase(h) }}</span>
+                    <span class="pill dot" [class]="'pill dot ' + etiquetteAction(h.action).teinte">{{ etiquetteAction(h.action).libelle }}</span>
+                  </div>
+                  <p class="faint small">{{ h.dateAction | dateHeure }}</p>
+                </li>
+              } @empty { <p class="muted small">Aucune opération enregistrée.</p> }
+            </ol>
+          </div>
+        </div>
+      }
+    }
+  } @else {
+    <p class="muted">Chargement…</p>
+  }
+</div>
+
+@if (ajoutParcours() && m()) {
+  <app-ajout-parcours [membreId]="m()!.id!" [nom]="nomComplet() + ' · ' + m()!.identifiantSnj" (fermer)="ajoutParcours.set(false)" (ajoute)="parcoursAjoute()" />
+}
+
+@if (gestionCompetences()) {
+  <app-modal titre="Compétences" [sousTitre]="nomComplet()" icone="award" [largeur]="520" (fermer)="gestionCompetences.set(false)">
+    <div class="stack" style="gap: 10px">
+      @for (c of profil()?.competences; track c.id) {
+        <div class="row-between ligne-comp"><span><strong>{{ c.intitule }}</strong><span class="muted small"> · {{ c.niveau ? NIVEAU[c.niveau].libelle : '—' }}</span></span>
+          <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="retirerCompetence(c)" aria-label="Retirer"><app-icon name="trash" [size]="15" /></button></div>
+      } @empty { <p class="muted small">Aucune compétence.</p> }
+    </div>
+    <div class="row mt-20">
+      <input class="input grow" [(ngModel)]="nouvelleCompetence" placeholder="Nouvelle compétence" (keydown.enter)="ajouterCompetence()" />
+      <select class="select" style="width: 150px" [(ngModel)]="nouveauNiveau">
+        <option value="DEBUTANT">Débutant</option><option value="INTERMEDIAIRE">Intermédiaire</option><option value="AVANCE">Avancé</option><option value="EXPERT">Expert</option>
+      </select>
+      <button type="button" class="btn btn-primary" (click)="ajouterCompetence()">Ajouter</button>
+    </div>
+    <div pied><button type="button" class="btn btn-secondary" (click)="gestionCompetences.set(false)">Fermer</button></div>
+  </app-modal>
+}
+
+@if (televersement(); as type) {
+  <app-modal titre="Ajouter un document" [sousTitre]="nomComplet()" icone="upload" [largeur]="500" (fermer)="televersement.set(null)">
+    <div class="stack" style="gap: 16px">
+      <div class="field"><label for="td">Titre</label><input id="td" class="input" [(ngModel)]="titreDocument" /></div>
+      <label class="dropzone">
+        <app-icon name="upload" [size]="24" />
+        <strong>{{ fichierDocument?.name ?? 'Choisir un fichier' }}</strong>
+        <span class="muted small">{{ type === 'PHOTO' ? 'JPG ou PNG · 2 Mo maximum' : 'PDF, image ou document · 20 Mo maximum' }}</span>
+        <input type="file" hidden (change)="choisirFichier($event)" [attr.accept]="type === 'PHOTO' ? 'image/png,image/jpeg' : null" />
+      </label>
+    </div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="televersement.set(null)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="!fichierDocument" (click)="televerser()">Téléverser</button>
+    </div>
+  </app-modal>
+}

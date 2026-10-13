@@ -1,0 +1,60 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <a class="link" routerLink="/opportunites">← Retour</a>
+      <h1>{{ id() ? 'Modifier l'opportunité' : 'Nouvelle opportunité' }}</h1>
+      <p class="sub">Publiez une offre d'emploi, de stage ou de formation</p>
+    </div>
+    <div class="actions">
+      <a [routerLink]="id() ? ['/opportunites', id()] : ['/opportunites']" class="btn btn-ghost">Annuler</a>
+      <button type="button" class="btn btn-secondary" [disabled]="envoi()" (click)="enregistrer(false)">Enregistrer le brouillon</button>
+      <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="enregistrer(true)">Publier</button>
+    </div>
+  </div>
+  <div class="mise">
+    <section class="card card-pad stack" style="gap: 20px">
+      <div class="field"><span class="label">Type d'opportunité</span>
+        <div class="segmented block">
+          @for (t of types; track t.cle) { <button type="button" [class.active]="f.type === t.cle" (click)="f.type = t.cle">{{ t.libelle }}</button> }
+        </div></div>
+      <div class="field"><label for="int">{{ f.type === 'FORMATION' ? 'Intitulé de la formation' : 'Intitulé du poste' }}<span class="req">*</span></label>
+        <input id="int" class="input" [(ngModel)]="f.intitule" placeholder="Technicien(ne) réseau" /></div>
+      <div class="form-grid">
+        <div class="field"><label for="org">Organisation<span class="req">*</span></label>
+          <div class="input-icon"><app-icon name="building" [size]="16" /><input id="org" class="input" [(ngModel)]="f.organisation" /></div></div>
+        <div class="field"><label for="lieu">Lieu</label>
+          <div class="input-icon"><app-icon name="map-pin" [size]="16" /><input id="lieu" class="input" list="villes" [(ngModel)]="f.lieu" />
+            <datalist id="villes">@for (r of regions(); track r) { <option [value]="r"></option> }</datalist></div></div>
+        <div class="field"><label for="ctr">{{ f.type === 'EMPLOI' ? 'Type de contrat' : 'Durée' }}</label>
+          <input id="ctr" class="input" list="contrats" [(ngModel)]="f.typeContrat" [placeholder]="f.type === 'EMPLOI' ? 'CDI' : '6 mois'" />
+          <datalist id="contrats"><option value="CDI"></option><option value="CDD 6 mois"></option><option value="CDD 12 mois"></option><option value="3 mois · gratuite"></option><option value="6 mois"></option></datalist></div>
+        <div class="field"><label for="lim">Date limite de candidature</label><input id="lim" type="date" class="input" [(ngModel)]="f.dateLimite" /></div>
+      </div>
+      <div class="field"><label for="desc">Description</label><textarea id="desc" class="textarea" rows="4" [(ngModel)]="f.description"></textarea></div>
+      <div class="field"><span class="label">Compétences recherchées</span>
+        <div class="row wrap">
+          @for (c of f.competences; track c) { <span class="tag soft">{{ c }}<button type="button" (click)="retirer(c)" aria-label="Retirer"><app-icon name="x" [size]="13" [stroke]="2.5" /></button></span> }
+          <input class="ajout" list="liste-comp" [(ngModel)]="ajout" (change)="ajouter()" (keydown.enter)="ajouter()" placeholder="+ Ajouter" />
+          <datalist id="liste-comp">@for (c of competences(); track c) { <option [value]="c"></option> }</datalist>
+        </div></div>
+    </section>
+    <aside class="card card-pad stack" style="gap: 18px">
+      <h3>Diffusion</h3>
+      <div class="field"><span class="label">Public visé</span>
+        <label class="radio"><input type="radio" name="pub" value="COMPETENCES" [(ngModel)]="f.publicCible" (ngModelChange)="estimer()" />Membres correspondant aux compétences</label>
+        <label class="radio"><input type="radio" name="pub" value="TOUS" [(ngModel)]="f.publicCible" (ngModelChange)="estimer()" />Tous les membres</label>
+        <label class="radio"><input type="radio" name="pub" value="REGION" [(ngModel)]="f.publicCible" (ngModelChange)="estimer()" />Une région</label>
+        @if (f.publicCible === 'REGION') {
+          <select class="select" [(ngModel)]="f.region" (ngModelChange)="estimer()" aria-label="Région"><option [ngValue]="undefined">Choisir…</option>
+            @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }</select>
+        }
+      </div>
+      @if (correspondants() !== null) {
+        <div class="correspond"><strong>{{ correspondants() | nombre }} membres correspondent</strong>
+          <p class="small">{{ (f.competences ?? []).length ? (f.competences ?? []).join(' ou ') : 'Toutes compétences' }}{{ f.region ? ' · ' + f.region : '' }}</p></div>
+      }
+      <div class="row-between"><strong class="small">Notifier les membres ciblés</strong><label class="switch"><input type="checkbox" [(ngModel)]="f.notifierMembres" aria-label="Notifier les membres ciblés" /></label></div>
+      <div class="row-between"><strong class="small">Afficher sur le portail public</strong><label class="switch"><input type="checkbox" [(ngModel)]="f.portailPublic" aria-label="Afficher sur le portail public" /></label></div>
+    </aside>
+  </div>
+</div>

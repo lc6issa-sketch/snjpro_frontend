@@ -1,0 +1,64 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Historique des modifications</h1><p class="sub">Traçabilité des opérations importantes effectuées dans SNJPro</p></div>
+    <div class="actions"><button type="button" class="btn btn-secondary" (click)="exporter()">Exporter le journal</button></div>
+  </div>
+  <div class="row wrap filtres">
+    <div class="search" style="width: 300px"><app-icon name="search" [size]="17" /><input class="input" [ngModel]="recherche" (ngModelChange)="rechercher($event)" placeholder="Rechercher une action, un membre…" /></div>
+    <div class="filtre"><app-icon name="users" [size]="16" /><select class="select" [(ngModel)]="utilisateur" (ngModelChange)="recharger()" aria-label="Utilisateur"><option value="">Tous les utilisateurs</option>@for (u of utilisateurs(); track u.id) { <option [value]="u.username">{{ u.prenom }} {{ u.nom }}</option> }</select></div>
+    <div class="filtre"><app-icon name="filter" [size]="16" /><select class="select" [(ngModel)]="action" (ngModelChange)="recharger()" aria-label="Action"><option value="">Toutes les actions</option>@for (a of actions; track a) { <option [value]="a">{{ libelleAction(a) }}</option> }</select></div>
+    <div class="filtre"><app-icon name="calendar" [size]="16" /><select class="select" [(ngModel)]="jours" (ngModelChange)="recharger()" aria-label="Période">@for (p of periodes; track p.jours) { <option [ngValue]="p.jours">{{ p.libelle }}</option> }</select></div>
+    @if (entite) { <span class="tag soft">{{ libelleEntite(entite) }} n° {{ entiteId }}<button type="button" (click)="retirerEntite()" aria-label="Retirer le filtre"><app-icon name="x" [size]="13" /></button></span> }
+  </div>
+
+  <div class="mise mt-20" [class.avec-detail]="selection()">
+    <section class="card">
+      <table class="table">
+        <thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>Élément concerné</th></tr></thead>
+        <tbody>
+          @for (h of operations(); track h.id) {
+            <tr class="clickable" [class.selected]="selection()?.id === h.id" (click)="ouvrir(h)">
+              <td><strong class="small">{{ jour(h.dateAction) }}</strong><br /><span class="faint xs">{{ heureDe(h.dateAction) }}</span></td>
+              <td>@if (h.utilisateur) { <span class="cell-person"><app-avatar [nom]="h.utilisateur" [size]="24" /><span class="small strong">{{ h.utilisateur }}</span></span> }
+                @else { <span class="row small strong"><app-icon name="sliders" [size]="16" class="faint" />Système</span> }</td>
+              <td><span class="pill dot" [class]="'pill dot ' + etiquette(h.action).teinte">{{ etiquette(h.action).libelle }}</span></td>
+              <td class="small">{{ libelleEntite(h.entite) }}{{ h.details ? ' · ' + roles(h.details) : (h.entiteId ? ' n° ' + h.entiteId : '') }}</td>
+            </tr>
+          } @empty { <tr><td colspan="4"><div class="empty">Aucune opération sur cette période.</div></td></tr> }
+        </tbody>
+      </table>
+      <div class="card-foot"><span>{{ total() | nombre }} opérations{{ jours ? ' sur les ' + (jours === 7 ? '7 derniers jours' : jours === 30 ? '30 derniers jours' : '3 derniers mois') : '' }}</span>
+        @if (operations().length < total()) { <button type="button" class="link" (click)="plus()">Charger plus</button> }</div>
+    </section>
+
+    @if (selection(); as s) {
+      <aside class="card detail">
+        <div class="row-between entete"><h3>Détail de l'opération</h3><button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="selection.set(null)" aria-label="Fermer"><app-icon name="x" [size]="17" /></button></div>
+        <div class="corps">
+          <span class="pill dot" [class]="'pill dot ' + etiquette(s.action).teinte">{{ etiquette(s.action).libelle }}</span>
+          <dl class="dl mt-16">
+            <dt>Date</dt><dd>{{ dateComplete(s.dateAction) }}</dd>
+            <dt>Utilisateur</dt><dd>{{ s.utilisateur || 'Système' }}</dd>
+            <dt>Élément</dt><dd>{{ libelleEntite(s.entite) }}{{ s.entiteId ? ' n° ' + s.entiteId : '' }}</dd>
+            @if (s.adresseIp) { <dt>Adresse IP</dt><dd>{{ s.adresseIp }}</dd> }
+          </dl>
+          @if (s.details) { <p class="muted small mt-16">{{ roles(s.details) }}</p> }
+        </div>
+        @if (s.champsModifies?.length) {
+          <div class="corps bord">
+            <h4>Champs modifiés ({{ s.champsModifies?.length }})</h4>
+            @for (c of s.champsModifies; track $index) {
+              <p class="champ">{{ c['libelle'] || c['champ'] }}</p>
+              <div class="valeur ancienne"><span>–</span><s>{{ c['ancienne'] || '—' }}</s></div>
+              <div class="valeur nouvelle"><span>+</span>{{ c['nouvelle'] || '—' }}</div>
+            }
+          </div>
+        }
+        <div class="corps bord">
+          @if (s.restaurable) { <button type="button" class="btn btn-secondary btn-block" (click)="restaurer(s)">Restaurer les valeurs</button> }
+          @if (s.entite === 'MEMBRE' && s.entiteId) { <button type="button" class="btn btn-ghost btn-block mt-8" (click)="voir(s)">Ouvrir la fiche du membre</button> }
+        </div>
+      </aside>
+    }
+  </div>
+</div>

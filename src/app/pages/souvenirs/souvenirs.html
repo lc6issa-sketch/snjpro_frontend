@@ -1,0 +1,238 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Souvenirs de formation</h1>
+      <p class="sub">Photos, vidéos et sons partagés par les formés et l'encadrement pendant la formation</p>
+    </div>
+    @if (peutGerer()) {
+      <div class="actions"><button type="button" class="btn btn-primary" (click)="ouvrirCreation()">Ajouter un souvenir</button></div>
+    }
+  </div>
+
+  <!-- Compteurs -->
+  <div class="kpis">
+    <div class="card kpi-inline"><div><p class="muted small">Publiés</p><p class="kpi-value">{{ stats()?.publies ?? 0 | nombre }}</p></div></div>
+    @if (peutGerer()) {
+      <button type="button" class="card kpi-inline cliquable" [class.alerte]="stats()?.enAttente" (click)="choisirStatut('EN_ATTENTE')">
+        <div><p class="muted small">À valider</p><p class="kpi-value">{{ stats()?.enAttente ?? 0 | nombre }}</p></div></button>
+    }
+    <div class="card kpi-inline"><div><p class="muted small">Photos</p><p class="kpi-value">{{ stats()?.photos ?? 0 | nombre }}</p></div></div>
+    <div class="card kpi-inline"><div><p class="muted small">Vidéos</p><p class="kpi-value">{{ stats()?.videos ?? 0 | nombre }}</p></div></div>
+    <div class="card kpi-inline"><div><p class="muted small">Sons</p><p class="kpi-value">{{ stats()?.audios ?? 0 | nombre }}</p></div></div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="barre-filtres">
+    @if (peutGerer()) {
+      <div class="pill-tabs">
+        <button type="button" [class.active]="statut() === 'PUBLIE'" (click)="choisirStatut('PUBLIE')">Publiés <span class="counter">{{ stats()?.publies ?? 0 }}</span></button>
+        <button type="button" [class.active]="statut() === 'EN_ATTENTE'" (click)="choisirStatut('EN_ATTENTE')">À valider <span class="counter">{{ stats()?.enAttente ?? 0 }}</span></button>
+        <button type="button" [class.active]="statut() === 'REJETE'" (click)="choisirStatut('REJETE')">Rejetés <span class="counter">{{ stats()?.rejetes ?? 0 }}</span></button>
+      </div>
+    }
+    <div class="segmented sm">
+      <button type="button" [class.active]="!type()" (click)="choisirType(null)">Tout</button>
+      <button type="button" [class.active]="type() === 'PHOTO'" (click)="choisirType('PHOTO')"><app-icon name="image" [size]="14" />Photos</button>
+      <button type="button" [class.active]="type() === 'VIDEO'" (click)="choisirType('VIDEO')"><app-icon name="video" [size]="14" />Vidéos</button>
+      <button type="button" [class.active]="type() === 'AUDIO'" (click)="choisirType('AUDIO')"><app-icon name="mic" [size]="14" />Sons</button>
+    </div>
+    <span class="grow"></span>
+    <select class="select select-sm filtre-cohorte" [(ngModel)]="cohorteId" (ngModelChange)="changerCohorte()" aria-label="Cohorte">
+      <option [ngValue]="null">Toutes les cohortes</option>
+      @for (c of cohortesPerimetre(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}</option> }
+    </select>
+    <div class="search filtre-recherche"><app-icon name="search" [size]="16" />
+      <input class="input input-sm" [(ngModel)]="recherche" (ngModelChange)="chercher()" placeholder="Titre, lieu, auteur…" aria-label="Rechercher" /></div>
+  </div>
+
+  <!-- Galerie -->
+  @if (souvenirs().length) {
+    <div class="galerie" [class.charge]="chargement()">
+      @for (s of souvenirs(); track s.id) {
+        <button type="button" class="carte card" (click)="ouvrir(s)">
+          <div class="couverture">
+            @if (couverture(s); as url) { <img [src]="url" [alt]="s.titre" loading="lazy" /> }
+            @else { <span class="placeholder"><app-icon [name]="iconeCouverture(s)" [size]="34" /></span> }
+            <div class="compteurs">
+              @if (s.nombrePhotos) { <span><app-icon name="image" [size]="13" />{{ s.nombrePhotos }}</span> }
+              @if (s.nombreVideos) { <span><app-icon name="video" [size]="13" />{{ s.nombreVideos }}</span> }
+              @if (s.nombreAudios) { <span><app-icon name="mic" [size]="13" />{{ s.nombreAudios }}</span> }
+            </div>
+            @if (s.statut !== 'PUBLIE') { <app-pill class="etat" [dico]="STATUT" [valeur]="s.statut" /> }
+          </div>
+          <div class="infos">
+            <strong class="titre">{{ s.titre }}</strong>
+            <span class="muted xs">{{ s.cohorteNom }}@if (s.datePrise) { · {{ s.datePrise | dateCourte }} }</span>
+            <span class="auteur xs">
+              @if (s.envoyeParMembre) { <span class="tag soft">Membre</span> }
+              <span class="faint">{{ s.auteurNom }} · {{ s.dateCreation | relatif }}</span>
+            </span>
+          </div>
+        </button>
+      }
+    </div>
+    <div class="card pied-galerie">
+      <app-pagination [page]="page()" [taille]="TAILLE" [total]="total()" libelle="souvenirs" (aller)="charger($event)" />
+    </div>
+  } @else {
+    <div class="card empty">
+      <app-icon name="image" [size]="36" />
+      <p class="title">{{ chargement() ? 'Chargement…' : statut() === 'EN_ATTENTE' ? 'Aucun souvenir à valider' : 'Aucun souvenir pour l\'instant' }}</p>
+      @if (!chargement() && statut() === 'PUBLIE') {
+        <p>Les photos, vidéos et sons de la formation apparaîtront ici.@if (peutGerer()) { Ajoutez le premier souvenir ou validez ceux envoyés par les membres. }</p>
+      }
+    </div>
+  }
+</div>
+
+<!-- ===================================================== Visionneuse -->
+@if (ouvert(); as s) {
+  <app-modal [titre]="s.titre!" [sousTitre]="s.cohorteNom + (s.datePrise ? ' · ' + (s.datePrise | dateCourte) : '')" icone="image" [largeur]="1020" (fermer)="fermerVisionneuse()">
+    <div class="visionneuse">
+      <div class="scene-col">
+        <div class="scene">
+          @if (media(); as m) {
+            @if (urls()[m.id!]; as url) {
+              @switch (m.type) {
+                @case ('VIDEO') { <video [src]="url" controls playsinline></video> }
+                @case ('AUDIO') {
+                  <div class="audio"><span class="onde"><app-icon name="mic" [size]="44" /></span><p>{{ m.nomFichier }}</p><audio [src]="url" controls></audio></div>
+                }
+                @default { <img [src]="url" [alt]="m.nomFichier" /> }
+              }
+            } @else { <span class="chargement"><app-icon name="refresh" [size]="26" class="spin" /></span> }
+          }
+          @if ((s.medias?.length ?? 0) > 1) {
+            <button type="button" class="nav precedent" (click)="deplacer(-1)" aria-label="Précédent"><app-icon name="chevron-left" [size]="22" /></button>
+            <button type="button" class="nav suivant" (click)="deplacer(1)" aria-label="Suivant"><app-icon name="chevron-right" [size]="22" /></button>
+            <span class="position">{{ index() + 1 }} / {{ s.medias?.length }}</span>
+          }
+        </div>
+        <div class="miniatures">
+          @for (m of s.medias; track m.id; let i = $index) {
+            <div class="miniature" [class.active]="i === index()">
+              <button type="button" class="choix" (click)="index.set(i)" [attr.aria-label]="m.nomFichier">
+                @if (m.type === 'PHOTO' && urls()[m.id!]) { <img [src]="urls()[m.id!]" alt="" /> }
+                @else { <app-icon [name]="icone(m.type)" [size]="20" /> }
+              </button>
+              @if (peutGerer() && (s.medias?.length ?? 0) > 1) {
+                <button type="button" class="retirer" (click)="retirerMedia(m)" title="Retirer ce fichier" aria-label="Retirer ce fichier"><app-icon name="x" [size]="12" /></button>
+              }
+            </div>
+          }
+          @if (peutGerer() && (s.medias?.length ?? 0) < 10) {
+            <label class="miniature ajout" title="Ajouter des fichiers">
+              <input type="file" multiple [accept]="acceptes" (change)="ajouterAuSouvenir($event)" hidden />
+              <app-icon name="plus" [size]="20" />
+            </label>
+          }
+        </div>
+        @if (progression() !== null) { <div class="progress mt-8"><span [style.width.%]="progression()"></span></div> }
+      </div>
+
+      <aside class="details">
+        <app-pill [dico]="STATUT" [valeur]="s.statut" />
+        @if (s.legende) { <p class="legende">{{ s.legende }}</p> }
+        <dl class="dl mt-16">
+          <dt>Cohorte</dt><dd>{{ s.cohorteNom }}</dd>
+          @if (s.datePrise) { <dt>Pris le</dt><dd>{{ s.datePrise | dateCourte }}</dd> }
+          @if (s.lieu) { <dt>Lieu</dt><dd>{{ s.lieu }}</dd> }
+          <dt>Auteur</dt><dd>{{ s.auteurNom }}@if (s.auteurIdentifiantSnj) { <br /><span class="faint xs">{{ s.auteurIdentifiantSnj }}</span> }</dd>
+          <dt>Ajouté</dt><dd>{{ s.dateCreation | relatif }}</dd>
+          <dt>Visible par</dt><dd>{{ s.visibleTous ? 'Tous les membres' : 'Membres de la cohorte' }}</dd>
+          @if (media(); as m) { <dt>Fichier</dt><dd class="ellipsis" [title]="m.nomFichier">{{ m.taille | taille }}</dd> }
+        </dl>
+        @if (s.statut === 'REJETE' && s.motifRejet) {
+          <div class="notice error mt-16"><app-icon name="alert-circle" [size]="16" /><span><strong>Rejeté :</strong> {{ s.motifRejet }}</span></div>
+        }
+        @if (s.statut === 'EN_ATTENTE') {
+          <div class="notice warn mt-16"><app-icon name="clock" [size]="16" /><span>Envoyé par un membre : vérifiez les fichiers avant de publier.</span></div>
+        }
+        @if (rejet()) {
+          <div class="field mt-16"><label for="motif">Motif du rejet <span class="req">*</span></label>
+            <textarea id="motif" class="textarea" rows="3" style="min-height: 72px" [(ngModel)]="motifRejet" placeholder="Photo floue, contenu inapproprié…"></textarea>
+            <span class="hint">Le membre verra ce motif dans l'application.</span></div>
+        }
+      </aside>
+    </div>
+
+    <div pied>
+      @if (peutGerer()) {
+        <button type="button" class="btn btn-danger-soft" (click)="supprimer()">Supprimer</button>
+        <button type="button" class="btn btn-ghost" (click)="ouvrirModification()">Modifier</button>
+        <span class="grow"></span>
+        @if (s.statut === 'EN_ATTENTE' || s.statut === 'REJETE') {
+          @if (rejet()) {
+            <button type="button" class="btn btn-ghost" (click)="rejet.set(false)">Annuler</button>
+            <button type="button" class="btn btn-danger" (click)="confirmerRejet()">Confirmer le rejet</button>
+          } @else {
+            @if (s.statut === 'EN_ATTENTE') { <button type="button" class="btn btn-secondary" (click)="rejet.set(true)">Rejeter</button> }
+            <button type="button" class="btn btn-primary" (click)="valider()">Publier</button>
+          }
+        }
+      } @else {
+        <button type="button" class="btn btn-primary" (click)="fermerVisionneuse()">Fermer</button>
+      }
+    </div>
+  </app-modal>
+}
+
+<!-- ===================================================== Ajout / modification -->
+@if (formulaire()) {
+  <app-modal [titre]="enEdition() ? 'Modifier le souvenir' : 'Ajouter un souvenir'"
+             [sousTitre]="enEdition() ? 'Les fichiers se gèrent depuis la visionneuse' : 'Photos, vidéos ou sons de la formation · publié immédiatement'"
+             [icone]="enEdition() ? 'pencil' : 'image'" [largeur]="620" (fermer)="formulaire.set(false)">
+    <div class="form-grid">
+      <div class="field full"><label for="st">Titre <span class="req">*</span></label>
+        <input id="st" class="input" [(ngModel)]="f.titre" maxlength="150" placeholder="Levée des couleurs, marche de nuit…" /></div>
+      <div class="field full"><div class="row-between"><label for="sl">Légende</label><span class="hint">Facultatif</span></div>
+        <textarea id="sl" class="textarea" rows="2" style="min-height: 64px" [(ngModel)]="f.legende" placeholder="Racontez le moment…"></textarea></div>
+      <div class="field"><label for="sc">Cohorte <span class="req">*</span></label>
+        <select id="sc" class="select" [(ngModel)]="f.cohorteId">
+          <option [ngValue]="undefined">Choisir…</option>
+          @for (c of cohortesPerimetre(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}</option> }
+        </select></div>
+      <div class="field"><label for="sd">Date de prise de vue</label><input id="sd" type="date" class="input" [(ngModel)]="f.datePrise" /></div>
+      <div class="field"><label for="slieu">Lieu</label><div class="input-icon"><app-icon name="map-pin" [size]="16" />
+        <input id="slieu" class="input" [(ngModel)]="f.lieu" placeholder="Centre d'instruction de Kati" /></div></div>
+      <div class="field"><span class="label">Visibilité</span>
+        <label class="checkbox visibilite"><input type="checkbox" [(ngModel)]="f.visibleTous" />Visible par tous les membres</label>
+        <span class="hint">Sinon, seulement les membres de la cohorte.</span></div>
+
+      @if (!enEdition()) {
+        <div class="full">
+          <label class="dropzone" [class.over]="survol()" (dragover)="$event.preventDefault(); survol.set(true)" (dragleave)="survol.set(false)" (drop)="deposer($event)">
+            <input type="file" multiple [accept]="acceptes" (change)="choisirFichiers($event)" hidden />
+            <app-icon name="upload" [size]="26" />
+            <strong>Glissez vos fichiers ici ou cliquez pour parcourir</strong>
+            <span class="muted xs">Photos (JPG, PNG, WebP), vidéos (MP4, WebM, MOV), sons (MP3, WAV, M4A, OGG) · 10 fichiers, 100 Mo chacun</span>
+          </label>
+          @if (fichiers().length) {
+            <div class="apercus">
+              @for (x of fichiers(); track $index; let i = $index) {
+                <div class="apercu">
+                  @switch (x.type) {
+                    @case ('PHOTO') { <img [src]="x.apercu" alt="" /> }
+                    @case ('VIDEO') { <video [src]="x.apercu" muted></video><span class="badge-type"><app-icon name="video" [size]="12" /></span> }
+                    @default { <span class="icone-audio"><app-icon name="mic" [size]="22" /></span> }
+                  }
+                  <span class="nom xs ellipsis" [title]="x.fichier.name">{{ x.fichier.name }}</span>
+                  <span class="faint xs">{{ x.fichier.size | taille }}</span>
+                  <button type="button" class="retirer" (click)="retirerFichier(i)" aria-label="Retirer"><app-icon name="x" [size]="12" /></button>
+                </div>
+              }
+            </div>
+          }
+          @if (progression() !== null) {
+            <div class="row mt-12"><div class="progress grow"><span [style.width.%]="progression()"></span></div><span class="small strong">{{ progression() }} %</span></div>
+          }
+        </div>
+      }
+    </div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="formulaire.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="enregistrer()">{{ enEdition() ? 'Enregistrer' : 'Publier le souvenir' }}
+      </button>
+    </div>
+  </app-modal>
+}

@@ -1,0 +1,102 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Documents</h1><p class="sub">Publiez et partagez les documents autorisés avec les membres</p></div>
+    @if (peutGerer()) {
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" (click)="ouvrirDossier()">Nouveau dossier</button>
+        <button type="button" class="btn btn-primary" (click)="ouvrirTeleversement()">Téléverser</button>
+      </div>
+    }
+  </div>
+  <div class="mise">
+    <aside class="card dossiers">
+      <h3>Dossiers</h3>
+      <button type="button" class="ligne" [class.active]="!dossier()" (click)="choisir(null)"><app-icon name="layout-grid" [size]="16" class="vert" /><span class="grow">Tous les documents</span><span class="muted small">{{ total() }}</span></button>
+      @for (d of dossiers(); track d.id) {
+        <div class="ligne-dossier">
+          <button type="button" class="ligne" [class.active]="dossier() === d.id" (click)="choisir(d.id!)"><app-icon name="file-text" [size]="16" class="or" /><span class="grow ellipsis">{{ d.nom }}</span><span class="muted small">{{ d.nombreDocuments }}</span></button>
+          @if (peutGerer() && !d.nombreDocuments) { <button type="button" class="suppr" (click)="supprimerDossier(d)" aria-label="Supprimer le dossier"><app-icon name="trash" [size]="14" /></button> }
+        </div>
+      }
+      <div class="espace">
+        <div class="row-between small"><span class="muted">Espace utilisé</span><strong>{{ espaceTexte() }}</strong></div>
+        <div class="progress lime mt-8"><span [style.width.%]="espace()?.pourcentage ?? 0"></span></div>
+      </div>
+    </aside>
+    <section class="card">
+      <div class="row-between entete">
+        <div class="search" style="width: 286px"><app-icon name="search" [size]="17" />
+          <input class="input" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" placeholder="Rechercher un document…" /></div>
+        <div class="segmented">
+          <button type="button" [class.active]="!visibilite()" (click)="filtrerVisibilite(null)">Tous</button>
+          <button type="button" [class.active]="visibilite() === 'MEMBRES'" (click)="filtrerVisibilite('MEMBRES')">Membres</button>
+          <button type="button" [class.active]="visibilite() === 'INTERNE'" (click)="filtrerVisibilite('INTERNE')">Interne</button>
+          <button type="button" [class.active]="visibilite() === 'PUBLIC'" (click)="filtrerVisibilite('PUBLIC')">Public</button>
+        </div>
+      </div>
+      <table class="table">
+        <thead><tr><th>Nom</th><th>Dossier</th><th>Visibilité</th><th>Taille</th><th>Ajouté le</th><th></th></tr></thead>
+        <tbody>
+          @for (d of filtres(); track d.id) {
+            <tr>
+              <td><span class="row"><strong>{{ d.titre || d.nomFichier }}{{ d.extension && !(d.titre ?? '').toLowerCase().endsWith('.' + d.extension) ? '.' + d.extension : '' }}</strong></span></td>
+              <td class="muted">{{ d.dossier || '—' }}</td>
+              <td><app-pill [dico]="VISIBILITE" [valeur]="d.visibilite" [point]="false" /></td>
+              <td class="muted">{{ d.taille | taille }}</td>
+              <td class="muted">{{ d.dateAjout | dateCourte }}</td>
+              <td class="text-right actions-ligne">
+                <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="telecharger(d)" aria-label="Télécharger"><app-icon name="download" [size]="16" /></button>
+                @if (peutGerer()) { <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="supprimer(d)" aria-label="Supprimer"><app-icon name="trash" [size]="15" /></button> }
+              </td>
+            </tr>
+          } @empty { <tr><td colspan="6"><div class="empty"><app-icon name="folder" [size]="30" /><p class="title">Aucun document</p><p>Téléversez un premier document dans ce dossier.</p></div></td></tr> }
+        </tbody>
+      </table>
+      <div class="card-foot"><span>{{ filtres().length }} document{{ filtres().length > 1 ? 's' : '' }} sur {{ documents().length }}</span></div>
+    </section>
+  </div>
+</div>
+
+@if (modeDossier()) {
+  <app-modal titre="Nouveau dossier" sousTitre="Organisez les documents par thème" icone="book-open" [largeur]="462" (fermer)="modeDossier.set(false)">
+    <div class="stack" style="gap: 18px">
+      <div class="field"><label for="nd">Nom du dossier<span class="req">*</span></label><input id="nd" class="input" [(ngModel)]="nomDossier" /></div>
+      <div class="field"><span class="label">Visibilité par défaut</span>
+        <div class="segmented block">@for (v of visibilites; track v.cle) { <button type="button" [class.active]="visibiliteDossier === v.cle" (click)="visibiliteDossier = v.cle">{{ v.libelle }}</button> }</div></div>
+    </div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="modeDossier.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="!nomDossier.trim()" (click)="creerDossier()">Créer le dossier</button>
+    </div>
+  </app-modal>
+}
+
+@if (modeTeleversement()) {
+  <app-modal titre="Téléverser un document" sousTitre="PDF, Word, Excel ou image · 20 Mo maximum" icone="upload" [largeur]="532" (fermer)="fermerTeleversement()">
+    <div class="stack" style="gap: 16px">
+      <label class="dropzone" [class.over]="survol()" (dragover)="$event.preventDefault(); survol.set(true)" (dragleave)="survol.set(false)" (drop)="deposer($event)">
+        <app-icon name="upload" [size]="22" class="vert" />
+        <strong>Glissez un fichier ou cliquez pour parcourir</strong>
+        <input type="file" hidden (change)="choisirFichier($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.png,.jpg,.jpeg" />
+      </label>
+      @if (fichier(); as f) {
+        <div class="file-chip">
+          <div class="grow"><strong class="small">{{ f.name }}</strong>
+            <div class="row mt-8"><div class="progress lime grow"><span [style.width.%]="progression()"></span></div><span class="xs strong">{{ progression() }} %</span></div></div>
+        </div>
+      }
+      <div class="field"><label for="tt">Titre</label><input id="tt" class="input" [(ngModel)]="titre" /></div>
+      <div class="form-grid">
+        <div class="field"><label for="dos">Dossier</label>
+          <select id="dos" class="select" [(ngModel)]="dossierCible" (ngModelChange)="adapterVisibilite()"><option [ngValue]="null">Sans dossier</option>
+            @for (d of dossiers(); track d.id) { <option [ngValue]="d.id">{{ d.nom }}</option> }</select></div>
+        <div class="field"><span class="label">Visibilité</span>
+          <div class="segmented block">@for (v of visibilites; track v.cle) { <button type="button" [class.active]="visibiliteDocument === v.cle" (click)="visibiliteDocument = v.cle">{{ v.libelle }}</button> }</div></div>
+      </div>
+    </div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="fermerTeleversement()">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="!fichier() || envoi()" (click)="televerser()">{{ envoi() ? 'Envoi…' : 'Publier le document' }}</button>
+    </div>
+  </app-modal>
+}

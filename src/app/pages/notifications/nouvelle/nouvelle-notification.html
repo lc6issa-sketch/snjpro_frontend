@@ -1,0 +1,76 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Notifications</h1><p class="sub">Envoyez des communications aux membres et suivez leur lecture</p></div>
+    <div class="actions"><a routerLink="/notifications/historique" class="btn btn-secondary">Historique des envois</a></div>
+  </div>
+
+  <div class="mise">
+    <section class="card">
+      <h3 class="bloc-titre">Nouvelle notification</h3>
+      <div class="corps">
+        <div class="field"><span class="label">Type</span>
+          <div class="segmented block">
+            @for (t of types; track t.cle) { <button type="button" [class.active]="f.type === t.cle" (click)="f.type = t.cle; maj()">{{ t.libelle }}</button> }
+          </div></div>
+
+        <div class="field"><label for="titre">Titre<span class="req">*</span></label>
+          <div class="compteur-champ"><input id="titre" class="input" maxlength="80" [(ngModel)]="f.titre" (ngModelChange)="maj()" placeholder="Mettez à jour votre situation professionnelle" />
+            <span class="faint xs">{{ f.titre?.length ?? 0 }} / 80</span></div></div>
+
+        <div class="field"><span class="label">Destinataires</span>
+          <div class="cibles">
+            <button type="button" class="cible" [class.active]="f.cible === 'TOUS'" (click)="cible('TOUS')">
+              <span class="grow"><strong>Tous les membres</strong><span class="muted xs">Membres non archivés</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'TOUS'" tabindex="-1" /></span></button>
+            <button type="button" class="cible" [class.active]="f.cible === 'REGION'" (click)="cible('REGION')">
+              <span class="grow"><strong>Par région</strong><span class="muted xs">{{ f.cible === 'REGION' && f.valeurs?.length ? f.valeurs?.join(', ') : 'Choisir une ou plusieurs régions' }}</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'REGION'" tabindex="-1" /></span></button>
+            <button type="button" class="cible" [class.active]="f.cible === 'COHORTE'" (click)="cible('COHORTE')">
+              <span class="grow"><strong>Par cohorte</strong><span class="muted xs">{{ f.cible === 'COHORTE' ? libelleCohorte() : 'Choisir une cohorte' }}</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'COHORTE'" tabindex="-1" /></span></button>
+            <button type="button" class="cible" [class.active]="f.cible === 'SELECTION'" (click)="cible('SELECTION')">
+              <span class="grow"><strong>Sélection manuelle</strong><span class="muted xs">{{ selection().length ? selection().length + ' membre(s) choisi(s)' : 'Depuis la liste des membres' }}</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'SELECTION'" tabindex="-1" /></span></button>
+          </div>
+          @switch (f.cible) {
+            @case ('REGION') {
+              <div class="row wrap choix-valeurs">@for (r of regions(); track r) { <button type="button" class="tag" [class.soft]="f.valeurs?.includes(r)" (click)="basculerRegion(r)">{{ r }}</button> }</div>
+            }
+            @case ('COHORTE') {
+              <select class="select mt-8" [ngModel]="f.valeurs?.[0]" (ngModelChange)="f.valeurs = [$event]; maj()" aria-label="Cohorte">
+                @for (c of cohortes(); track c.id) { <option [value]="'' + c.id">{{ c.nom }} · {{ c.nombreMembres | nombre }} membres</option> }</select>
+            }
+            @case ('SELECTION') {
+              <div class="selection mt-8">
+                <div class="search"><app-icon name="search" [size]="16" /><input class="input" [ngModel]="rechercheMembre" (ngModelChange)="chercherMembre($event)" placeholder="Ajouter un membre : nom ou identifiant SNJ…" /></div>
+                @if (propositions().length) {
+                  <div class="menu card">@for (m of propositions(); track m.id) { <button type="button" (click)="ajouterMembre(m)"><strong>{{ m.prenom }} {{ m.nom }}</strong><span class="muted xs">{{ m.identifiantSnj }}</span></button> }</div>
+                }
+                <div class="row wrap mt-8">@for (m of selection(); track m.id) { <span class="tag soft">{{ m.prenom }} {{ m.nom }}<button type="button" (click)="retirerMembre(m)" aria-label="Retirer"><app-icon name="x" [size]="13" /></button></span> }</div>
+              </div>
+            }
+          }
+        </div>
+
+        <div class="field"><label for="msg">Message<span class="req">*</span></label>
+          <div class="compteur-champ zone"><textarea id="msg" class="textarea" rows="4" maxlength="500" [(ngModel)]="f.message" (ngModelChange)="maj()"></textarea>
+            <span class="faint xs">{{ f.message?.length ?? 0 }} / 500</span></div></div>
+
+        <div class="field"><span class="label">Canaux d'envoi</span>
+          <div class="row" style="gap: 32px">
+            <label class="row small"><span class="switch"><input type="checkbox" [(ngModel)]="f.canalApplication" (ngModelChange)="maj()" /></span>Notification dans l'application</label>
+            <label class="row small"><span class="switch"><input type="checkbox" [(ngModel)]="f.canalSms" (ngModelChange)="maj()" /></span>SMS</label>
+            <label class="row small"><span class="switch"><input type="checkbox" [(ngModel)]="f.canalEmail" (ngModelChange)="maj()" /></span>E-mail</label>
+          </div></div>
+      </div>
+      <div class="action-bar pied">
+        <div class="row" style="gap: 22px">
+          <label class="radio"><input type="radio" name="quand" [value]="false" [(ngModel)]="programmer" />Maintenant</label>
+          <label class="radio"><input type="radio" name="quand" [value]="true" [(ngModel)]="programmer" />Programmer</label>
+          @if (programmer) { <input type="datetime-local" class="input input-sm" style="width: 210px" [(ngModel)]="dateProgrammee" aria-label="Date d'envoi" /> }
+        </div>
+        <div class="row">
+          <button type="button" class="btn btn-secondary" [disabled]="envoi()" (click)="envoyer(true)">Brouillon</button>
+          <button type="button" class="btn btn-primary" [disabled]="envoi() || (programmer && !dateProgrammee)" (click)="envoyer(false)">
+            {{ programmer ? 'Programmer pour' : 'Envoyer à' }} {{ nombreTexte() }} membres</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

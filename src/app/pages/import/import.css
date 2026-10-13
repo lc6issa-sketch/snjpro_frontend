@@ -1,0 +1,46 @@
+.depot-carte { padding: 20px; }
+.cohorte { gap: 14px; margin-bottom: 16px; }
+.cohorte .label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.depot { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 40px 20px; border: 2px dashed var(--secondary); border-radius: 14px; cursor: pointer; text-align: center; }
+.depot:hover, .depot.over { background: var(--lime-bg); }
+.depot strong { font-size: 18px; margin-top: 10px; }
+.rond { width: 68px; height: 68px; border-radius: 50%; background: var(--lime-bg); color: var(--secondary); display: grid; place-items: center; }
+.vert { color: var(--secondary); } .bleu { color: var(--blue); } .or { color: var(--gold); } .rouge { color: var(--red); }
+.mise { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.mise.inverse { grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr); }
+h3 { font-size: 15px; font-weight: 600; }
+.mb { margin-bottom: 14px; }
+.resume { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+.resume strong { font-size: 15px; }
+.a-verifier { border: 1.5px solid var(--gold); }
+.fichier { display: flex; align-items: center; gap: 14px; padding: 18px; }
+.barre-resultat { display: flex; gap: 4px; height: 8px; }
+.barre-resultat span { border-radius: 4px; min-width: 6px; }
+.barre-resultat .vert { background: var(--secondary); flex: 1; }
+.barre-resultat .rouge { background: var(--red); }
+.barre-resultat .or { background: var(--gold); }
+.onglets { padding: 20px 18px 0; }
+.or-fond { background: var(--gold-bg); color: var(--gold-text); }
+.corps-verif { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.doublon-ouvert { border: 1.5px solid var(--gold-border); border-radius: 12px; background: var(--gold-bg-soft); overflow: hidden; }
+.entete-doublon { gap: 10px; padding: 14px 16px; }
+.comparaison th { background: var(--gold-bg); }
+.comparaison td, .comparaison th { padding: 9px 16px; }
+.valeur { font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+.valeur.nouveau.diff { background: var(--tint); color: var(--primary); }
+.valeur.ancien.diff { background: var(--red-bg); color: var(--red-text); }
+.motifs { padding: 0 16px 10px; }
+.actions-doublon { padding: 12px 16px; border-top: 1px solid var(--gold-border); }
+.doublon-ligne { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; font: inherit; color: var(--text); text-align: left; }
+.doublon-ligne:hover { border-color: var(--border-strong); }
+.tous { gap: 14px; padding-top: 6px; }
+.fin { padding: 48px 20px 36px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+.fin h2 { font-size: 24px; font-weight: 700; margin-top: 18px; }
+.succes { width: 120px; height: 120px; border-radius: 50%; background: var(--lime-bg); display: grid; place-items: center; }
+.succes span { width: 94px; height: 94px; border-radius: 50%; background: var(--lime-200); display: grid; place-items: center; }
+.succes i { width: 64px; height: 64px; border-radius: 50%; background: var(--secondary); color: #fff; display: grid; place-items: center; }
+.chiffres { display: grid; grid-template-columns: repeat(4, 195px); gap: 18px; margin: 30px 0 32px; }
+.chiffres div { padding: 18px; border-radius: 12px; background: var(--bg); display: flex; flex-direction: column; gap: 6px; }
+.chiffres strong { font-size: 24px; font-weight: 700; }
+.chiffres span { font-size: 13px; color: var(--text-2); }
+@media (max-width: 1100px) { .mise, .mise.inverse { grid-template-columns: minmax(0, 1fr); } .chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); } .steps-h { flex-wrap: wrap; } }
