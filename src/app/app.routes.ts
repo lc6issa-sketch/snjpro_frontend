@@ -93,6 +93,13 @@ export const routes: Routes = [
         title: 'Paramètres · SNJPro',
         loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres),
       },
+
+      // ----- Compétences -----
+      {
+        path: 'competences',
+        title: 'Compétences · SNJPro',
+        loadComponent: () => import('./pages/competences/competences').then(m => m.Competences),
+      },
     ],
   },
 

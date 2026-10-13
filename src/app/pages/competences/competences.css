@@ -1,0 +1,14 @@
+.mise { display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 20px; align-items: start; }
+.cat { padding: 18px 8px 10px; }
+.cat h3 { font-size: 15px; font-weight: 600; padding: 0 10px 12px; }
+.ligne { width: 100%; display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 0; background: none; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text); text-align: left; }
+.ligne:hover { background: var(--bg); }
+.ligne.active { background: var(--tint); }
+.entete { padding: 16px 18px; border-bottom: 1px solid var(--border); }
+.membres { display: flex; flex-direction: column; gap: 6px; width: 98px; }
+.niveau { display: inline-flex; gap: 3px; }
+.niveau i { width: 8px; height: 8px; border-radius: 2px; background: var(--muted-bg); }
+.niveau i.on { background: var(--secondary); }
+.detenteur { display: flex; align-items: center; gap: 12px; padding: 10px; border: 0; background: none; border-radius: 10px; cursor: pointer; text-align: left; font-size: 14px; }
+.detenteur:hover { background: var(--bg); }
+@media (max-width: 1000px) { .mise { grid-template-columns: minmax(0, 1fr); } }
