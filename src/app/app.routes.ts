@@ -227,6 +227,13 @@ export const routes: Routes = [
         title: 'Mobilisation · SNJPro',
         loadComponent: () => import('./pages/mobilisations/detail/mobilisation-detail').then(m => m.MobilisationDetail),
       },
+
+      // ----- Opportunités -----
+      {
+        path: 'opportunites',
+        title: 'Opportunités · SNJPro',
+        loadComponent: () => import('./pages/opportunites/liste/opportunites-liste').then(m => m.OpportunitesListe),
+      },
     ],
   },
 
