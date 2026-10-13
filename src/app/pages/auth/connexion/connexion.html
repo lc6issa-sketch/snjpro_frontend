@@ -1,0 +1,32 @@
+<div class="haut">
+  <h1>Connexion</h1>
+  <p class="intro">Accédez à votre espace de gestion SNJPro.</p>
+  @if (expire) { <div class="notice warn mt-16"><app-icon name="clock" [size]="16" />Votre session a expiré. Reconnectez-vous.</div> }
+  <form (ngSubmit)="seConnecter()" #f="ngForm">
+    <div class="field">
+      <label for="identifiant">Adresse e-mail</label>
+      <div class="input-icon">
+        <app-icon name="mail" [size]="17" />
+        <input id="identifiant" name="identifiant" class="input" [(ngModel)]="identifiant" required autocomplete="username"
+               placeholder="prenom.nom@snj-pro.ml" />
+      </div>
+    </div>
+    <div class="field">
+      <div class="lab"><label for="mdp">Mot de passe</label><a routerLink="/mot-de-passe-oublie">Mot de passe oublié ?</a></div>
+      <div class="input-icon">
+        <app-icon name="lock" [size]="17" />
+        <input id="mdp" name="mdp" class="input" [type]="voir() ? 'text' : 'password'" [(ngModel)]="motDePasse" required autocomplete="current-password" placeholder="••••••••••" />
+        <span class="suffix"><button type="button" (click)="voir.set(!voir())" [attr.aria-label]="voir() ? 'Masquer' : 'Afficher'"><app-icon [name]="voir() ? 'eye-off' : 'eye'" [size]="17" /></button></span>
+      </div>
+    </div>
+    <label class="checkbox"><input type="checkbox" name="souvenir" [(ngModel)]="seSouvenir" />Rester connecté sur cet appareil</label>
+    @if (erreur()) { <div class="notice error"><app-icon name="alert-circle" [size]="16" />{{ erreur() }}</div> }
+    <button class="btn btn-primary btn-lg btn-block mt-8" type="submit" [disabled]="chargement() || f.invalid">
+      {{ chargement() ? 'Connexion…' : 'Se connecter' }}
+    </button>
+    <div class="ou">ou</div>
+    <button class="btn btn-secondary btn-lg btn-block" type="button" (click)="codeSms()" [disabled]="chargement()"> Recevoir un code par SMS
+    </button>
+  </form>
+</div>
+<p class="bas">Besoin d'un accès ? Contactez l'administrateur de votre direction.</p>
