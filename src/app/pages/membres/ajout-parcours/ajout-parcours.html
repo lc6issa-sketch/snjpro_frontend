@@ -1,0 +1,23 @@
+<app-modal titre="Ajouter une étape au parcours" [sousTitre]="nom()" icone="graduation-cap" [largeur]="532" (fermer)="fermer.emit()">
+  <div class="stack" style="gap: 18px">
+    <div class="field"><span class="label">Type d'étape</span>
+      <div class="segmented block">
+        @for (t of types; track t.cle) { <button type="button" [class.active]="type === t.cle" (click)="type = t.cle">{{ t.libelle }}</button> }
+      </div></div>
+    <div class="field"><label for="int">Intitulé<span class="req">*</span></label>
+      <input id="int" class="input" [(ngModel)]="intitule" placeholder="Affectation — Direction régionale de Sikasso" /></div>
+    <div class="form-grid">
+      <div class="field"><label for="dd">Date de début</label><input id="dd" type="date" class="input" [(ngModel)]="dateDebut" /></div>
+      <div class="field"><div class="row-between"><label for="df">Date de fin</label><span class="hint">Facultatif</span></div>
+        <input id="df" type="date" class="input" [(ngModel)]="dateFin" /></div>
+    </div>
+    <div class="field"><label for="lieu">Lieu / unité</label>
+      <div class="input-icon"><app-icon name="building" [size]="17" /><input id="lieu" class="input" [(ngModel)]="lieu" /></div></div>
+    <div class="field"><div class="row-between"><label for="desc">Description</label><span class="hint">Facultatif</span></div>
+      <textarea id="desc" class="textarea" rows="3" [(ngModel)]="description"></textarea></div>
+  </div>
+  <div pied>
+    <button type="button" class="btn btn-ghost" (click)="fermer.emit()">Annuler</button>
+    <button type="button" class="btn btn-primary" [disabled]="!intitule.trim() || envoi()" (click)="ajouter()">Ajouter l'étape</button>
+  </div>
+</app-modal>
