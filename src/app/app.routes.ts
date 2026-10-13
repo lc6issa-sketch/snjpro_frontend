@@ -234,6 +234,20 @@ export const routes: Routes = [
         title: 'Opportunités · SNJPro',
         loadComponent: () => import('./pages/opportunites/liste/opportunites-liste').then(m => m.OpportunitesListe),
       },
+      {
+        path: 'opportunites/nouvelle',
+        title: 'Nouvelle opportunité · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: GESTION_OPPORTUNITES },
+        loadComponent: () => import('./pages/opportunites/form/opportunite-form').then(m => m.OpportuniteForm),
+      },
+      {
+        path: 'opportunites/:id/modifier',
+        title: 'Modifier l\'opportunité · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: GESTION_OPPORTUNITES },
+        loadComponent: () => import('./pages/opportunites/form/opportunite-form').then(m => m.OpportuniteForm),
+      },
     ],
   },
 
