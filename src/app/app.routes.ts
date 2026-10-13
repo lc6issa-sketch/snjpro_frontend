@@ -121,6 +121,11 @@ export const routes: Routes = [
         title: 'Notifications · SNJPro',
         loadComponent: () => import('./pages/notifications/nouvelle/nouvelle-notification').then(m => m.NouvelleNotification),
       },
+      {
+        path: 'notifications/historique',
+        title: 'Historique des envois · SNJPro',
+        loadComponent: () => import('./pages/notifications/historique/historique-envois').then(m => m.HistoriqueEnvois),
+      },
     ],
   },
 
