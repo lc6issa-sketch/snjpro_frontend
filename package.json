@@ -7,6 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "modeles": "node scripts/generer-modeles.js",
     "serve:ssr:snjpro_frontend": "node dist/snjpro_frontend/server/server.mjs"
   },
   "private": true,
