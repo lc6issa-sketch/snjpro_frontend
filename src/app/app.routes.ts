@@ -253,6 +253,13 @@ export const routes: Routes = [
         title: 'Opportunité · SNJPro',
         loadComponent: () => import('./pages/opportunites/detail/opportunite-detail').then(m => m.OpportuniteDetail),
       },
+
+      // ----- Documents -----
+      {
+        path: 'documents',
+        title: 'Documents · SNJPro',
+        loadComponent: () => import('./pages/documents/documents').then(m => m.Documents),
+      },
     ],
   },
 
