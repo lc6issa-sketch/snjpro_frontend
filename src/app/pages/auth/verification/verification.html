@@ -1,0 +1,25 @@
+<div class="haut">
+  <a routerLink="/connexion" class="retour"><app-icon name="chevron-left" [size]="16" />Retour à la connexion</a>
+  <div class="pastille lime"><app-icon name="shield-check" [size]="22" /></div>
+  <h1>Vérification en deux étapes</h1>
+  <p class="intro">Saisissez le code à 6 chiffres envoyé par SMS{{ telephone() ? ' au ' + telephone() : '' }}.</p>
+  <form (ngSubmit)="verifier()">
+    <div class="cases" (paste)="coller($event)">
+      @for (i of [0, 1, 2, 3, 4, 5]; track i) {
+        <input #case class="case" inputmode="numeric" maxlength="1" [value]="chiffres()[i]" [attr.aria-label]="'Chiffre ' + (i + 1)"
+               (input)="saisir(i, $event)" (keydown.backspace)="effacer(i, $event)" />
+      }
+    </div>
+    <p class="muted small">
+      Vous n'avez rien reçu ?
+      @if (attente() > 0) { Renvoyer le code dans {{ minuteur() }} }
+      @else { <button type="button" class="link" (click)="renvoyer()">Renvoyer le code</button> }
+    </p>
+    @if (erreur()) { <div class="notice error"><app-icon name="alert-circle" [size]="16" />{{ erreur() }}</div> }
+    <button class="btn btn-primary btn-lg btn-block" type="submit" [disabled]="code().length < 6 || chargement()">
+      {{ chargement() ? 'Vérification…' : 'Vérifier et se connecter' }}
+    </button>
+    <label class="checkbox"><input type="checkbox" name="confiance" [(ngModel)]="confiance" />Faire confiance à cet appareil pendant 30 jours</label>
+  </form>
+</div>
+<p class="bas">Problème de réception ? Contactez votre administrateur.</p>

@@ -1,0 +1,3 @@
+.cases { display: flex; gap: 8px; justify-content: space-between; }
+.case { width: 52px; height: 66px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--muted-bg); text-align: center; font: inherit; font-size: 24px; font-weight: 700; color: var(--text); }
+.case:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: var(--focus); }
