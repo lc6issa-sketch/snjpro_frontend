@@ -177,6 +177,11 @@ export const routes: Routes = [
         data: { roles: GESTION_MEMBRES },
         loadComponent: () => import('./pages/membres/nouveau/nouveau-membre').then(m => m.NouveauMembre),
       },
+      {
+        path: 'membres/:id',
+        title: 'Profil du membre · SNJPro',
+        loadComponent: () => import('./pages/membres/profil/profil-membre').then(m => m.ProfilMembre),
+      },
     ],
   },
 
