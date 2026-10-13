@@ -55,8 +55,4 @@ export class ImportService {
   supprimer(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/sessions/${id}`);
   }
-
-  modele(): Observable<HttpResponse<Blob>> {
-    return this.http.get(`${this.apiUrl}/modele`, { responseType: 'blob', observe: 'response' }).pipe(tap(enregistrerFichier));
-  }
 }
