@@ -1,0 +1,101 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Membres</h1>
+      <p class="sub">{{ total() | nombre }} éléments enregistrés{{ filtresActifs().length ? ' · ' + (page()?.totalElements ?? 0) + ' correspondent aux filtres' : '' }}</p>
+    </div>
+    <div class="actions">
+      @if (peutGerer()) { <a routerLink="/import" class="btn btn-secondary">Importer</a> }
+      <button type="button" class="btn btn-secondary" (click)="exporter.set(true)">Exporter</button>
+      @if (peutGerer()) { <a routerLink="/membres/nouveau" class="btn btn-primary">Nouveau membre</a> }
+    </div>
+  </div>
+
+  <div class="card filtres">
+    <div class="row">
+      <div class="search grow" style="min-width: 220px">
+        <app-icon name="search" [size]="17" />
+        <input class="input" [ngModel]="filtre().query" (ngModelChange)="rechercher($event)" placeholder="Nom, prénom ou identifiant SNJ…" />
+      </div>
+      <select class="select auto" [ngModel]="filtre().cohorteId ?? ''" (ngModelChange)="changer('cohorteId', $event ? +$event : null)">
+        <option value="">Cohorte</option>
+        @for (c of cohortes(); track c.id) { <option [value]="c.id">{{ c.nom }}</option> }
+      </select>
+      <select class="select auto" [ngModel]="filtre().region ?? ''" (ngModelChange)="changer('region', $event)">
+        <option value="">Région</option>
+        @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }
+      </select>
+      <select class="select auto" [ngModel]="filtre().profession ?? ''" (ngModelChange)="changer('profession', $event)">
+        <option value="">Profession</option>
+        @for (p of professions(); track p) { <option [value]="p">{{ p }}</option> }
+      </select>
+      <select class="select auto" [ngModel]="filtre().competence ?? ''" (ngModelChange)="changer('competence', $event)">
+        <option value="">Compétence</option>
+        @for (c of competences(); track c) { <option [value]="c">{{ c }}</option> }
+      </select>
+      <select class="select auto" [ngModel]="filtre().statut ?? ''" (ngModelChange)="changer('statut', $event)">
+        <option value="">Statut</option>
+        @for (s of statuts; track s.cle) { <option [value]="s.cle">{{ s.libelle }}</option> }
+      </select>
+    </div>
+    @if (filtresActifs().length) {
+      <div class="row wrap actifs">
+        <span class="muted small">Filtres actifs :</span>
+        @for (f of filtresActifs(); track f.cle) {
+          <span class="tag soft">{{ f.texte }}<button type="button" (click)="changer(f.cle, null)" aria-label="Retirer"><app-icon name="x" [size]="13" [stroke]="2.5" /></button></span>
+        }
+        <button type="button" class="link link-muted" (click)="toutEffacer()">Tout effacer</button>
+        <span class="grow"></span>
+        <strong class="small">{{ page()?.totalElements | nombre }} résultats</strong>
+      </div>
+    }
+  </div>
+
+  <div class="card mt-20">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width: 44px"><span class="checkbox"><input type="checkbox" [checked]="toutCoche()" [indeterminate]="selection().size > 0 && !toutCoche()" (change)="cocherTout()" aria-label="Tout sélectionner" /></span></th>
+            <th>Membre</th><th>Identifiant</th><th>Cohorte</th><th>Profession</th><th>Statut</th><th>Mise à jour</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (m of membres(); track m.id) {
+            <tr class="clickable" [class.selected]="selection().has(m.id!)" (click)="ouvrir(m)">
+              <td (click)="$event.stopPropagation()"><span class="checkbox"><input type="checkbox" [checked]="selection().has(m.id!)" (change)="cocher(m.id!)" [attr.aria-label]="'Sélectionner ' + m.prenom" /></span></td>
+              <td><div class="cell-person"><app-avatar [nom]="m.prenom + ' ' + m.nom" [size]="32" />
+                <div><div class="name">{{ m.prenom }} {{ m.nom }}</div><div class="meta">{{ m.numeroTelephone | telMasque }}</div></div></div></td>
+              <td class="strong identifiant">{{ m.identifiantSnj }}</td>
+              <td class="muted">{{ m.cohorteNom }}{{ m.localisation?.region ? ' · ' + m.localisation?.region : '' }}</td>
+              <td>{{ m.situationProfessionnelle?.profession || '—' }}</td>
+              <td>
+                @if ((m.tauxCompletude ?? 100) < 50 && m.statut === 'ACTIF') { <span class="pill red dot">Incomplet</span> }
+                @else { <app-pill [dico]="STATUT" [valeur]="m.statut" /> }
+              </td>
+              <td class="muted">{{ m.dateModification || m.dateCreation | relatif }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7">
+              @if (chargement()) { <div class="empty">Chargement…</div> }
+              @else { <div class="empty"><app-icon name="users" [size]="32" /><p class="title">Aucun membre trouvé</p><p>Modifiez les filtres ou ajoutez un nouveau membre.</p></div> }
+            </td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <app-pagination [page]="numeroPage()" [taille]="taille" [total]="page()?.totalElements ?? 0" (aller)="allerA($event)" />
+  </div>
+</div>
+
+@if (selection().size) {
+  <div class="barre-selection">
+    <span class="nb">{{ selection().size }}</span><span class="strong">membres sélectionnés</span>
+    <span class="sep"></span>
+    <button type="button" class="btn btn-sm blanc" (click)="mobiliser()">Mobiliser</button>
+    <button type="button" class="btn btn-sm sombre" (click)="notifier()">Notifier</button>
+    <button type="button" class="btn btn-sm sombre" (click)="exporter.set(true)">Exporter</button>
+    <button type="button" class="fermer" (click)="viderSelection()" aria-label="Vider la sélection"><app-icon name="x" [size]="17" /></button>
+  </div>
+}
+@if (exporter()) { <app-export-membres [filtres]="filtre()" [etiquettes]="etiquettes()" (fermer)="exporter.set(false)" /> }

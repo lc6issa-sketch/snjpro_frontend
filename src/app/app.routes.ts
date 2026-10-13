@@ -163,6 +163,13 @@ export const routes: Routes = [
         title: 'Tableau de bord · SNJPro',
         loadComponent: () => import('./pages/tableau-de-bord/tableau-de-bord').then(m => m.TableauDeBord),
       },
+
+      // ----- Membres -----
+      {
+        path: 'membres',
+        title: 'Membres · SNJPro',
+        loadComponent: () => import('./pages/membres/liste/membres-liste').then(m => m.MembresListe),
+      },
     ],
   },
 
