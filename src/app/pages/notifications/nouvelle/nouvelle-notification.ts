@@ -9,8 +9,8 @@ import { ReferentielService } from '../../../core/services/referentiel.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { CibleNotification, CohorteDTO, MembreResponseDTO, NotificationDTOs, TypeNotification } from '../../../models/api.models';
 import { Icon } from '../../../shared/components/icon/icon';
-import { NombrePipe, RelatifPipe } from '../../../shared/pipes/format.pipes';
-import { heure, dateLongue, nombre } from '../../../shared/utils/format';
+import { NombrePipe } from '../../../shared/pipes/format.pipes';
+import { nombre } from '../../../shared/utils/format';
 import { NotificationService } from '../../../core/services/notification.service';
 import { messageErreur } from '../../../shared/utils/http';
 
@@ -21,7 +21,7 @@ const TYPES: { cle: TypeNotification; libelle: string }[] = [
 /** Écran web 35 — Nouvelle notification aux membres, avec aperçu mobile et envois récents. */
 @Component({
   selector: 'app-nouvelle-notification',
-  imports: [FormsModule, RouterLink, Icon, NombrePipe, RelatifPipe],
+  imports: [FormsModule, RouterLink, Icon, NombrePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './nouvelle-notification.html',
   styleUrl: './nouvelle-notification.css'
@@ -37,13 +37,11 @@ export class NouvelleNotification implements OnInit {
   protected readonly types = TYPES;
   protected readonly regions = signal<string[]>([]);
   protected readonly cohortes = signal<CohorteDTO[]>([]);
-  protected readonly recents = signal<NotificationDTOs.Resume[]>([]);
   protected readonly estimation = signal<NotificationDTOs.Estimation | null>(null);
   protected readonly selection = signal<MembreResponseDTO[]>([]);
   protected readonly propositions = signal<MembreResponseDTO[]>([]);
   protected readonly envoi = signal(false);
   protected readonly version = signal(0);
-  protected readonly maintenant = new Date();
 
   protected f: NotificationDTOs.Envoi = { type: 'INFORMATION', titre: '', message: '', cible: 'TOUS', valeurs: [], canalApplication: true, canalSms: true, canalEmail: false };
   protected programmer = false;
@@ -52,8 +50,6 @@ export class NouvelleNotification implements OnInit {
   private readonly calcul = new Subject<void>();
   private readonly recherche = new Subject<string>();
 
-  protected readonly heureTexte = heure(this.maintenant);
-  protected readonly jourTexte = dateLongue(this.maintenant);
   protected readonly nombreTexte = computed(() => nombre(this.estimation()?.nombreDestinataires ?? 0));
   protected readonly libelleCohorte = computed(() => {
     this.version();
@@ -71,7 +67,6 @@ export class NouvelleNotification implements OnInit {
   ngOnInit(): void {
     this.referentiel.regionsMali().subscribe(r => this.regions.set(r));
     this.cohorteService.lister().subscribe(c => this.cohortes.set(c.filter(x => x.statut !== 'ARCHIVEE')));
-    this.service.historique(0, 3).subscribe(p => this.recents.set(p.content ?? []));
     const q = this.route.snapshot.queryParamMap;
     if (q.get('type')) this.f.type = q.get('type') as TypeNotification;
     if (q.get('titre')) this.f.titre = q.get('titre')!;
@@ -128,7 +123,6 @@ export class NouvelleNotification implements OnInit {
         this.selection.set([]);
         this.programmer = false;
         this.maj();
-        this.service.historique(0, 3).subscribe(p => this.recents.set(p.content ?? []));
       },
       error: e => { this.envoi.set(false); this.toast.error(messageErreur(e)); }
     });

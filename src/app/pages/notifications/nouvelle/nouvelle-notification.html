@@ -72,34 +72,5 @@
         </div>
       </div>
     </section>
-
-    <aside class="stack">
-      <div class="card card-pad">
-        <h3 class="sous">Aperçu sur mobile</h3>
-        <div class="telephone">
-          <i class="encoche"></i>
-          <p class="heure">{{ heureTexte }}</p>
-          <p class="jour">{{ jourTexte }}</p>
-          <div class="notif">
-            <div class="row-between"><span class="row xs app"><img class="mini-logo" src="logo_snj.png" alt="" />SNJPRO</span><span class="xs faint">maintenant</span></div>
-            <strong>{{ f.titre || 'Titre de la notification' }}</strong>
-            <p>{{ f.message || 'Le message apparaîtra ici.' }}</p>
-          </div>
-          <i class="barre"></i>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-head"><h3>Envois récents</h3><a routerLink="/notifications/historique" class="link">Tout voir</a></div>
-        <div class="card-body stack" style="gap: 0">
-          @for (r of recents(); track r.id) {
-            <div class="envoi">
-              <strong class="small">{{ r.titre }}</strong>
-              <p class="muted xs">{{ r.destinatairesLibelle || (r.nombreDestinataires | nombre) + ' membres' }} · {{ r.dateEnvoi || r.programmeLe | relatif }}</p>
-              <div class="row mt-8"><div class="progress lime grow"><span [style.width.%]="r.tauxLecture ?? 0"></span></div><strong class="xs">{{ r.tauxLecture ?? 0 | nombre }} % lus</strong></div>
-            </div>
-          } @empty { <p class="muted small">Aucun envoi pour l'instant.</p> }
-        </div>
-      </div>
-    </aside>
   </div>
 </div>
