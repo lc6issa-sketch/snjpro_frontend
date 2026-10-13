@@ -1,0 +1,35 @@
+<app-modal titre="Exporter les membres" [sousTitre]="sousTitre()" icone="download" [largeur]="568" (fermer)="fermer.emit()">
+  <p class="label">Format</p>
+  <div class="formats">
+    @for (f of formats; track f.cle) {
+      <button type="button" class="format" [class.choisi]="format() === f.cle" (click)="format.set(f.cle)">
+        <span class="col"><strong>{{ f.titre }}</strong><span class="muted xs">{{ f.detail }}</span></span>
+        @if (format() === f.cle) { <span class="coche"><app-icon name="check" [size]="12" [stroke]="3.5" /></span> }
+      </button>
+    }
+  </div>
+  <div class="row-between mt-24"><p class="label">Données à inclure</p><button type="button" class="link" (click)="toutSelectionner()">Tout sélectionner</button></div>
+  <div class="sections">
+    @for (s of sectionsDispo; track s.cle) {
+      <label class="section">
+        <span class="checkbox"><input type="checkbox" [checked]="sections().has(s.cle)" (change)="basculer(s.cle)" /></span>
+        <span class="col"><strong>{{ s.titre }}</strong><span class="muted xs">{{ s.detail }}</span></span>
+      </label>
+    }
+  </div>
+  @if (etiquettes().length) {
+    <p class="label mt-24">Filtres appliqués</p>
+    <div class="row wrap mt-8">@for (e of etiquettes(); track e) { <span class="tag soft">{{ e }}</span> }</div>
+  }
+  <div class="masque mt-24">
+    <div class="grow"><strong>Masquer les données sensibles</strong><p class="muted small">Téléphones et e-mails partiellement masqués</p></div>
+    <label class="switch"><input type="checkbox" [(ngModel)]="masquer" (ngModelChange)="estimer()" /></label>
+  </div>
+  <p class="row muted small mt-20"><app-icon name="shield-check" [size]="15" />Cet export sera enregistré dans l'historique des opérations.</p>
+  <div pied>
+    <span class="muted small grow">Taille estimée : {{ tailleTexte() }}</span>
+    <button type="button" class="btn btn-ghost" (click)="fermer.emit()">Annuler</button>
+    <button type="button" class="btn btn-primary" [disabled]="!sections().size || chargement()" (click)="exporter()">Exporter {{ nombreTexte() }} membres
+    </button>
+  </div>
+</app-modal>
