@@ -208,6 +208,20 @@ export const routes: Routes = [
         title: 'Mobilisation · SNJPro',
         loadComponent: () => import('./pages/mobilisations/liste/mobilisations-liste').then(m => m.MobilisationsListe),
       },
+      {
+        path: 'mobilisations/nouvelle',
+        title: 'Nouvelle mobilisation · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: GESTION_MOBILISATIONS },
+        loadComponent: () => import('./pages/mobilisations/assistant/mobilisation-assistant').then(m => m.MobilisationAssistant),
+      },
+      {
+        path: 'mobilisations/:id/edition',
+        title: 'Nouvelle mobilisation · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: GESTION_MOBILISATIONS },
+        loadComponent: () => import('./pages/mobilisations/assistant/mobilisation-assistant').then(m => m.MobilisationAssistant),
+      },
     ],
   },
 
