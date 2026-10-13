@@ -126,6 +126,13 @@ export const routes: Routes = [
         title: 'Historique des envois · SNJPro',
         loadComponent: () => import('./pages/notifications/historique/historique-envois').then(m => m.HistoriqueEnvois),
       },
+
+      // ----- Demandes des membres -----
+      {
+        path: 'demandes',
+        title: 'Demandes · SNJPro',
+        loadComponent: () => import('./pages/demandes/demandes').then(m => m.Demandes),
+      },
     ],
   },
 
