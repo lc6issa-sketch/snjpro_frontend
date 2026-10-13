@@ -260,6 +260,13 @@ export const routes: Routes = [
         title: 'Documents · SNJPro',
         loadComponent: () => import('./pages/documents/documents').then(m => m.Documents),
       },
+
+      // ----- Souvenirs -----
+      {
+        path: 'souvenirs',
+        title: 'Souvenirs de formation · SNJPro',
+        loadComponent: () => import('./pages/souvenirs/souvenirs').then(m => m.Souvenirs),
+      },
     ],
   },
 
