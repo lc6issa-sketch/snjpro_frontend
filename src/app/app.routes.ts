@@ -1,3 +1,89 @@
 import { Routes } from '@angular/router';
+import { authGuard, invitesGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { RoleEnum } from './models/api.models';
+import { MainLayout } from './layout/main-layout/main-layout';
+import { AuthLayout } from './layout/auth-layout/auth-layout';
 
-export const routes: Routes = [];
+// Rôles autorisés sur les écrans de saisie (transmis au roleGuard via data.roles)
+const REDACTEURS_ACTUALITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION'];
+
+export const routes: Routes = [
+  // Redirection de la racine avant le bloc AuthLayout (path ''), sinon celui-ci capture « / » et s'affiche sans formulaire
+  { path: '', pathMatch: 'full', redirectTo: 'actualites' },
+
+  // =========================================================================
+  // ROUTES PUBLIQUES (écrans web 01 à 04)
+  // =========================================================================
+  {
+    path: '',
+    component: AuthLayout,
+    children: [
+      {
+        path: 'connexion',
+        canActivate: [invitesGuard],
+        title: 'Connexion · SNJPro',
+        loadComponent: () => import('./pages/auth/connexion/connexion').then(m => m.Connexion),
+      },
+      {
+        path: 'verification',
+        title: 'Vérification · SNJPro',
+        loadComponent: () => import('./pages/auth/verification/verification').then(m => m.Verification),
+      },
+      {
+        path: 'mot-de-passe-oublie',
+        title: 'Mot de passe oublié · SNJPro',
+        loadComponent: () => import('./pages/auth/mot-de-passe-oublie/mot-de-passe-oublie').then(m => m.MotDePasseOublie),
+      },
+      {
+        path: 'reinitialiser-mot-de-passe',
+        title: 'Nouveau mot de passe · SNJPro',
+        loadComponent: () => import('./pages/auth/nouveau-mot-de-passe/nouveau-mot-de-passe').then(m => m.NouveauMotDePasse),
+      },
+      {
+        path: 'invitation',
+        title: 'Activer mon compte · SNJPro',
+        loadComponent: () => import('./pages/auth/nouveau-mot-de-passe/nouveau-mot-de-passe').then(m => m.NouveauMotDePasse),
+      },
+    ],
+  },
+  {
+    path: 'acces-refuse',
+    title: 'Accès non autorisé · SNJPro',
+    loadComponent: () => import('./pages/acces-refuse/acces-refuse').then(m => m.AccesRefuse),
+  },
+
+  // =========================================================================
+  // ESPACE DE GESTION
+  // =========================================================================
+  {
+    path: '',
+    component: MainLayout,
+    canActivate: [authGuard],
+    children: [
+      // ----- Actualités -----
+      {
+        path: 'actualites',
+        title: 'Actualités · SNJPro',
+        loadComponent: () => import('./pages/actualites/liste/actualites-liste').then(m => m.ActualitesListe),
+      },
+      {
+        path: 'actualites/nouvelle',
+        title: 'Nouvelle actualité · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: REDACTEURS_ACTUALITES },
+        loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
+      },
+      {
+        path: 'actualites/:id',
+        title: 'Actualité · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: REDACTEURS_ACTUALITES },
+        loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
+      },
+    ],
+  },
+
+  // Redirection par défaut si la route n'existe pas
+  { path: '**', redirectTo: 'actualites' },
+];
