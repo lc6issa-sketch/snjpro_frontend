@@ -114,6 +114,13 @@ export const routes: Routes = [
         title: 'Historique · SNJPro',
         loadComponent: () => import('./pages/historique/historique').then(m => m.HistoriqueOperations),
       },
+
+      // ----- Notifications & alertes -----
+      {
+        path: 'notifications',
+        title: 'Notifications · SNJPro',
+        loadComponent: () => import('./pages/notifications/nouvelle/nouvelle-notification').then(m => m.NouvelleNotification),
+      },
     ],
   },
 
