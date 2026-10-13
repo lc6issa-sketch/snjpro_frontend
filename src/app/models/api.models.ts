@@ -198,6 +198,9 @@ export interface InvitationDTO {
   region?: string;
   cohorteId?: number;
   message?: string;
+  /** Facultatif, avec motDePasse : création directe d'un compte actif, sans e-mail. */
+  username?: string;
+  motDePasse?: string;
 }
 
 export interface LocalisationDTO {
