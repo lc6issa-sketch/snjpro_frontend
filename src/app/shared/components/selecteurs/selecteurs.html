@@ -1,0 +1,79 @@
+@if (mode(); as m) {
+  <div #panneau class="panneau" [class.haut]="pos().haut" [class.liste-mode]="m === 'select'"
+       [style.top.px]="pos().top" [style.bottom.px]="pos().bottom" [style.left.px]="pos().left"
+       [style.min-width.px]="pos().minWidth" [style.max-height.px]="pos().maxHeight">
+    @if (m === 'select') {
+      <ul #liste class="liste" role="listbox">
+        @for (o of options(); track o.index; let i = $index) {
+          <li role="option" [attr.aria-selected]="o.choisi" [attr.aria-disabled]="o.desactive || null"
+              [class.actif]="i === actif()" [class.choisi]="o.choisi" [class.off]="o.desactive"
+              (mousemove)="survoler(i)" (click)="choisir(i)">
+            <span class="libelle">{{ o.libelle || ' ' }}</span>
+            @if (o.choisi) { <app-icon name="check" [size]="15" /> }
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="corps">
+        @if (m !== 'time') {
+          <div class="cal">
+            <div class="cal-tete">
+              <button type="button" class="titre" (click)="basculerVue()" [disabled]="vueCal() === 'annees'">
+                {{ titre() }} @if (vueCal() !== 'annees') { <app-icon name="chevron-down" [size]="14" /> }
+              </button>
+              <div class="nav">
+                <button type="button" (click)="decaler(-1)" aria-label="Précédent"><app-icon name="chevron-left" [size]="16" /></button>
+                <button type="button" (click)="decaler(1)" aria-label="Suivant"><app-icon name="chevron-right" [size]="16" /></button>
+              </div>
+            </div>
+            @switch (vueCal()) {
+              @case ('jours') {
+                <div class="semaine">@for (j of joursSemaine; track $index) { <span>{{ j }}</span> }</div>
+                <div class="grille jours">
+                  @for (c of jours(); track c.iso) {
+                    <button type="button" [class.hors]="c.hors" [class.auj]="c.auj" [class.choisi]="c.choisi"
+                            [disabled]="c.off" (click)="choisirJour(c.iso)">{{ c.jour }}</button>
+                  }
+                </div>
+              }
+              @case ('mois') {
+                <div class="grille trois">
+                  @for (mo of moisGrille(); track mo.index) {
+                    <button type="button" [class.auj]="mo.auj" [class.choisi]="mo.choisi" [disabled]="mo.off"
+                            (click)="choisirMois(mo.index)">{{ mo.libelle }}</button>
+                  }
+                </div>
+              }
+              @case ('annees') {
+                <div class="grille trois">
+                  @for (a of anneesGrille(); track a.annee) {
+                    <button type="button" [class.auj]="a.auj" [class.choisi]="a.choisi" [disabled]="a.off"
+                            (click)="choisirAnnee(a.annee)">{{ a.annee }}</button>
+                  }
+                </div>
+              }
+            }
+          </div>
+        }
+        @if (m === 'time' || m === 'datetime-local') {
+          <div class="heures">
+            <div class="col-tete">Heure</div><div class="col-tete">Min.</div>
+            <div #colH class="col">
+              @for (h of heures; track h) { <button type="button" [class.choisi]="h === heureChoisie()" (click)="choisirHeure(h)">{{ h }}</button> }
+            </div>
+            <div #colM class="col">
+              @for (mn of minutes; track mn) { <button type="button" [class.choisi]="mn === minuteChoisie()" (click)="choisirMinute(mn)">{{ mn }}</button> }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="pied">
+        @if (!requis()) { <button type="button" class="link link-muted" (click)="effacer()">Effacer</button> }
+        <button type="button" class="link" (click)="maintenant()">{{ m === 'time' ? 'Maintenant' : m === 'month' ? 'Ce mois-ci' : "Aujourd'hui" }}</button>
+        @if (m === 'time' || m === 'datetime-local') {
+          <button type="button" class="btn btn-primary btn-sm valider" (click)="fermer(true)">Valider</button>
+        }
+      </div>
+    }
+  </div>
+}
