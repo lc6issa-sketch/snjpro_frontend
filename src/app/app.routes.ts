@@ -146,6 +146,13 @@ export const routes: Routes = [
         title: 'Activités & présences · SNJPro',
         loadComponent: () => import('./pages/activites/activites').then(m => m.Activites),
       },
+
+      // ----- Messagerie -----
+      {
+        path: 'messagerie',
+        title: 'Messagerie · SNJPro',
+        loadComponent: () => import('./pages/messagerie/messagerie').then(m => m.Messagerie),
+      },
     ],
   },
 
