@@ -201,6 +201,13 @@ export const routes: Routes = [
         title: 'Cohorte · SNJPro',
         loadComponent: () => import('./pages/cohortes/detail/cohorte-detail').then(m => m.CohorteDetail),
       },
+
+      // ----- Mobilisations -----
+      {
+        path: 'mobilisations',
+        title: 'Mobilisation · SNJPro',
+        loadComponent: () => import('./pages/mobilisations/liste/mobilisations-liste').then(m => m.MobilisationsListe),
+      },
     ],
   },
 
