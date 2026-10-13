@@ -107,6 +107,13 @@ export const routes: Routes = [
         title: 'Import de données · SNJPro',
         loadComponent: () => import('./pages/import/import').then(m => m.Import),
       },
+
+      // ----- Historique -----
+      {
+        path: 'historique',
+        title: 'Historique · SNJPro',
+        loadComponent: () => import('./pages/historique/historique').then(m => m.HistoriqueOperations),
+      },
     ],
   },
 
