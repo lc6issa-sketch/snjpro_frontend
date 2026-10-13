@@ -32,7 +32,6 @@ export class Import implements OnInit {
 
   protected readonly etape = signal<Etape>(1);
   protected readonly cohortes = signal<CohorteDTO[]>([]);
-  protected readonly recents = signal<ImportAssistantDTOs.Session[]>([]);
   protected readonly analyse = signal<ImportAssistantDTOs.Analyse | null>(null);
   protected readonly verification = signal<ImportAssistantDTOs.Verification | null>(null);
   protected readonly resultat = signal<ImportAssistantDTOs.Resultat | null>(null);
@@ -79,11 +78,9 @@ export class Import implements OnInit {
       this.cohortes.set(c.filter(x => x.statut !== 'ARCHIVEE'));
       this.cohorteId ??= this.cohortes().find(x => x.statut === 'EN_FORMATION')?.id ?? this.cohortes()[0]?.id ?? null;
     });
-    this.chargerRecents();
   }
 
   // ------------------------------------------------------------ étape 1
-  protected modele(): void { this.service.modele().subscribe({ error: e => this.toast.error(messageErreur(e)) }); }
   protected choisir(ev: Event): void { const f = (ev.target as HTMLInputElement).files?.[0]; if (f) this.analyser(f); (ev.target as HTMLInputElement).value = ''; }
   protected deposer(ev: DragEvent): void { ev.preventDefault(); this.survol.set(false); const f = ev.dataTransfer?.files?.[0]; if (f) this.analyser(f); }
 
@@ -93,16 +90,8 @@ export class Import implements OnInit {
     if (f.size > 20 * 1024 * 1024) { this.toast.error('Le fichier dépasse 20 Mo.'); return; }
     this.chargement.set(true);
     this.service.analyser(f, this.cohorteId).subscribe({
-      next: a => { this.chargement.set(false); this.ouvrirAnalyse(a); this.chargerRecents(); },
+      next: a => { this.chargement.set(false); this.ouvrirAnalyse(a); },
       error: e => { this.chargement.set(false); this.toast.error(messageErreur(e)); }
-    });
-  }
-
-  protected reprendre(s: ImportAssistantDTOs.Session): void {
-    if (s.statut === 'TERMINE' || s.statut === 'ANNULE') { this.service.rapport(s.id!).subscribe({ error: e => this.toast.error(messageErreur(e)) }); return; }
-    this.service.obtenir(s.id!).subscribe({
-      next: a => { this.ouvrirAnalyse(a); if (s.statut === 'VERIFIE') this.verifier(); },
-      error: e => this.toast.error(messageErreur(e))
     });
   }
 
@@ -171,7 +160,7 @@ export class Import implements OnInit {
     this.chargement.set(true);
     const debut = performance.now();
     this.service.importer(id).subscribe({
-      next: r => { this.chargement.set(false); this.duree.set(Math.max(1, Math.round((performance.now() - debut) / 1000))); this.resultat.set(r); this.etape.set(4); this.chargerRecents(); this.shell.rafraichir(); },
+      next: r => { this.chargement.set(false); this.duree.set(Math.max(1, Math.round((performance.now() - debut) / 1000))); this.resultat.set(r); this.etape.set(4); this.shell.rafraichir(); },
       error: e => { this.chargement.set(false); this.toast.error(messageErreur(e)); }
     });
   }
@@ -179,7 +168,7 @@ export class Import implements OnInit {
   protected async annuler(): Promise<void> {
     const id = this.session()?.id;
     if (id && !(await this.confirmation.demander('Abandonner cet import ?', 'Le fichier sera supprimé et aucun membre ne sera créé.', 'Abandonner', true))) return;
-    if (id) this.service.supprimer(id).subscribe({ next: () => this.chargerRecents() });
+    if (id) this.service.supprimer(id).subscribe();
     this.nouveau();
   }
 
@@ -191,13 +180,6 @@ export class Import implements OnInit {
   // ------------------------------------------------------------ libellés
   protected libelleChamp(cle?: string | null): string { return this.analyse()?.champsDisponibles?.find(c => c.cle === cle)?.libelle ?? cle ?? ''; }
   protected decisionTexte(d?: DecisionDoublon): string { return d === 'FUSIONNER' ? 'Fusionner' : d === 'CONSERVER_LES_DEUX' ? 'Conserver les deux' : d === 'IGNORER' ? 'Ignorer' : ''; }
-  protected statutRecent(s: ImportAssistantDTOs.Session): { texte: string; teinte: string } {
-    switch (s.statut) {
-      case 'TERMINE': return { texte: 'Terminé', teinte: 'green' };
-      case 'ANNULE': return { texte: 'Annulé', teinte: 'grey' };
-      default: return { texte: 'En cours', teinte: 'gold' };
-    }
-  }
   protected sousTitre(): string {
     const s = this.session();
     if (!s) return 'Intégrez les anciens fichiers Excel ou CSV dans la base SNJPro';
@@ -206,5 +188,4 @@ export class Import implements OnInit {
   }
   protected nombre(n?: number | null): string { return nombre(n); }
 
-  private chargerRecents(): void { this.service.sessions(0, 4).subscribe({ next: p => this.recents.set(p.content ?? []), error: () => this.recents.set([]) }); }
 }

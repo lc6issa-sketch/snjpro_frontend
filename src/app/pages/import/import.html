@@ -3,7 +3,6 @@
     <div><h1>Import de données</h1><p class="sub">{{ sousTitre() }}</p></div>
     <div class="actions">
       @if (etape() === 2) { <button type="button" class="btn btn-secondary" (click)="nouveau()">Changer de fichier</button> }
-      @else if (etape() !== 4) { <button type="button" class="btn btn-secondary" (click)="modele()">Télécharger le modèle</button> }
     </div>
   </div>
 
@@ -31,31 +30,6 @@
           <span class="btn btn-secondary mt-8">Parcourir les fichiers</span>
           <input type="file" hidden accept=".xlsx,.xls,.csv" (change)="choisir($event)" [disabled]="chargement()" />
         </label>
-      </div>
-      <div class="grid grid-2 mt-20">
-        <div class="card">
-          <div class="card-head"><div><h3>Avant d'importer</h3><p class="sub">Vérifiez que votre fichier contient ces colonnes</p></div></div>
-          <div class="card-body stack" style="gap: 14px">
-            @for (c of [['Nom et prénom', true], ['Sexe', true], ['Date et lieu de naissance', false], ['Numéro de téléphone', false], ['Région, profession, compétences', false]]; track c[0]) {
-              <div class="row-between small"><span class="row"><app-icon name="check" [size]="16" [class]="c[1] ? 'vert' : 'bleu'" />{{ c[0] }}</span><strong [class]="c[1] ? 'vert' : 'bleu'">{{ c[1] ? 'Obligatoire' : 'Recommandé' }}</strong></div>
-            }
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h3>Imports récents</h3></div>
-          <table class="table mt-12">
-            <thead><tr><th>Fichier</th><th>Par</th><th>Lignes</th><th>Statut</th></tr></thead>
-            <tbody>
-              @for (s of recents(); track s.id) {
-                <tr class="clickable" (click)="reprendre(s)">
-                  <td><span class="row"><app-icon name="file-spreadsheet" [size]="16" class="vert" /><strong class="small">{{ s.nomFichier }}</strong></span></td>
-                  <td class="muted">{{ s.creePar }}</td><td>{{ s.totalLignes | nombre }}</td>
-                  <td><span class="pill dot" [class]="'pill dot ' + statutRecent(s).teinte">{{ statutRecent(s).texte }}</span></td>
-                </tr>
-              } @empty { <tr><td colspan="4"><div class="empty small">Aucun import pour l'instant.</div></td></tr> }
-            </tbody>
-          </table>
-        </div>
       </div>
     }
 
