@@ -13,7 +13,7 @@ const GESTION_OPPORTUNITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ'
 
 export const routes: Routes = [
   // Redirection de la racine avant le bloc AuthLayout (path ''), sinon celui-ci capture « / » et s'affiche sans formulaire
-  { path: '', pathMatch: 'full', redirectTo: 'actualites' },
+  { path: '', pathMatch: 'full', redirectTo: 'tableau-de-bord' },
 
   // =========================================================================
   // ROUTES PUBLIQUES (écrans web 01 à 04)
@@ -70,94 +70,6 @@ export const routes: Routes = [
     component: MainLayout,
     canActivate: [authGuard],
     children: [
-      // ----- Actualités -----
-      {
-        path: 'actualites',
-        title: 'Actualités · SNJPro',
-        loadComponent: () => import('./pages/actualites/liste/actualites-liste').then(m => m.ActualitesListe),
-      },
-      {
-        path: 'actualites/nouvelle',
-        title: 'Nouvelle actualité · SNJPro',
-        canActivate: [roleGuard],
-        data: { roles: REDACTEURS_ACTUALITES },
-        loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
-      },
-      {
-        path: 'actualites/:id',
-        title: 'Actualité · SNJPro',
-        canActivate: [roleGuard],
-        data: { roles: REDACTEURS_ACTUALITES },
-        loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
-      },
-
-      // ----- Utilisateurs & rôles -----
-      {
-        path: 'utilisateurs',
-        title: 'Utilisateurs & rôles · SNJPro',
-        loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs),
-      },
-      {
-        path: 'parametres',
-        title: 'Paramètres · SNJPro',
-        loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres),
-      },
-
-      // ----- Compétences -----
-      {
-        path: 'competences',
-        title: 'Compétences · SNJPro',
-        loadComponent: () => import('./pages/competences/competences').then(m => m.Competences),
-      },
-
-      // ----- Import & doublons -----
-      {
-        path: 'import',
-        title: 'Import de données · SNJPro',
-        loadComponent: () => import('./pages/import/import').then(m => m.Import),
-      },
-
-      // ----- Historique -----
-      {
-        path: 'historique',
-        title: 'Historique · SNJPro',
-        loadComponent: () => import('./pages/historique/historique').then(m => m.HistoriqueOperations),
-      },
-
-      // ----- Notifications & alertes -----
-      {
-        path: 'notifications',
-        title: 'Notifications · SNJPro',
-        loadComponent: () => import('./pages/notifications/nouvelle/nouvelle-notification').then(m => m.NouvelleNotification),
-      },
-      {
-        path: 'notifications/historique',
-        title: 'Historique des envois · SNJPro',
-        loadComponent: () => import('./pages/notifications/historique/historique-envois').then(m => m.HistoriqueEnvois),
-      },
-
-      // ----- Demandes des membres -----
-      {
-        path: 'demandes',
-        title: 'Demandes · SNJPro',
-        loadComponent: () => import('./pages/demandes/demandes').then(m => m.Demandes),
-      },
-
-      // ----- Activités & présences -----
-      {
-        path: 'activites',
-        title: 'Activités & présences · SNJPro',
-        loadComponent: () => import('./pages/activites/activites').then(m => m.Activites),
-      },
-
-      // ----- Messagerie -----
-      {
-        path: 'messagerie',
-        title: 'Messagerie · SNJPro',
-        loadComponent: () => import('./pages/messagerie/messagerie').then(m => m.Messagerie),
-      },
-
-      // ----- Tableau de bord -----
       {
         path: 'tableau-de-bord',
         title: 'Tableau de bord · SNJPro',
@@ -190,7 +102,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/membres/modifier/modifier-membre').then(m => m.ModifierMembre),
       },
 
-      // ----- Cohortes -----
+      // ----- Cohortes & compétences -----
       {
         path: 'cohortes',
         title: 'Cohortes · SNJPro',
@@ -200,6 +112,11 @@ export const routes: Routes = [
         path: 'cohortes/:id',
         title: 'Cohorte · SNJPro',
         loadComponent: () => import('./pages/cohortes/detail/cohorte-detail').then(m => m.CohorteDetail),
+      },
+      {
+        path: 'competences',
+        title: 'Compétences · SNJPro',
+        loadComponent: () => import('./pages/competences/competences').then(m => m.Competences),
       },
 
       // ----- Mobilisations -----
@@ -228,6 +145,39 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/mobilisations/detail/mobilisation-detail').then(m => m.MobilisationDetail),
       },
 
+      // ----- Notifications -----
+      {
+        path: 'notifications',
+        title: 'Notifications · SNJPro',
+        loadComponent: () => import('./pages/notifications/nouvelle/nouvelle-notification').then(m => m.NouvelleNotification),
+      },
+      {
+        path: 'notifications/historique',
+        title: 'Historique des envois · SNJPro',
+        loadComponent: () => import('./pages/notifications/historique/historique-envois').then(m => m.HistoriqueEnvois),
+      },
+
+      // ----- Actualités -----
+      {
+        path: 'actualites',
+        title: 'Actualités · SNJPro',
+        loadComponent: () => import('./pages/actualites/liste/actualites-liste').then(m => m.ActualitesListe),
+      },
+      {
+        path: 'actualites/nouvelle',
+        title: 'Nouvelle actualité · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: REDACTEURS_ACTUALITES },
+        loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
+      },
+      {
+        path: 'actualites/:id',
+        title: 'Actualité · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: REDACTEURS_ACTUALITES },
+        loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
+      },
+
       // ----- Opportunités -----
       {
         path: 'opportunites',
@@ -254,22 +204,57 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/opportunites/detail/opportunite-detail').then(m => m.OpportuniteDetail),
       },
 
-      // ----- Documents -----
+      // ----- Documents, demandes, souvenirs, activités -----
       {
         path: 'documents',
         title: 'Documents · SNJPro',
         loadComponent: () => import('./pages/documents/documents').then(m => m.Documents),
       },
-
-      // ----- Souvenirs -----
+      {
+        path: 'demandes',
+        title: 'Demandes · SNJPro',
+        loadComponent: () => import('./pages/demandes/demandes').then(m => m.Demandes),
+      },
       {
         path: 'souvenirs',
         title: 'Souvenirs de formation · SNJPro',
         loadComponent: () => import('./pages/souvenirs/souvenirs').then(m => m.Souvenirs),
       },
+      {
+        path: 'activites',
+        title: 'Activités & présences · SNJPro',
+        loadComponent: () => import('./pages/activites/activites').then(m => m.Activites),
+      },
+
+      // ----- Administration -----
+      {
+        path: 'import',
+        title: 'Import de données · SNJPro',
+        loadComponent: () => import('./pages/import/import').then(m => m.Import),
+      },
+      {
+        path: 'historique',
+        title: 'Historique · SNJPro',
+        loadComponent: () => import('./pages/historique/historique').then(m => m.HistoriqueOperations),
+      },
+      {
+        path: 'utilisateurs',
+        title: 'Utilisateurs & rôles · SNJPro',
+        loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs),
+      },
+      {
+        path: 'parametres',
+        title: 'Paramètres · SNJPro',
+        loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres),
+      },
+      {
+        path: 'messagerie',
+        title: 'Messagerie · SNJPro',
+        loadComponent: () => import('./pages/messagerie/messagerie').then(m => m.Messagerie),
+      },
     ],
   },
 
   // Redirection par défaut si la route n'existe pas
-  { path: '**', redirectTo: 'actualites' },
+  { path: '**', redirectTo: 'tableau-de-bord' },
 ];
