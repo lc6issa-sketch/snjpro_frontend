@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide SNJPro Frontend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --surface-2:#f0f2f8; --border:#e2e6ef;
+  --text:#1c2333; --muted:#5d6780; --faint:#8a93a8;
+  --accent:#0f7b5f; --accent-soft:#e3f4ee; --accent-2:#c8891a; --accent-2-soft:#fbf1df;
+  --danger:#c0392b; --danger-soft:#fbe9e7; --info:#2563eb; --info-soft:#e7eefc;
+  --violet:#7c3aed; --violet-soft:#f0e9fd;
+  --code-bg:#0f172a; --code-text:#e2e8f0; --code-kw:#f472b6; --code-an:#fbbf24; --code-str:#86efac; --code-com:#64748b; --code-ty:#7dd3fc;
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 16px rgba(16,24,40,.06);
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1117; --surface:#161b24; --surface-2:#1d2430; --border:#2a3240;
+    --text:#e6e9ef; --muted:#9aa4b8; --faint:#6b7590;
+    --accent:#34c79b; --accent-soft:#12302a; --accent-2:#f0b44c; --accent-2-soft:#33280f;
+    --danger:#f07167; --danger-soft:#3a1715; --info:#6ea2ff; --info-soft:#14213d;
+    --violet:#a78bfa; --violet-soft:#241a3d;
+    --code-bg:#0a0e16; --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117; --surface:#161b24; --surface-2:#1d2430; --border:#2a3240;
+  --text:#e6e9ef; --muted:#9aa4b8; --faint:#6b7590;
+  --accent:#34c79b; --accent-soft:#12302a; --accent-2:#f0b44c; --accent-2-soft:#33280f;
+  --danger:#f07167; --danger-soft:#3a1715; --info:#6ea2ff; --info-soft:#14213d;
+  --violet:#a78bfa; --violet-soft:#241a3d;
+  --code-bg:#0a0e16; --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:var(--bg);color:var(--text);font:15.5px/1.65 Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+code,pre,.mono{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+a{color:var(--accent)}
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50;transition:width .1s}
+
+/* ---------- Layout ---------- */
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh}
+aside{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-right:1px solid var(--border);padding:22px 16px 40px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.brand-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#0a5a45);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px;letter-spacing:.5px}
+.brand b{display:block;font-size:15px}
+.brand small{color:var(--muted);font-size:12px}
+.tools{display:flex;gap:8px;margin:16px 0 12px}
+.search{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font:inherit;font-size:13.5px}
+.btn-icon{border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:8px;width:38px;cursor:pointer;font-size:16px}
+nav ol{list-style:none;margin:0;padding:0;counter-reset:n}
+nav li a{display:flex;gap:10px;align-items:baseline;padding:6px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;counter-increment:n}
+nav li a::before{content:counter(n,decimal-leading-zero);font:600 11px "JetBrains Mono",monospace;color:var(--faint)}
+nav li a:hover{background:var(--surface-2);color:var(--text)}
+nav li a.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav li a.active::before{color:var(--accent)}
+nav li.hidden{display:none}
+main{padding:40px 56px 120px;max-width:1120px;width:100%;min-width:0}
+.menu-toggle{display:none}
+
+/* ---------- Typo ---------- */
+h1{font-size:40px;line-height:1.15;margin:0 0 12px;letter-spacing:-.02em}
+h2{font-size:28px;margin:0 0 6px;letter-spacing:-.01em}
+h3{font-size:19px;margin:30px 0 10px}
+h4{font-size:15.5px;margin:20px 0 6px}
+p{margin:0 0 14px}
+.lead{font-size:18px;color:var(--muted);max-width:760px}
+.kicker{font:600 12px "JetBrains Mono",monospace;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:6px}
+section{padding:56px 0 8px;border-top:1px solid var(--border)}
+section:first-of-type{border-top:0;padding-top:0}
+.sub{color:var(--muted);margin-bottom:22px}
+:not(pre)>code{background:var(--surface-2);border:1px solid var(--border);padding:1px 6px;border-radius:6px;font-size:.86em}
+ul.clean{padding-left:20px} ul.clean li{margin:4px 0}
+mark{background:var(--accent-2-soft);color:inherit;padding:0 2px;border-radius:3px}
+
+/* ---------- Components ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat{padding:16px 18px}
+.stat .v{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.stat .l{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font:600 11.5px "JetBrains Mono",monospace;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted);border:1px solid var(--border);margin:2px 3px 2px 0}
+.tag.g{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.tag.o{background:var(--accent-2-soft);color:var(--accent-2);border-color:transparent}
+.tag.r{background:var(--danger-soft);color:var(--danger);border-color:transparent}
+.tag.b{background:var(--info-soft);color:var(--info);border-color:transparent}
+.tag.v{background:var(--violet-soft);color:var(--violet);border-color:transparent}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.warn{border-color:var(--accent-2);background:var(--accent-2-soft)}
+.callout.danger{border-color:var(--danger);background:var(--danger-soft)}
+.callout.info{border-color:var(--info);background:var(--info-soft)}
+.callout b:first-child{display:block;margin-bottom:2px}
+table{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:var(--surface-2);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+tr:last-child td{border-bottom:0}
+.table-wrap{overflow-x:auto;margin:12px 0 18px;border-radius:var(--radius)}
+
+/* code */
+.code{position:relative;margin:12px 0 18px}
+.code pre{background:var(--code-bg);color:var(--code-text);padding:16px 18px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.6;margin:0}
+.code .lang{position:absolute;top:8px;right:76px;font:600 10.5px "JetBrains Mono",monospace;color:#64748b;text-transform:uppercase}
+.copy{position:absolute;top:6px;right:8px;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:6px;font:600 11px Inter;padding:4px 9px;cursor:pointer}
+.copy:hover{background:#334155}
+.k{color:var(--code-kw)} .a{color:var(--code-an)} .s{color:var(--code-str)} .c{color:var(--code-com);font-style:italic} .t{color:var(--code-ty)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0;border-bottom:1px solid var(--border)}
+.tab{border:0;background:none;color:var(--muted);padding:9px 14px;font:600 14px Inter;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.on{color:var(--accent);border-color:var(--accent)}
+.pane{display:none;padding-top:16px}
+.pane.on{display:block}
+
+/* tree explorer */
+.explorer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:16px;align-items:start}
+.tree{font:13.5px "JetBrains Mono",monospace;padding:14px 10px;max-height:640px;overflow:auto}
+.tree ul{list-style:none;margin:0;padding-left:16px;border-left:1px dashed var(--border)}
+.tree>ul{padding-left:0;border:0}
+.tree li{margin:1px 0}
+.node{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:6px;cursor:pointer;user-select:none;white-space:nowrap}
+.node:hover{background:var(--surface-2)}
+.node.sel{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.node .ic{width:16px;text-align:center}
+.node .cnt{font-size:11px;color:var(--faint)}
+li.closed>ul{display:none}
+.detail{position:sticky;top:20px;min-height:300px}
+.detail h3{margin-top:0;font-family:"JetBrains Mono",monospace;font-size:17px;word-break:break-all}
+.detail .why{background:var(--surface-2);border-radius:8px;padding:12px 14px;margin:10px 0}
+.detail .files{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+
+/* line explainer (pom / properties) */
+.explain{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;align-items:start}
+.lines{background:var(--code-bg);color:var(--code-text);border-radius:10px;padding:10px 0;font:12.5px/1.55 "JetBrains Mono",monospace;max-height:620px;overflow:auto}
+.lines .ln{display:block;padding:1px 14px;white-space:pre;cursor:pointer;border-left:3px solid transparent}
+.lines .ln.blk:hover{background:#1e293b}
+.lines .ln.on{background:#13342b;border-left-color:#34c79b}
+.lines .ln.dim{opacity:.55;cursor:default}
+.explain .detail{min-height:200px}
+
+/* annotations */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.chip{border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:5px 12px;border-radius:999px;font:600 13px Inter;cursor:pointer}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ann-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.ann{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .15s,transform .15s}
+.ann:hover{border-color:var(--accent);transform:translateY(-1px)}
+.ann .n{font:600 14.5px "JetBrains Mono",monospace;color:var(--accent-2)}
+.ann .ct{float:right;font:600 11px "JetBrains Mono",monospace;color:var(--faint)}
+.ann p{font-size:13.5px;color:var(--muted);margin:6px 0 0}
+.ann .more{display:none;margin-top:10px;font-size:13.5px}
+.ann.open .more{display:block}
+.ann .more pre{background:var(--code-bg);color:var(--code-text);padding:10px 12px;border-radius:8px;font-size:12px;overflow-x:auto;margin:8px 0 0}
+
+/* layers */
+.layers{display:flex;flex-direction:column;gap:8px}
+.layer{display:grid;grid-template-columns:170px minmax(0,1fr);gap:14px;align-items:center;padding:14px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface)}
+.layer .nm{font-weight:700}
+.layer .nm small{display:block;font:500 12px "JetBrains Mono",monospace;color:var(--muted)}
+.arrow{text-align:center;color:var(--faint);font-size:13px;line-height:1}
+
+/* stepper */
+.stepper{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:16px}
+.steps{display:flex;flex-direction:column;gap:4px}
+.step{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:14px;border:1px solid transparent}
+.step .num{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2);font:700 12px "JetBrains Mono",monospace}
+.step.on{background:var(--surface);border-color:var(--border);color:var(--text);box-shadow:var(--shadow)}
+.step.on .num{background:var(--accent);color:#fff}
+.step.done .num{background:var(--accent-soft);color:var(--accent)}
+.step-body{min-height:280px}
+.step-body .where{font:600 12.5px "JetBrains Mono",monospace;color:var(--accent-2);margin-bottom:8px}
+.step-nav{display:flex;gap:8px;margin-top:14px}
+.btn{border:1px solid var(--border);background:var(--surface-2);color:var(--text);padding:8px 14px;border-radius:8px;font:600 13.5px Inter;cursor:pointer}
+.btn.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* jwt */
+.jwt-raw{font:13px/1.6 "JetBrains Mono",monospace;word-break:break-all;background:var(--surface-2);border:1px solid var(--border);padding:12px 14px;border-radius:8px}
+.jh{color:#e11d48}.jp{color:#7c3aed}.js{color:#0891b2}
+[data-theme="dark"] .jh, .dark-auto .jh{color:#fb7185}
+.jwt-parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.jwt-parts .card{padding:12px 14px}
+.jwt-parts pre{margin:6px 0 0;font-size:12px;white-space:pre-wrap;word-break:break-all}
+textarea{width:100%;min-height:80px;font:12.5px "JetBrains Mono",monospace;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:end}
+.sim label{font-size:12.5px;color:var(--muted);font-weight:600;display:block;margin-bottom:4px}
+select,input[type=text]{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font:inherit;font-size:14px}
+.verdict{margin-top:14px;padding:14px 16px;border-radius:10px;font-size:14.5px}
+.verdict.ok{background:var(--accent-soft);border:1px solid var(--accent)}
+.verdict.ko{background:var(--danger-soft);border:1px solid var(--danger)}
+.verdict.mid{background:var(--accent-2-soft);border:1px solid var(--accent-2)}
+
+/* checklist */
+.check{display:flex;gap:12px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--surface);margin-bottom:10px}
+.check input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.check.done{opacity:.6}
+.check.done b{text-decoration:line-through}
+.check details summary{cursor:pointer;color:var(--accent);font-size:13.5px;font-weight:600;margin-top:4px}
+.bar{height:8px;background:var(--surface-2);border-radius:99px;overflow:hidden;margin:6px 0 16px}
+.bar>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+
+/* quiz */
+.q{margin-bottom:16px}
+.q .opts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.q button.opt{text-align:left;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 12px;border-radius:8px;font:inherit;font-size:14px;cursor:pointer}
+.q button.opt.good{background:var(--accent-soft);border-color:var(--accent)}
+.q button.opt.bad{background:var(--danger-soft);border-color:var(--danger)}
+.q .fb{font-size:13.5px;color:var(--muted);margin-top:6px;display:none}
+
+/* cron */
+.cron{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.cron .f{text-align:center;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:74px}
+.cron .f b{display:block;font:700 18px "JetBrains Mono",monospace;color:var(--accent)}
+.cron .f small{color:var(--muted);font-size:11.5px}
+
+/* er diagram */
+.er{display:flex;flex-wrap:wrap;gap:10px}
+.ent{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:13px;min-width:170px;flex:1 1 170px;cursor:pointer}
+.ent b{font-family:"JetBrains Mono",monospace;font-size:13px}
+.ent .tb{color:var(--faint);font:11.5px "JetBrains Mono",monospace}
+.ent .rel{color:var(--muted);font-size:12px;margin-top:4px}
+.ent.hl{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.ent.dim{opacity:.35}
+
+footer{color:var(--faint);font-size:13px;margin-top:60px;border-top:1px solid var(--border);padding-top:20px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1000px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  aside{position:fixed;inset:0 auto 0 0;width:290px;transform:translateX(-100%);transition:transform .2s;z-index:40;box-shadow:var(--shadow)}
+  aside.open{transform:none}
+  .menu-toggle{display:block;position:fixed;bottom:18px;right:18px;z-index:45;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:12px 18px;font:700 14px Inter;box-shadow:var(--shadow)}
+  main{padding:28px 16px 100px}
+  .explorer,.explain,.stepper{grid-template-columns:1fr}
+  .detail{position:static}
+  .g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sim{grid-template-columns:1fr}
+  .jwt-parts{grid-template-columns:1fr}
+  h1{font-size:30px}
+}
+@media (max-width:560px){
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .layer{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<button class="menu-toggle" onclick="document.querySelector('aside').classList.toggle('open')">☰ Sommaire</button>
+<div class="layout">
+<aside>
+  <div class="brand">
+    <div class="brand-logo">SNJ</div>
+    <div><b>SNJPro Frontend</b><small>Guide complet de l'application web</small></div>
+  </div>
+  <div class="tools">
+    <input class="search" id="navSearch" placeholder="Filtrer le sommaire…" aria-label="Filtrer le sommaire">
+    <button class="btn-icon" id="themeBtn" title="Changer de thème">◐</button>
+  </div>
+  <nav><ol id="toc">
+    <li><a href="#intro">Vue d'ensemble</a></li>
+    <li><a href="#techno">Technologies &amp; outils</a></li>
+    <li><a href="#structure">Structure du projet</a></li>
+    <li><a href="#couches">Architecture</a></li>
+    <li><a href="#package">package.json décortiqué</a></li>
+    <li><a href="#config">angular.json &amp; tsconfig</a></li>
+    <li><a href="#demarrage">Démarrage &amp; SSR</a></li>
+    <li><a href="#annotations">Décorateurs &amp; API Angular</a></li>
+    <li><a href="#signaux">Signaux &amp; rendu</a></li>
+    <li><a href="#templates">Templates &amp; formulaires</a></li>
+    <li><a href="#routage">Routage &amp; lazy loading</a></li>
+    <li><a href="#auth">Authentification (JWT)</a></li>
+    <li><a href="#acces">Gardes &amp; permissions</a></li>
+    <li><a href="#api">Communication avec l'API</a></li>
+    <li><a href="#modeles">Modèles générés</a></li>
+    <li><a href="#design">Design system &amp; thèmes</a></li>
+    <li><a href="#coquille">La coquille (layout)</a></li>
+    <li><a href="#partages">Composants partagés</a></li>
+    <li><a href="#selecteurs">Listes &amp; calendriers</a></li>
+    <li><a href="#modules">Écrans &amp; modules</a></li>
+    <li><a href="#lancer">Lancer, tester, construire</a></li>
+    <li><a href="#refaire">Refaire le projet</a></li>
+    <li><a href="#attention">Points d'attention</a></li>
+    <li><a href="#journal">Journal des mises à jour</a></li>
+    <li><a href="#quiz">Quiz de révision</a></li>
+  </ol></nav>
+</aside>
+
+<main>
+
+<!-- ===================================================== INTRO -->
+<section id="intro">
+  <div class="kicker">SNJPro · application web de gestion</div>
+  <h1>Comprendre (et pouvoir refaire) le frontend SNJPro</h1>
+  <p class="lead">Ce guide explique tout le projet Angular : à quoi sert chaque dossier et chaque fichier de configuration, comment l'application démarre, comment elle parle au backend Spring Boot, comment l'authentification JWT est gérée côté navigateur, comment sont construits les écrans, le système de design et les thèmes clair / sombre. Après lecture, on doit pouvoir le maintenir… ou le refaire.</p>
+
+  <h3>En une phrase</h3>
+  <div class="callout"><b>SNJPro Web</b>Une <b>application monopage (SPA) Angular 21</b> en composants autonomes et signaux, qui affiche les écrans de gestion du Service National des Jeunes (membres, cohortes, mobilisations, présences…) et consomme l'API REST du backend (<code>http://localhost:8080/api</code>) avec un jeton JWT.</div>
+
+  <div class="grid g4" style="margin-top:18px">
+    <div class="card stat"><div class="v">109</div><div class="l">fichiers dans <code>src/app</code></div></div>
+    <div class="card stat"><div class="v">57</div><div class="l">composants autonomes</div></div>
+    <div class="card stat"><div class="v">25</div><div class="l">services injectables</div></div>
+    <div class="card stat"><div class="v">44</div><div class="l">routes chargées à la demande</div></div>
+  </div>
+
+  <h3>Ce que gère l'application</h3>
+  <div class="grid g3">
+    <div class="card"><b>👥 Membres &amp; cohortes</b><p class="sub" style="margin:4px 0 0">Liste filtrable, création en 6 étapes, profil complet, export, cohortes et compétences.</p></div>
+    <div class="card"><b>📣 Mobilisation &amp; communication</b><p class="sub" style="margin:4px 0 0">Assistant de mobilisation, notifications push, actualités, opportunités, messagerie.</p></div>
+    <div class="card"><b>📂 Gestion administrative</b><p class="sub" style="margin:4px 0 0">Documents, demandes, activités et présences par QR code, imports Excel/CSV, statistiques, historique, utilisateurs et rôles.</p></div>
+  </div>
+
+  <h3>Comment le front et le back se répartissent le travail</h3>
+  <div class="layers">
+    <div class="layer"><div class="nm">Navigateur<small>Angular (ce projet)</small></div><div>Affiche les écrans, valide les saisies pour le confort, garde le jeton, masque ce que l'utilisateur ne peut pas faire.</div></div>
+    <div class="arrow">⇅ HTTP + JSON · en-tête <code>Authorization: Bearer &lt;jwt&gt;</code></div>
+    <div class="layer"><div class="nm">API REST<small>Spring Boot (snjpro_back)</small></div><div>Seule source de vérité : vérifie le jeton, les rôles et le périmètre, applique les règles métier, lit/écrit MySQL.</div></div>
+  </div>
+  <div class="callout warn"><b>Règle d'or</b>Tout ce que fait le front pour la sécurité (gardes de route, menus masqués, boutons cachés) n'est que du <b>confort</b>. Le backend revérifie chaque appel (<code>@PreAuthorize</code>, périmètre) : un utilisateur qui forge une requête obtient un 403.</div>
+</section>
+
+<!-- ===================================================== TECHNO -->
+<section id="techno">
+  <div class="kicker">Chapitre 1</div>
+  <h2>Technologies &amp; outils</h2>
+  <p class="sub">Tout ce qui est installé et pourquoi.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Outil</th><th>Version</th><th>Rôle dans le projet</th></tr>
+    <tr><td><b>Angular</b> (core, common, forms, router, platform-browser)</td><td>21.2</td><td>Le framework : composants, injection de dépendances, routeur, formulaires, client HTTP. Utilisé en mode <b>composants autonomes</b> (pas de <code>NgModule</code>) et <b>sans zone.js</b> (détection de changement pilotée par les signaux).</td></tr>
+    <tr><td><b>TypeScript</b></td><td>5.9</td><td>JavaScript typé. Mode <code>strict</code> + <code>strictTemplates</code> : les erreurs de type sont aussi vérifiées dans les templates HTML.</td></tr>
+    <tr><td><b>RxJS</b></td><td>7.8</td><td>Flux asynchrones. Chaque appel HTTP renvoie un <code>Observable</code> ; on utilise <code>pipe</code>, <code>map</code>, <code>tap</code>, <code>switchMap</code>, <code>debounceTime</code>, <code>forkJoin</code>, <code>catchError</code>.</td></tr>
+    <tr><td><b>@angular/ssr</b> + <b>Express</b></td><td>21.2 · 5.1</td><td>Serveur Node qui sert l'application. Configuré en <code>RenderMode.Client</code> : il renvoie la coquille HTML, le rendu se fait dans le navigateur (l'appli est réservée aux connectés).</td></tr>
+    <tr><td><b>@angular/build</b> (esbuild + Vite)</td><td>21.2</td><td>Compilation, serveur de développement avec rechargement à chaud, build de production.</td></tr>
+    <tr><td><b>qrcode</b></td><td>1.5</td><td>Génère en SVG le QR code de présence d'une activité (composant <code>app-qr-code</code>).</td></tr>
+    <tr><td><b>Vitest</b> + <b>jsdom</b></td><td>4.0 · 28</td><td>Tests unitaires (<code>ng test</code>) dans un DOM simulé.</td></tr>
+    <tr><td><b>Prettier</b></td><td>3.8</td><td>Formatage du code (<code>.prettierrc</code> : 100 colonnes, guillemets simples, parseur Angular pour le HTML).</td></tr>
+    <tr><td><b>Police Inter</b></td><td>Google Fonts</td><td>Typographie des maquettes Figma, chargée dans <code>index.html</code>.</td></tr>
+    <tr><td><b>npm</b></td><td>11</td><td>Gestionnaire de paquets (<code>package-lock.json</code> fige les versions exactes).</td></tr>
+  </table></div>
+  <div class="callout info"><b>Ce qui n'est PAS utilisé (et pourquoi)</b>Pas de bibliothèque de composants (Angular Material, PrimeNG…) : tout est fait main d'après les maquettes, dans <code>src/styles.css</code> et les composants de <code>shared/</code>. Pas de NgRx : l'état partagé tient dans des services à signaux. Pas de bibliothèque d'icônes : les tracés Lucide sont copiés dans <code>icon.ts</code>.</div>
+</section>
+
+<!-- ===================================================== STRUCTURE -->
+<section id="structure">
+  <div class="kicker">Chapitre 2</div>
+  <h2>Structure du projet</h2>
+  <p class="sub">Cliquez sur un dossier ou un fichier : son rôle, pourquoi il existe et ce qu'il contient s'affichent à droite.</p>
+  <div class="explorer">
+    <div class="card tree" id="tree"></div>
+    <div class="card detail" id="treeDetail"></div>
+  </div>
+</section>
+
+<!-- ===================================================== COUCHES -->
+<section id="couches">
+  <div class="kicker">Chapitre 3</div>
+  <h2>Architecture</h2>
+  <p class="sub">Le code est rangé par responsabilité. Une page ne fait jamais d'appel HTTP elle-même : elle passe par un service.</p>
+  <div class="layers">
+    <div class="layer"><div class="nm">pages/<small>écrans</small></div><div>Un composant par écran (liste, formulaire, détail). Il lit des signaux, appelle les services, affiche. Chargé à la demande par le routeur.</div></div>
+    <div class="arrow">▼ appelle</div>
+    <div class="layer"><div class="nm">core/services/<small>services métier</small></div><div>Un service par domaine (<code>MembreService</code>, <code>ActiviteService</code>…) : une méthode = un endpoint du backend. Injecte <code>HttpClient</code> et renvoie des <code>Observable</code> typés avec les modèles générés.</div></div>
+    <div class="arrow">▼ HttpClient</div>
+    <div class="layer"><div class="nm">environments<small>src/environments</small></div><div>Chaque service construit son URL depuis <code>environments.apiUrl</code> ; <code>shared/utils/http.ts</code> fournit <code>toParams</code>, <code>formulaire</code> (multipart), <code>enregistrerFichier</code> (téléchargements) et <code>urlLocale</code> (images protégées).</div></div>
+    <div class="arrow">▼ intercepteurs</div>
+    <div class="layer"><div class="nm">sessionInterceptor · erreurInterceptor<small>core/interceptors</small></div><div><code>sessionInterceptor</code> ajoute <code>Authorization: Bearer …</code> ; <code>erreurInterceptor</code> intercepte les 401 (session expirée ⇒ retour à la connexion).</div></div>
+    <div class="arrow">▼ réseau</div>
+    <div class="layer"><div class="nm">Backend<small>localhost:8080/api</small></div><div>Spring Boot (voir le guide du backend).</div></div>
+  </div>
+  <h3>Les autres familles</h3>
+  <div class="grid g3">
+    <div class="card"><h4 style="margin-top:0">layout/</h4><p>La « coquille » commune : barre latérale, barre du haut, recherche Ctrl K, panneau de notifications, mise en page des écrans de connexion. Les pages s'affichent dans son <code>&lt;router-outlet&gt;</code>.</p></div>
+    <div class="card"><h4 style="margin-top:0">shared/</h4><p>Briques réutilisées partout : icônes, avatar, modale, graphiques, pagination, pastilles, QR code, toasts, popups de sélection, pipes de format, libellés.</p></div>
+    <div class="card"><h4 style="margin-top:0">models/</h4><p><code>api.models.ts</code> : les interfaces TypeScript <b>générées</b> depuis les DTO Java du backend. Le front et le back partagent ainsi les mêmes formes de données.</p></div>
+  </div>
+  <div class="callout"><b>Qui garde l'état ?</b>Pas de « store » global : l'état partagé vit dans des services <code>providedIn: 'root'</code> à base de signaux — <code>AuthService</code> (utilisateur, permissions), <code>ShellService</code> (compteurs du menu, menu replié, panneaux ouverts), <code>ThemeService</code> (thème), <code>ToastService</code>, <code>ConfirmationService</code>. L'état d'un écran reste dans son composant.</div>
+</section>
+
+<!-- ===================================================== PACKAGE -->
+<section id="package">
+  <div class="kicker">Chapitre 4</div>
+  <h2>package.json décortiqué</h2>
+  <p class="sub">Cliquez sur une ligne en couleur pour l'explication.</p>
+  <div class="explain">
+    <div class="lines" id="pkgLines"></div>
+    <div class="card detail" id="pkgDetail"></div>
+  </div>
+  <div class="callout info"><b>dependencies ou devDependencies ?</b><code>dependencies</code> = nécessaire pour faire tourner l'application (dans le navigateur ou le serveur SSR). <code>devDependencies</code> = seulement pour développer, compiler et tester. Le symbole <code>^21.2.0</code> autorise les mises à jour mineures (21.x) ; <code>~7.8.0</code> seulement les correctifs (7.8.x). Les versions exactes installées sont figées dans <code>package-lock.json</code>.</div>
+</section>
+
+<!-- ===================================================== CONFIG -->
+<section id="config">
+  <div class="kicker">Chapitre 5</div>
+  <h2>angular.json &amp; tsconfig</h2>
+  <div class="tabs">
+    <button class="tab on" data-pane="pane-ng">angular.json</button>
+    <button class="tab" data-pane="pane-ts">tsconfig*.json</button>
+    <button class="tab" data-pane="pane-autres">Autres fichiers</button>
+  </div>
+  <div class="pane on" id="pane-ng">
+    <p class="sub">Le fichier de l'Angular CLI : comment construire, servir et tester. Cliquez sur une ligne.</p>
+    <div class="explain">
+      <div class="lines" id="ngLines"></div>
+      <div class="card detail" id="ngDetail"></div>
+    </div>
+  </div>
+  <div class="pane" id="pane-ts">
+    <div class="table-wrap"><table>
+      <tr><th>Option</th><th>Effet</th></tr>
+      <tr><td><code>strict: true</code></td><td>Active toutes les vérifications strictes (pas de <code>any</code> implicite, <code>null</code> vérifié…).</td></tr>
+      <tr><td><code>noImplicitReturns</code>, <code>noFallthroughCasesInSwitch</code></td><td>Toute branche d'une fonction doit retourner ; pas de <code>case</code> qui « tombe » dans le suivant.</td></tr>
+      <tr><td><code>noPropertyAccessFromIndexSignature</code></td><td>Oblige <code>obj['cle']</code> pour les objets-dictionnaires (ex. <code>process.env['PORT']</code> dans <code>server.ts</code>).</td></tr>
+      <tr><td><code>target: ES2022</code>, <code>module: preserve</code></td><td>JavaScript moderne en sortie ; les imports sont laissés tels quels pour l'outil de build (esbuild).</td></tr>
+      <tr><td><code>isolatedModules</code>, <code>importHelpers</code></td><td>Chaque fichier compilable seul (requis par esbuild) ; les aides TypeScript viennent de <code>tslib</code> au lieu d'être recopiées.</td></tr>
+      <tr><td><code>strictTemplates</code></td><td>Vérifie les types <b>dans les templates</b> : une faute de frappe sur une propriété ou un mauvais type d'<code>input</code> casse la compilation.</td></tr>
+      <tr><td><code>strictInjectionParameters</code>, <code>strictInputAccessModifiers</code></td><td>Erreurs claires si une dépendance n'est pas injectable ; respect de <code>private</code>/<code>readonly</code> sur les entrées.</td></tr>
+      <tr><td><code>tsconfig.app.json</code></td><td>Compile <code>src/**/*.ts</code> sauf les tests ; types Node (pour <code>server.ts</code>).</td></tr>
+      <tr><td><code>tsconfig.spec.json</code></td><td>Compile les <code>*.spec.ts</code> avec les globales de Vitest (<code>describe</code>, <code>it</code>, <code>expect</code>).</td></tr>
+    </table></div>
+  </div>
+  <div class="pane" id="pane-autres">
+    <div class="table-wrap"><table>
+      <tr><th>Fichier</th><th>Rôle</th></tr>
+      <tr><td><code>src/index.html</code></td><td>La seule page HTML. Contient <code>&lt;app-root&gt;</code>, la police Inter, l'icône, et un petit script qui applique le thème (clair/sombre) <b>avant</b> le premier affichage.</td></tr>
+      <tr><td><code>src/styles.css</code></td><td>Feuille globale : variables de couleur (jetons), thème sombre, boutons, cartes, tableaux, formulaires, pastilles… (voir chapitre « Design system »).</td></tr>
+      <tr><td><code>public/</code></td><td>Fichiers copiés tels quels : <code>logo_snj.png</code>, <code>logo_nom_app.png</code>, <code>logo_nom_app_blanc.png</code> (variante pour fond sombre), <code>favicon.ico</code>.</td></tr>
+      <tr><td><code>.editorconfig</code>, <code>.prettierrc</code></td><td>Indentation et formatage communs à tous les éditeurs.</td></tr>
+      <tr><td><code>.vscode/</code></td><td>Extensions recommandées et configurations de lancement / débogage pour VS Code.</td></tr>
+      <tr><td><code>scripts/generer-modeles.js</code></td><td>Générateur des interfaces TypeScript depuis les DTO Java (chapitre « Modèles générés »).</td></tr>
+      <tr><td><code>dist/</code>, <code>.angular/</code>, <code>node_modules/</code></td><td>Générés : build, cache du compilateur, paquets npm. Jamais modifiés à la main, ignorés par Git.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ===================================================== DEMARRAGE -->
+<section id="demarrage">
+  <div class="kicker">Chapitre 6</div>
+  <h2>Démarrage de l'application &amp; SSR</h2>
+  <p class="sub">Du chargement de la page au premier écran, pas à pas.</p>
+  <div class="stepper" id="bootStepper"></div>
+  <h3>app.config.ts : les « fournisseurs » globaux</h3>
+  <div class="code"><span class="lang">ts</span><button class="copy">Copier</button><pre><span class="k">export const</span> appConfig: <span class="t">ApplicationConfig</span> = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),                 <span class="c">// erreurs non interceptées → console</span>
+    provideRouter(routes,
+      withComponentInputBinding(),                        <span class="c">// :id de l'URL → input id() du composant</span>
+      withInMemoryScrolling({ scrollPositionRestoration: <span class="s">'top'</span> })),
+    provideHttpClient(withFetch(),                        <span class="c">// HttpClient basé sur fetch()</span>
+      withInterceptors([erreurInterceptor, sessionInterceptor])), <span class="c">// 401 + jeton JWT</span>
+    { provide: LOCALE_ID, useValue: <span class="s">'fr-FR'</span> }             <span class="c">// dates et nombres en français</span>
+  ]
+};</pre></div>
+  <div class="callout info"><b>Pourquoi un serveur SSR si le rendu est côté client ?</b>Le projet a été créé avec <code>ng new --ssr</code>. <code>app.routes.server.ts</code> déclare <code>RenderMode.Client</code> pour toutes les routes : le serveur Express (<code>server.ts</code>) ne fait que servir les fichiers et la coquille HTML. Le rendu serveur n'apporterait rien (pas de référencement à soigner, pages réservées aux connectés, jeton stocké dans le navigateur). Conséquence pour le code : tout accès à <code>localStorage</code>, <code>window</code> ou <code>document</code> est protégé par <code>isPlatformBrowser(PLATFORM_ID)</code> ou placé dans <code>afterNextRender</code>.</div>
+</section>
+
+<!-- ===================================================== ANNOTATIONS -->
+<section id="annotations">
+  <div class="kicker">Chapitre 7</div>
+  <h2>Décorateurs &amp; API Angular utilisés</h2>
+  <p class="sub">L'équivalent front des « annotations » Spring. Filtrez par famille, cliquez sur une carte pour un exemple tiré du projet. Le nombre indique les occurrences dans <code>src/app</code>.</p>
+  <input type="text" id="annSearch" placeholder="Rechercher (ex. signal, inject, @for…)" style="max-width:420px">
+  <div class="filters" id="annFilters"></div>
+  <div class="ann-grid" id="annGrid"></div>
+</section>
+
+<!-- ===================================================== SIGNAUX -->
+<section id="signaux">
+  <div class="kicker">Chapitre 8</div>
+  <h2>Signaux &amp; détection de changement</h2>
+  <p class="sub">Comment l'écran se met à jour quand une donnée change.</p>
+  <div class="grid g3">
+    <div class="card"><h4 style="margin-top:0"><code>signal()</code></h4><p>Une valeur observable : on la lit en l'appelant (<code>membres()</code>), on la change avec <code>.set()</code> ou <code>.update()</code>. Angular sait quels templates l'ont lue et ne redessine qu'eux.</p></div>
+    <div class="card"><h4 style="margin-top:0"><code>computed()</code></h4><p>Une valeur <b>dérivée</b>, recalculée seulement quand un signal lu change. Ex. <code>connecte = computed(() =&gt; !!this.utilisateur()?.token)</code>.</p></div>
+    <div class="card"><h4 style="margin-top:0"><code>effect()</code></h4><p>Un effet de bord qui se relance quand ses signaux changent. Ex. <code>ThemeService</code> pose <code>data-theme</code> sur <code>&lt;html&gt;</code> à chaque changement de thème.</p></div>
+  </div>
+  <div class="code"><span class="lang">ts</span><button class="copy">Copier</button><pre><span class="c">// Extrait simplifié de pages/activites/activites.ts</span>
+<span class="k">protected readonly</span> selection = signal&lt;<span class="t">ActiviteDTOs.Resume</span> | <span class="k">null</span>&gt;(<span class="k">null</span>);
+<span class="k">protected readonly</span> c = computed(() =&gt; <span class="k">this</span>.selection()?.compteurs ?? <span class="k">null</span>);
+
+<span class="k">protected</span> choisir(a: <span class="t">ActiviteDTOs.Resume</span>) {
+  <span class="k">this</span>.selection.set(a);            <span class="c">// → le template qui lit selection() / c() est redessiné</span>
+}</pre></div>
+  <div class="callout"><b>Zoneless + OnPush</b>Le projet n'inclut pas <code>zone.js</code>. Les composants sont en <code>ChangeDetectionStrategy.OnPush</code> (56 sur 57) : ils ne sont revérifiés que lorsqu'un signal qu'ils lisent change, qu'un événement du template se produit ou qu'une entrée change. C'est pourquoi l'état d'écran est presque toujours un <code>signal</code> : une simple propriété modifiée dans un <code>subscribe</code> ne serait pas forcément réaffichée.</div>
+  <div class="callout warn"><b>Propriétés « classiques » liées par ngModel</b>Les objets de formulaire (<code>nouvelle</code>, <code>f</code>, <code>filtre</code>…) restent des propriétés simples modifiées par <code>[(ngModel)]</code> : l'événement de saisie déclenche lui-même le rafraîchissement du composant.</div>
+  <h3>Abonnements et nettoyage</h3>
+  <ul class="clean">
+    <li>Appels HTTP : <code>subscribe()</code> direct, ils se terminent seuls après la réponse.</li>
+    <li>Flux longs (événements du routeur, recherche avec <code>debounceTime</code>) : <code>.pipe(takeUntilDestroyed())</code>, désabonnement automatique à la destruction du composant.</li>
+    <li>Minuteries (<code>setInterval</code> du rafraîchissement des présences, compte à rebours du QR) : arrêtées dans <code>ngOnDestroy</code>.</li>
+    <li><code>toSignal()</code> transforme un Observable en signal (URL courante dans la barre latérale).</li>
+  </ul>
+</section>
+
+<!-- ===================================================== TEMPLATES -->
+<section id="templates">
+  <div class="kicker">Chapitre 9</div>
+  <h2>Templates &amp; formulaires</h2>
+  <div class="grid g2">
+    <div class="card"><h4 style="margin-top:0">Contrôle de flux intégré</h4><p><code>@if (cond) { … } @else { … }</code>, <code>@for (x of liste(); track x.id) { … } @empty { … }</code>, <code>@switch</code>. Remplacent <code>*ngIf</code>/<code>*ngFor</code> (plus rapides, pas d'import). <code>track</code> est obligatoire : il permet de ne recréer que les lignes qui changent.</p></div>
+    <div class="card"><h4 style="margin-top:0">Liaisons</h4><p><code>{{ valeur }}</code> interpolation · <code>[prop]="expr"</code> propriété · <code>(evt)="méthode($event)"</code> événement · <code>[class.active]</code>, <code>[style.width.%]</code> classes et styles · <code>[attr.aria-label]</code> attribut.</p></div>
+    <div class="card"><h4 style="margin-top:0">Formulaires « template-driven »</h4><p><code>FormsModule</code> + <code>[(ngModel)]</code> (224 usages). Choix assumé : formulaires simples, validation légère côté front, la vraie validation est faite par le backend (<code>@Valid</code>) et ses messages sont affichés via <code>messageErreur()</code>.</p></div>
+    <div class="card"><h4 style="margin-top:0">Pipes</h4><p>Transforment une valeur à l'affichage : <code>{{ n | nombre }}</code> → « 1 284 », <code>| dateCourte</code>, <code>| dateHeure</code>, <code>| heure</code>, <code>| relatif</code> (« il y a 5 min »), <code>| taille</code> (« 2,4 Mo »), <code>| telMasque</code>.</p></div>
+  </div>
+  <div class="callout info"><b>Templates en ligne ou fichiers séparés ?</b>Les petits composants ont <code>template</code> et <code>styles</code> dans le <code>.ts</code> ; les gros écrans ont <code>templateUrl</code> (.html) et <code>styleUrl</code> (.css). Les styles d'un composant sont <b>encapsulés</b> : ils ne débordent pas sur le reste de l'application (sauf <code>::ng-deep</code>, utilisé 5 fois pour styler un composant enfant).</div>
+</section>
+
+<!-- ===================================================== ROUTAGE -->
+<section id="routage">
+  <div class="kicker">Chapitre 10</div>
+  <h2>Routage &amp; lazy loading</h2>
+  <p class="sub"><code>app.routes.ts</code> définit <b>toutes</b> les routes, regroupées par sections commentées : les écrans publics (dans <code>AuthLayout</code>), l'espace de gestion (dans <code>MainLayout</code>, protégé par <code>authGuard</code>) et deux écrans isolés (accès refusé, projection plein écran).</p>
+  <div class="code"><span class="lang">ts</span><button class="copy">Copier</button><pre>{ path: <span class="s">''</span>, component: MainLayout, canActivate: [authGuard], children: [
+  { path: <span class="s">'activites'</span>, title: <span class="s">'Activités &amp; présences · SNJPro'</span>,
+    loadComponent: () =&gt; <span class="k">import</span>(<span class="s">'./pages/activites/activites'</span>).then(m =&gt; m.Activites) },
+  { path: <span class="s">'membres/nouveau'</span>, title: <span class="s">'Nouveau membre · SNJPro'</span>,
+    canActivate: [roleGuard], data: { roles: GESTION_MEMBRES },
+    loadComponent: () =&gt; <span class="k">import</span>(<span class="s">'./pages/membres/nouveau/nouveau-membre'</span>).then(m =&gt; m.NouveauMembre) },
+  …
+]}</pre></div>
+  <ul class="clean">
+    <li><b><code>loadComponent</code></b> : le code d'un écran n'est téléchargé que lorsqu'on y va (un « chunk » JavaScript par page). Le premier chargement reste léger.</li>
+    <li><b><code>title</code></b> : titre de l'onglet du navigateur.</li>
+    <li><b><code>withComponentInputBinding()</code></b> : les paramètres d'URL (<code>/membres/:id</code>) et de requête arrivent directement dans les <code>input()</code> du composant.</li>
+    <li><b>Ordre</b> : la redirection <code>'' → tableau-de-bord</code> est placée avant le bloc public, sinon celui-ci capterait « / ». La route <code>**</code> renvoie au tableau de bord.</li>
+  </ul>
+  <h3>Toutes les routes</h3>
+  <input type="text" id="routeSearch" placeholder="Filtrer (ex. membre, nouvelle, garde…)" style="max-width:420px;margin-bottom:12px">
+  <div class="table-wrap"><table id="routeTable"></table></div>
+</section>
+
+<!-- ===================================================== AUTH -->
+<section id="auth">
+  <div class="kicker">Chapitre 11</div>
+  <h2>Authentification côté navigateur (JWT)</h2>
+  <p class="sub">Le backend est <b>sans session</b> (stateless) : il délivre un jeton JWT que le front garde et renvoie à chaque appel.</p>
+  <div class="stepper" id="authStepper"></div>
+  <h3>Où est stocké le jeton ?</h3>
+  <div class="table-wrap"><table>
+    <tr><th>« Rester connecté »</th><th>Stockage</th><th>Durée</th></tr>
+    <tr><td>coché</td><td><code>localStorage['snjpro.session']</code></td><td>Survit à la fermeture du navigateur, jusqu'à l'expiration du jeton (24 h côté backend) ou la déconnexion.</td></tr>
+    <tr><td>décoché</td><td><code>sessionStorage['snjpro.session']</code></td><td>Effacé à la fermeture de l'onglet.</td></tr>
+  </table></div>
+  <p>La valeur stockée est la réponse complète de <code>/auth/login</code> (<code>AuthResponse</code> : jeton, rôle, nom, région, photo…). Au démarrage, <code>AuthService.lireSession()</code> la relit pour que l'utilisateur reste connecté après un rechargement.</p>
+  <div class="callout warn"><b>Sécurité du stockage</b>Un jeton en <code>localStorage</code> est lisible par tout script de la page : la protection repose sur l'absence de faille XSS (Angular échappe automatiquement les interpolations ; <code>bypassSecurityTrustHtml</code> n'est utilisé que pour les icônes, dont le contenu est fixe). Alternative plus robuste : cookie <code>HttpOnly</code> posé par le backend.</div>
+  <h3>Anatomie de l'intercepteur</h3>
+  <div class="code"><span class="lang">ts</span><button class="copy">Copier</button><pre><span class="c">// core/interceptors/session.interceptor.ts</span>
+<span class="k">export const</span> sessionInterceptor: <span class="t">HttpInterceptorFn</span> = (req, next) =&gt; {
+  <span class="k">const</span> token = inject(AuthService).token;
+  <span class="k">if</span> (!token || !req.url.startsWith(environments.apiUrl)) <span class="k">return</span> next(req); <span class="c">// jeton seulement vers NOTRE API</span>
+  <span class="k">return</span> next(req.clone({ setHeaders: { Authorization: <span class="s">`Bearer ${token}`</span> } })); <span class="c">// requêtes immuables → clone</span>
+};
+
+<span class="c">// core/interceptors/erreur.interceptor.ts</span>
+<span class="k">export const</span> erreurInterceptor: <span class="t">HttpInterceptorFn</span> = (req, next) =&gt; {
+  <span class="k">const</span> auth = inject(AuthService), router = inject(Router);
+  <span class="k">return</span> next(req).pipe(catchError(erreur =&gt; {
+    <span class="k">if</span> (erreur.status === <span class="a">401</span> &amp;&amp; !routePublique(req) &amp;&amp; auth.connecte()) {
+      auth.effacer();                                       <span class="c">// jeton expiré ou révoqué</span>
+      router.navigate([<span class="s">'/connexion'</span>], { queryParams: { expire: <span class="a">1</span> } });
+    }
+    <span class="k">return</span> throwError(() =&gt; erreur);                     <span class="c">// l'écran affiche quand même son erreur</span>
+  }));
+};</pre></div>
+  <div class="callout info"><b>Pourquoi exclure les routes publiques du 401 ?</b>Sur <code>/auth/login</code>, un 401 veut dire « identifiant ou mot de passe incorrect », pas « session expirée » : il ne faut ni effacer la session ni rediriger.</div>
+</section>
+
+<!-- ===================================================== ACCES -->
+<section id="acces">
+  <div class="kicker">Chapitre 12</div>
+  <h2>Gardes de route &amp; permissions</h2>
+  <div class="grid g3">
+    <div class="card"><h4 style="margin-top:0"><code>authGuard</code></h4><p>Espace de gestion. Non connecté ⇒ <code>/connexion?retour=…</code>. Rôle <code>MEMBRE</code> ⇒ <code>/acces-refuse</code> (les membres utilisent l'application mobile).</p></div>
+    <div class="card"><h4 style="margin-top:0"><code>invitesGuard</code></h4><p>Écran de connexion : si l'on est déjà connecté, on est envoyé au tableau de bord.</p></div>
+    <div class="card"><h4 style="margin-top:0"><code>roleGuard</code></h4><p>Lit les rôles autorisés dans <code>data: { roles: [...] }</code> de la route et restreint l'accès à cette liste (création d'un membre, rédaction d'actualités, gestion des mobilisations et des opportunités).</p></div>
+  </div>
+  <h3>Trois niveaux de filtrage</h3>
+  <ol class="clean">
+    <li><b>Menu</b> — la barre latérale n'affiche une entrée que si <code>auth.peutVoir(module)</code> : matrice des permissions du rôle lue sur <code>GET /api/auth/permissions</code> (modifiable dans Utilisateurs &amp; rôles).</li>
+    <li><b>Route</b> — les gardes ci-dessus.</li>
+    <li><b>Boutons</b> — dans les écrans, <code>auth.aRole(…)</code> ou un <code>computed</code> (<code>peutGerer</code>) masque les actions (créer, modifier, supprimer).</li>
+  </ol>
+  <h3>🧪 Simulateur d'accès</h3>
+  <p class="sub">Choisissez un rôle et une route : le simulateur applique les gardes et la matrice de permissions par défaut du backend.</p>
+  <div class="card">
+    <div class="sim" style="grid-template-columns:repeat(2,minmax(0,1fr)) auto">
+      <div><label for="simRole">Utilisateur</label><select id="simRole"></select></div>
+      <div><label for="simRoute">Route demandée</label><select id="simRoute"></select></div>
+      <div><button class="btn pri" id="simGo">Tester</button></div>
+    </div>
+    <div id="simOut"></div>
+  </div>
+</section>
+
+<!-- ===================================================== API -->
+<section id="api">
+  <div class="kicker">Chapitre 13</div>
+  <h2>Communication avec l'API</h2>
+  <p class="sub">Chaque service injecte <code>HttpClient</code> et construit ses URL depuis <code>environments.apiUrl</code> (<code>src/environments/environments.development.ts</code> pour <code>ng serve</code>, <code>environments.ts</code> pour <code>ng build</code>). Les petites fonctions communes sont dans <code>shared/utils/http.ts</code>.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Fonction</th><th>Usage</th></tr>
+    <tr><td><code>toParams({ … })</code></td><td>Paramètres de requête : <code>null</code>/<code>undefined</code>/vides ignorés ; un tableau devient un paramètre répété (<code>?region=Kayes&amp;region=Ségou</code>).</td></tr>
+    <tr><td><code>formulaire({ fichier, … })</code></td><td>Corps <code>multipart/form-data</code> (photo, document, fichier d'import). Avec <code>{ reportProgress: true, observe: 'events' }</code> : barre « 72 % ».</td></tr>
+    <tr><td><code>map(urlLocale)</code></td><td>Image ou PDF protégé : téléchargé avec le jeton (<code>responseType: 'blob'</code>) puis transformé en URL locale <code>blob:</code> affichable dans <code>&lt;img&gt;</code> (une balise <code>&lt;img src&gt;</code> classique n'enverrait pas l'en-tête Authorization).</td></tr>
+    <tr><td><code>tap(enregistrerFichier)</code></td><td>Export Excel/CSV/PDF (<code>observe: 'response'</code>) : lit le nom dans <code>Content-Disposition</code> et déclenche l'enregistrement du fichier.</td></tr>
+  </table></div>
+  <h3>Un service métier type</h3>
+  <div class="code"><span class="lang">ts</span><button class="copy">Copier</button><pre>@Injectable({ providedIn: <span class="s">'root'</span> })
+<span class="k">export class</span> <span class="t">ActiviteService</span> {
+  <span class="k">private readonly</span> http = inject(HttpClient);
+  <span class="k">private readonly</span> apiUrl = <span class="s">`${environments.apiUrl}/activites`</span>;
+
+  lister(statut?: <span class="t">StatutActivite</span> | <span class="k">null</span>, annee?: <span class="t">number</span>, mois?: <span class="t">number</span>): <span class="t">Observable</span>&lt;<span class="t">ActiviteDTOs.Resume</span>[]&gt; {
+    <span class="k">return this</span>.http.get&lt;<span class="t">ActiviteDTOs.Resume</span>[]&gt;(<span class="k">this</span>.apiUrl, { params: toParams({ statut, annee, mois }) });
+  }
+
+  saisir(id: <span class="t">number</span>, s: <span class="t">ActiviteDTOs.SaisieManuelle</span>): <span class="t">Observable</span>&lt;<span class="t">ActiviteDTOs.PresenceDTO</span>&gt; {
+    <span class="k">return this</span>.http.post&lt;<span class="t">ActiviteDTOs.PresenceDTO</span>&gt;(<span class="s">`${this.apiUrl}/${id}/presences`</span>, s);
+  }
+
+  exporter(id: <span class="t">number</span>, format: <span class="t">FormatFichier</span> = <span class="s">'XLSX'</span>): <span class="t">Observable</span>&lt;<span class="t">HttpResponse</span>&lt;<span class="t">Blob</span>&gt;&gt; {
+    <span class="k">return this</span>.http.get(<span class="s">`${this.apiUrl}/${id}/presences/export`</span>, { params: toParams({ format }), responseType: <span class="s">'blob'</span>, observe: <span class="s">'response'</span> })
+      .pipe(tap(enregistrerFichier));
+  }
+}</pre></div>
+  <h3>Gestion des erreurs</h3>
+  <p><code>messageErreur(err)</code> (dans <code>shared/utils/http.ts</code>) transforme toute erreur HTTP en phrase lisible, affichée par <code>ToastService</code> :</p>
+  <div class="table-wrap"><table>
+    <tr><th>Cas</th><th>Message affiché</th></tr>
+    <tr><td><code>status 0</code></td><td>« Impossible de joindre le serveur SNJPro. Vérifiez que le backend est démarré. »</td></tr>
+    <tr><td>Erreur de validation (<code>errors: {champ: message}</code>)</td><td>Les messages des champs, séparés par « · »</td></tr>
+    <tr><td>Corps avec <code>message</code> (règle métier, 409…)</td><td>Le message du backend</td></tr>
+    <tr><td><code>403</code> / <code>404</code></td><td>« Vous n'avez pas les droits pour cette action. » / « Élément introuvable. »</td></tr>
+  </table></div>
+  <div class="callout"><b>Recette d'un écran</b>1) le composant appelle <code>service.methode().subscribe({ next, error })</code> ; 2) <code>next</code> met à jour un signal (le template se redessine) et affiche un toast de succès ; 3) <code>error</code> affiche <code>toast.error(messageErreur(e))</code>. Un signal <code>envoi</code> désactive le bouton pendant l'appel pour éviter les doubles clics.</div>
+</section>
+
+<!-- ===================================================== MODELES -->
+<section id="modeles">
+  <div class="kicker">Chapitre 14</div>
+  <h2>Modèles générés depuis le backend</h2>
+  <p class="sub"><code>src/app/models/api.models.ts</code> n'est pas écrit à la main : il est produit par <code>scripts/generer-modeles.js</code> à partir des DTO et énumérations Java.</p>
+  <div class="grid g2">
+    <div class="card"><h4 style="margin-top:0">Ce que fait le générateur</h4><ul class="clean"><li>lit <code>dto/*.java</code> et <code>enumeration/*.java</code> du backend ;</li><li>une classe DTO → une <code>interface</code> (champs optionnels <code>?</code>) ;</li><li>une classe « …DTOs » regroupant des classes <code>static</code> → un <code>namespace</code> (<code>ActiviteDTOs.Resume</code>) ;</li><li>un <code>enum</code> Java → un type union (<code>'EN_COURS' | 'TERMINEE' | …</code>) ;</li><li>types : <code>String</code>/<code>LocalDate</code>/<code>LocalDateTime</code> → <code>string</code>, nombres → <code>number</code>, <code>List&lt;X&gt;</code> → <code>X[]</code>, <code>Map</code> → <code>Record</code>.</li></ul></div>
+    <div class="card"><h4 style="margin-top:0">Quand le relancer ?</h4><p>Après <b>toute</b> modification d'un DTO ou d'une énumération côté backend :</p><div class="code"><span class="lang">bash</span><button class="copy">Copier</button><pre>SNJ_BACK=/home/mohamed/Documents/projet_spring_boot/snjpro_back npm run modeles</pre></div><p>Sans <code>SNJ_BACK</code>, le script cherche le backend dans <code>../snj_pro_backend</code> à côté du projet. Vérifier ensuite avec <code>git diff</code> que seuls les champs attendus ont changé, puis <code>ng build</code> : les écrans qui utilisaient un champ supprimé ne compilent plus (c'est voulu).</p></div>
+  </div>
+  <div class="callout warn"><b>Ne jamais éditer api.models.ts à la main</b>La modification serait écrasée à la prochaine génération. Les types propres au front (ex. <code>DeuxiemeFacteur</code>, <code>PreferenceTheme</code>) sont déclarés dans les services.</div>
+</section>
+
+<!-- ===================================================== DESIGN -->
+<section id="design">
+  <div class="kicker">Chapitre 15</div>
+  <h2>Design system &amp; thèmes clair / sombre</h2>
+  <p class="sub">Toutes les couleurs passent par des <b>variables CSS</b> (« jetons ») définies dans <code>src/styles.css</code>. Un composant n'écrit jamais <code>#FFFFFF</code> mais <code>var(--surface)</code> : changer de thème revient à redéfinir les variables.</p>
+  <h3>Les jetons (cliquez pour copier le nom)</h3>
+  <div class="filters" id="tokFilters"></div>
+  <div class="table-wrap"><table id="tokTable"></table></div>
+  <h3>Comment le thème est appliqué</h3>
+  <div class="stepper" id="themeStepper"></div>
+  <h3>Classes globales à connaître</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Famille</th><th>Classes</th></tr>
+    <tr><td>Mise en page</td><td><code>.page</code>, <code>.page-head</code>, <code>.grid .grid-2/3/4</code>, <code>.row</code>, <code>.row-between</code>, <code>.stack</code>, <code>.grow</code></td></tr>
+    <tr><td>Boutons</td><td><code>.btn</code> + <code>.btn-primary / -secondary / -ghost / -soft / -danger / -danger-soft</code>, tailles <code>.btn-sm / -lg</code>, <code>.btn-icon</code>, <code>.link</code></td></tr>
+    <tr><td>Cartes</td><td><code>.card</code>, <code>.card-head</code>, <code>.card-body</code>, <code>.card-foot</code>, <code>.kpi</code></td></tr>
+    <tr><td>Formulaires</td><td><code>.field</code>, <code>.input</code>, <code>.select</code>, <code>.textarea</code>, <code>.form-grid</code>, <code>.checkbox</code>, <code>.radio</code>, <code>.switch</code>, <code>.segmented</code>, <code>.search</code>, <code>.input-icon</code></td></tr>
+    <tr><td>Données</td><td><code>.table</code>, <code>.table-wrap</code>, <code>.pill</code> (+ couleurs), <code>.tag</code>, <code>.counter</code>, <code>.progress</code>, <code>.pager</code></td></tr>
+    <tr><td>États</td><td><code>.empty</code>, <code>.notice.ok/warn/info/error</code>, <code>.skeleton</code>, <code>.spin</code></td></tr>
+    <tr><td>Teintes d'icône</td><td><code>.tone-green / lime / blue / violet / gold / red / teal / grey</code></td></tr>
+  </table></div>
+  <div class="callout warn"><b>Règle pour tout nouveau style</b>N'utiliser que des variables (<code>var(--surface)</code>, <code>var(--text-2)</code>, <code>var(--surface-selected)</code>…). Une couleur codée en dur reste claire en mode sombre. Exceptions volontaires : QR codes (fond blanc pour rester lisibles), disque blanc de l'emblème, dégradés verts de marque, maquettes de téléphone.</div>
+</section>
+
+<!-- ===================================================== COQUILLE -->
+<section id="coquille">
+  <div class="kicker">Chapitre 16</div>
+  <h2>La coquille (layout)</h2>
+  <div class="grid g2">
+    <div class="card"><h4 style="margin-top:0">MainLayout</h4><p>Barre latérale fixe + colonne de contenu (barre du haut + <code>&lt;router-outlet&gt;</code>). Charge au démarrage le profil, la photo et les compteurs. Ferme le panneau de notifications à chaque navigation. Pose la classe <code>menu-reduit</code> qui change <code>--sidebar-w</code> (228 px → 72 px).</p></div>
+    <div class="card"><h4 style="margin-top:0">Sidebar</h4><p>Menu construit depuis le tableau <code>MENU</code> : liens directs et <b>groupes dépliables</b> (Communication — dont Souvenirs avec le badge « à valider » —, Documents &amp; demandes, Données, Administration). Filtré par <code>peutVoir</code> ; un groupe réduit à un lien devient un lien simple. Le groupe de la page courante s'ouvre seul. <b>Mode réduit</b> (icônes seules) mémorisé dans <code>localStorage['snj.menu-reduit']</code>, avec info-bulles et sous-menus au survol.</p></div>
+    <div class="card"><h4 style="margin-top:0">Topbar</h4><p>Recherche globale (<code>Ctrl K</code>), menu <b>Apparence</b> (Clair / Sombre / Système), messagerie et cloche avec pastille non lue, menu du profil.</p></div>
+    <div class="card"><h4 style="margin-top:0">ShellService</h4><p>État partagé de la coquille : badges du menu (membres, mobilisations en cours, demandes en attente, doublons d'import), alertes et messages non lus, panneaux ouverts, photo, menu réduit. <code>rafraichir()</code> fait les appels en parallèle avec <code>forkJoin</code>, chacun protégé par <code>catchError</code>.</p></div>
+    <div class="card"><h4 style="margin-top:0">AuthLayout</h4><p>Mise en page des écrans publics : panneau vert de marque à gauche, formulaire à droite.</p></div>
+    <div class="card"><h4 style="margin-top:0">App (racine)</h4><p><code>&lt;router-outlet /&gt;&lt;app-toasts /&gt;&lt;app-selecteurs /&gt;</code> : les toasts, la boîte de confirmation et les popups de sélection sont montés une seule fois pour toute l'application. Injecte <code>ThemeService</code> pour appliquer le thème partout.</p></div>
+  </div>
+</section>
+
+<!-- ===================================================== PARTAGES -->
+<section id="partages">
+  <div class="kicker">Chapitre 17</div>
+  <h2>Composants, services et utilitaires partagés</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Élément</th><th>Sélecteur / usage</th><th>Rôle</th></tr>
+    <tr><td>Icon</td><td><code>&lt;app-icon name="users" [size]="17" /&gt;</code></td><td>Icônes SVG Lucide (trait 2 px) stockées dans un dictionnaire ; ajout d'une icône = une entrée dans <code>ICONES</code>.</td></tr>
+    <tr><td>Avatar</td><td><code>&lt;app-avatar [nom]="…" [photo]="…" /&gt;</code></td><td>Photo ou initiales sur une teinte stable dérivée du nom.</td></tr>
+    <tr><td>Modal</td><td><code>&lt;app-modal titre="…" (fermer)="…"&gt;… &lt;div pied&gt;…&lt;/div&gt;&lt;/app-modal&gt;</code></td><td>Boîte de dialogue (Échap pour fermer) ; projection de contenu avec <code>&lt;ng-content select="[pied]"&gt;</code>.</td></tr>
+    <tr><td>Graphiques</td><td><code>app-bar-chart</code>, <code>app-donut</code>, <code>app-ring</code>, <code>app-area-chart</code></td><td>Graphiques SVG faits main (pas de bibliothèque), couleurs par variables CSS.</td></tr>
+    <tr><td>Pagination</td><td><code>&lt;app-pagination [page] [taille] [total] (aller)="…" /&gt;</code></td><td>« Affichage de 1 à 10 sur 84 » + numéros de page.</td></tr>
+    <tr><td>Pill</td><td><code>&lt;app-pill [dico]="STATUT" [valeur]="a.statut" /&gt;</code></td><td>Pastille de statut colorée à partir d'un dictionnaire de libellés (<code>shared/utils/libelles.ts</code>).</td></tr>
+    <tr><td>QrCode</td><td><code>&lt;app-qr-code [contenu]="q.contenuQr" /&gt;</code></td><td>QR code SVG (bibliothèque <code>qrcode</code>).</td></tr>
+    <tr><td>Robustesse</td><td><code>&lt;app-robustesse [mdp]="…" /&gt;</code></td><td>Jauge de robustesse d'un mot de passe.</td></tr>
+    <tr><td>Selecteurs</td><td><code>&lt;app-selecteurs /&gt;</code> (une fois, dans App)</td><td>Remplace les popups natives des listes et champs date/heure (chapitre suivant).</td></tr>
+    <tr><td>Toasts + ToastService</td><td><code>toast.success('…')</code>, <code>toast.error('…')</code></td><td>Messages éphémères en bas à droite.</td></tr>
+    <tr><td>ConfirmationService</td><td><code>await confirmation.demander(titre, message, action, danger)</code></td><td>Boîte « Êtes-vous sûr ? » qui renvoie une <code>Promise&lt;boolean&gt;</code>.</td></tr>
+    <tr><td>Pipes (<code>format.pipes.ts</code>)</td><td><code>nombre</code>, <code>dateCourte</code>, <code>dateMoyenne</code>, <code>dateHeure</code>, <code>heure</code>, <code>relatif</code>, <code>taille</code>, <code>telMasque</code></td><td>Formats français (s'appuient sur <code>shared/utils/format.ts</code>).</td></tr>
+    <tr><td>Utilitaires</td><td><code>libelles.ts</code>, <code>categories.ts</code>, <code>texte-enrichi.ts</code></td><td>Libellés et couleurs des énumérations, catégories de compétences, mise en forme du texte des actualités.</td></tr>
+  </table></div>
+</section>
+
+<!-- ===================================================== SELECTEURS -->
+<section id="selecteurs">
+  <div class="kicker">Chapitre 18</div>
+  <h2>Listes déroulantes &amp; calendriers stylés</h2>
+  <p class="sub">Les popups natives de <code>&lt;select&gt;</code> et <code>&lt;input type="date|month|datetime-local|time"&gt;</code> sont dessinées par le système : le CSS ne les atteint pas. <code>Selecteurs</code> les remplace pour toute l'application, sans toucher aux templates.</p>
+  <div class="stepper" id="selStepper"></div>
+  <div class="callout info"><b>À savoir pour écrire un écran</b>Rien à faire : un <code>&lt;select class="select" [(ngModel)]="…"&gt;</code> ou un <code>&lt;input type="date" class="input"&gt;</code> classique reçoit automatiquement le panneau stylé, le clavier (flèches, Entrée, Échap, saisie de lettres) et respecte <code>min</code>, <code>max</code>, <code>required</code>, <code>disabled</code>. Les listes multiples (<code>multiple</code>, <code>size&gt;1</code>) et les <code>&lt;datalist&gt;</code> restent natives.</div>
+</section>
+
+<!-- ===================================================== MODULES -->
+<section id="modules">
+  <div class="kicker">Chapitre 19</div>
+  <h2>Écrans &amp; modules</h2>
+  <p class="sub">Chaque écran, son composant, les services qu'il utilise et les endpoints du backend. Filtrez la liste.</p>
+  <input type="text" id="modSearch" placeholder="Filtrer (ex. présence, import, qr…)" style="max-width:420px;margin-bottom:12px">
+  <div class="table-wrap"><table id="modTable"></table></div>
+
+  <h3 id="souvenirs">Zoom : Souvenirs de formation</h3>
+  <p>Écran <code>/souvenirs</code> (<code>pages/souvenirs/</code>) : photos, vidéos et sons de la formation, par cohorte. Entrée « Souvenirs » du groupe Communication (module <code>SOUVENIRS</code>), avec un badge du nombre d'envois de membres <b>à valider</b> (<code>ShellService</code> → <code>/souvenirs/statistiques</code>).</p>
+  <ul class="clean">
+    <li><b>Galerie</b> : compteurs (publiés, à valider, photos, vidéos, sons), onglets Publiés / À valider / Rejetés (masqués pour la direction, qui ne voit que les publiés), filtre par type, cohorte et recherche, cartes avec la première photo en couverture, pagination par 12.</li>
+    <li><b>Visionneuse</b> (<code>app-modal</code> 1020 px) : <code>&lt;img&gt;</code>, <code>&lt;video controls&gt;</code> ou <code>&lt;audio controls&gt;</code>, flèches et miniatures, ajout / retrait de fichiers, et selon le statut : <b>Publier</b>, <b>Rejeter</b> (motif obligatoire, montré au membre), Modifier, Supprimer.</li>
+    <li><b>Ajout</b> : titre, légende, cohorte (limitée au périmètre : sa cohorte pour un responsable de cohorte, les cohortes de sa région pour un responsable régional), date de prise de vue, lieu, « visible par tous les membres », zone de dépôt multi-fichiers avec aperçus ; contrôle côté navigateur (10 fichiers, 100 Mo, formats) puis envoi <code>multipart</code> avec <b>barre de progression</b> (<code>uploadSuivi</code>).</li>
+    <li><b>Fichiers protégés</b> : chaque média est récupéré avec le jeton puis affiché via une URL <code>blob:</code> (<code>SouvenirService.fichier</code> : <code>responseType: 'blob'</code> puis <code>map(urlLocale)</code>), mise en cache par identifiant et libérée (<code>URL.revokeObjectURL</code>) à la sortie de l'écran.</li>
+    <li><b>Envois multiples</b> : <code>formulaire()</code> (<code>shared/utils/http.ts</code>) accepte une liste de fichiers sous un même nom de champ (<code>ChampsFormulaire</code>).</li>
+    <li>Une alerte « Nouveau souvenir à valider » de la cloche ouvre directement le souvenir (<code>/souvenirs?id=…</code>).</li>
+  </ul>
+
+  <h3 id="us14">Zoom : Activités &amp; présences (US14)</h3>
+  <p><i>« En tant que responsable, je veux enregistrer la présence des membres lors d'une activité afin de conserver une trace de leur participation. »</i> — écran <code>/activites</code> (<code>pages/activites/</code>).</p>
+  <div class="table-wrap"><table>
+    <tr><th>Critère d'acceptation</th><th>Dans l'interface</th></tr>
+    <tr><td>Un QR code peut être associé à l'activité</td><td>« Nouvelle activité » : interrupteur <b>Générer un QR code de présence</b>. Le QR (<code>app-qr-code</code>) et son code à 6 caractères s'affichent dans la fiche, rafraîchis toutes les 15 s ; bouton <b>Plein écran</b> → <code>/activites/:id/projection</code> (QR géant renouvelé toutes les 30 s, compteur, dernières arrivées en direct) à afficher sur un écran à l'entrée. « Terminer » désactive le QR.</td></tr>
+    <tr><td>Le membre peut être identifié</td><td>Le membre scanne le QR dans l'application mobile (son compte l'identifie). Sans téléphone : <b>Saisir une présence</b> → recherche par nom, prénom ou identifiant SNJ (<code>MembreService.rechercher</code>, avec <code>debounceTime</code>), heure d'arrivée et motif.</td></tr>
+    <tr><td>La présence est enregistrée</td><td><code>POST /activites/{id}/presences</code> ; les compteurs (présents / inscrits, taux, arrivées de la dernière heure, saisies manuelles) se mettent à jour. Un doublon renvoie le message du backend (409).</td></tr>
+    <tr><td>Un responsable peut consulter les présences</td><td>Tableau des derniers pointages dans la fiche, et bouton <b>Voir toutes les présences (N)</b> : registre complet paginé (membre, identifiant, date et heure, mode QR / code / manuel, motif, saisi par), retrait d'un pointage erroné, <b>export Excel</b>.</td></tr>
+  </table></div>
+  <div class="callout"><b>Gestion de l'activité</b>Le crayon ouvre « Modifier l'activité » (même formulaire que la création, description comprise) ; la corbeille n'apparaît que s'il n'y a encore aucune présence (sinon le backend refuse : on termine l'activité). Les actions sont réservées à <code>peutGerer()</code> : administrateurs, agents SNJ, responsables régionaux et de cohorte.</div>
+</section>
+
+<!-- ===================================================== LANCER -->
+<section id="lancer">
+  <div class="kicker">Chapitre 20</div>
+  <h2>Lancer, tester, construire</h2>
+  <div class="code"><span class="lang">bash</span><button class="copy">Copier</button><pre><span class="c"># Prérequis : Node.js 20+, backend démarré sur http://localhost:8080</span>
+npm install                 <span class="c"># installe node_modules d'après package-lock.json</span>
+npm start                   <span class="c"># ng serve → http://localhost:4200, rechargement à chaud</span>
+
+npm run build               <span class="c"># build de production → dist/snj_pro_web/{browser,server}</span>
+npm run serve:ssr:snj_pro_web   <span class="c"># sert le build avec Express → http://localhost:4000</span>
+
+npm test                    <span class="c"># tests Vitest (ng test) ; --watch=false pour un passage unique</span>
+npm run modeles             <span class="c"># régénère api.models.ts (voir chapitre 14, variable SNJ_BACK)</span>
+npx prettier --write src    <span class="c"># formate le code</span></pre></div>
+  <h3>Comptes et données de test</h3>
+  <p>Le backend fournit un jeu de données de démonstration (<code>snjpro_back/docs/donnees-test/</code>, voir son guide) : 182 membres, 6 cohortes, mobilisations, activités avec présences (dont une <b>en cours aujourd'hui</b> avec QR actif), opportunités, demandes, messagerie… Comptes (mot de passe <code>Test@2024</code>) pour vérifier chaque rôle :</p>
+  <div class="table-wrap"><table>
+    <tr><th>Identifiant</th><th>Rôle</th><th>Périmètre</th></tr>
+    <tr><td><code>a.diallo</code></td><td>Agent SNJ</td><td>National</td></tr>
+    <tr><td><code>d.traore</code></td><td>Direction</td><td>Tableau de bord, statistiques, actualités</td></tr>
+    <tr><td><code>r.keita</code> · <code>s.sangare</code></td><td>Responsables régionaux</td><td>Koulikoro · Ségou</td></tr>
+    <tr><td><code>c.sangare</code> · <code>f.toure</code></td><td>Responsables de cohorte</td><td>Cohorte 2025 — Kati · Cohorte 2024 — Ségou</td></tr>
+    <tr><td><code>p.orange</code></td><td>Partenaire</td><td>Opportunités</td></tr>
+    <tr><td><code>membre1</code> · <code>membre2</code> · <code>membre3</code></td><td>Membres</td><td>Application mobile (refusés sur le web)</td></tr>
+  </table></div>
+  <h3>Écrire un test de composant</h3>
+  <div class="code"><span class="lang">ts</span><button class="copy">Copier</button><pre>describe(<span class="s">'App'</span>, () =&gt; {
+  beforeEach(<span class="k">async</span> () =&gt; {
+    <span class="k">await</span> TestBed.configureTestingModule({ imports: [App], providers: [provideRouter([])] }).compileComponents();
+  });
+  it(<span class="s">'crée le composant racine'</span>, () =&gt; {
+    expect(TestBed.createComponent(App).componentInstance).toBeTruthy();
+  });
+});</pre></div>
+  <div class="callout info"><b>Se connecter</b>Compte créé au premier démarrage du backend : <code>admin</code> / <code>Admin@2024</code> (à changer dans Paramètres › Sécurité). Pour changer l'adresse de l'API (serveur distant), modifier <code>apiUrl</code> dans <code>src/environments/environments.ts</code> (et <code>environments.development.ts</code>) et autoriser l'origine dans la configuration CORS du backend.</div>
+</section>
+
+<!-- ===================================================== REFAIRE -->
+<section id="refaire">
+  <div class="kicker">Chapitre 21</div>
+  <h2>Refaire le projet de zéro — check-list</h2>
+  <p class="sub">Cochez au fur et à mesure (mémorisé dans votre navigateur). <span id="chkCount"></span></p>
+  <div class="bar"><div id="chkBar"></div></div>
+  <div id="checklist"></div>
+</section>
+
+<!-- ===================================================== ATTENTION -->
+<section id="attention">
+  <div class="kicker">Chapitre 22</div>
+  <h2>Points d'attention &amp; améliorations</h2>
+  <div class="grid g2">
+    <div class="callout danger"><b>Adresse de l'API en dur</b><code>API_URL</code> vaut <code>http://localhost:8080/api</code>. → passer par une variable de build (<code>fileReplacements</code> / <code>define</code>) ou un fichier de configuration chargé au démarrage pour la production.</div>
+    <div class="callout warn"><b>Jeton dans le stockage du navigateur</b>Lisible par JavaScript : la moindre faille XSS l'exposerait. → cookie <code>HttpOnly</code> + <code>SameSite</code> côté backend à terme.</div>
+    <div class="callout warn"><b>Pas de « refresh token »</b>À l'expiration (24 h), l'utilisateur est renvoyé à la connexion au premier 401.</div>
+    <div class="callout warn"><b>Tests</b>Un seul test (création du composant racine). → tester au moins les services (avec <code>HttpTestingController</code>), les gardes et les écrans critiques (connexion, création de membre, présences).</div>
+    <div class="callout info"><b>Responsive</b>Les écrans suivent les maquettes 1280 px ; quelques règles adaptent les grilles sous 1100 et 720 px, mais la barre latérale n'a pas encore de mode « tiroir » mobile.</div>
+    <div class="callout info"><b>Accessibilité</b>Libellés <code>aria-label</code> sur les boutons-icônes, navigation clavier dans les popups de sélection ; à compléter par un audit (contrastes en mode sombre, ordre de tabulation des modales).</div>
+    <div class="callout info"><b>SSR inutilisé</b>Le serveur Express n'apporte rien en <code>RenderMode.Client</code> : l'application pourrait être servie comme simples fichiers statiques (Nginx).</div>
+    <div class="callout info"><b>Internationalisation</b>Textes en français écrits dans les templates. Pour une autre langue : <code>@angular/localize</code> (i18n).</div>
+  </div>
+</section>
+
+<!-- ===================================================== JOURNAL -->
+<section id="journal">
+  <div class="kicker">Annexe</div>
+  <h2>Journal des mises à jour</h2>
+  <p class="sub">Ce guide est mis à jour à chaque modification du frontend (et le guide du backend à chaque modification du backend).</p>
+  <div class="table-wrap"><table>
+    <tr><th>Date</th><th>Modification</th><th>Fichiers principaux</th></tr>
+    <tr><td>07/10/2026</td><td>Restructuration de l'architecture : composants découpés en <code>nom.ts</code> / <code>nom.html</code> / <code>nom.css</code> (classes sans suffixe <code>Component</code>), un fichier par service avec <code>HttpClient</code> + <code>environments.apiUrl</code> (suppression d'<code>ApiService</code>, <code>api.config.ts</code> et <code>gestion.services.ts</code>), routes centralisées dans <code>app.routes.ts</code> (suppression des <code>*.routes.ts</code>), <code>roleGuard</code> piloté par <code>data.roles</code>, intercepteurs <code>session</code> / <code>erreur</code>, interfaces déplacées dans <code>models/*.model.ts</code>.</td><td><code>src/environments/*</code>, <code>core/*</code>, <code>app.routes.ts</code>, <code>shared/utils/http.ts</code>, <code>models/*</code>, tous les composants</td></tr>
+    <tr><td>03/10/2026</td><td>Correction : Paramètres › Préférences restait vide (le backend renvoie une liste, l'écran attendait un objet <code>{ preferences }</code>) ; le personnel ne voit plus que ses 6 événements.</td><td><code>gestion.services.ts</code>, <code>pages/parametres/parametres.component.ts</code></td></tr>
+    <tr><td>03/10/2026</td><td>Écran Souvenirs de formation (galerie, visionneuse photo / vidéo / son, modération, ajout multi-fichiers avec progression), entrée de menu avec badge, alertes <code>SOUVENIR</code>, icônes <code>mic</code> et <code>video</code>, envoi de plusieurs fichiers dans <code>ApiService</code>.</td><td><code>pages/souvenirs/*</code>, <code>gestion.services.ts</code>, <code>api.service.ts</code>, <code>sidebar</code>, <code>shell.service.ts</code>, <code>notifications-panel</code>, <code>libelles.ts</code></td></tr>
+    <tr><td>03/10/2026</td><td>Ajout des comptes et données de test au chapitre « Lancer, tester, construire ».</td><td><code>docs/guide-complet-frontend.html</code></td></tr>
+    <tr><td>03/10/2026</td><td>Création du guide. US14 (présences) : registre complet paginé des présences, modification et suppression d'une activité, champ description. Générateur de modèles : chemin du backend configurable (<code>SNJ_BACK</code>).</td><td><code>pages/activites/*</code>, <code>scripts/generer-modeles.js</code>, <code>models/api.models.ts</code></td></tr>
+    <tr><td>03/10/2026</td><td>Thèmes clair / sombre / système (<code>ThemeService</code>, jetons CSS, script anti-flash), menu Apparence dans la barre du haut.</td><td><code>styles.css</code>, <code>core/services/theme.service.ts</code>, <code>index.html</code>, ~40 composants</td></tr>
+    <tr><td>03/10/2026</td><td>Barre latérale regroupée (16 → 10 entrées) et repliable en mode icônes ; logo « SNJPro » pour fond sombre.</td><td><code>layout/sidebar</code>, <code>layout/shell.service.ts</code>, <code>layout/logo</code>, <code>public/logo_nom_app_blanc.png</code></td></tr>
+    <tr><td>02/10/2026</td><td>Popups natives des listes déroulantes et champs date/heure remplacées par des panneaux stylés.</td><td><code>shared/components/selecteurs</code>, <code>styles.css</code></td></tr>
+  </table></div>
+</section>
+
+<!-- ===================================================== QUIZ -->
+<section id="quiz">
+  <div class="kicker">Chapitre 23</div>
+  <h2>Quiz de révision</h2>
+  <p class="sub">Vérifiez que tout est clair. <span id="quizScore"></span></p>
+  <div id="quizBox"></div>
+  <footer>Guide écrit à partir du code source de <code>snj_pro_frontend</code> (Angular 21.2, TypeScript 5.9). Il complète le guide du backend : <code>snjpro_back/docs/guide-complet-snjpro.html</code>.</footer>
+</section>
+
+</main>
+</div>
+<script>
+/* ===================================================================== THEME */
+(function(){
+  const root=document.documentElement;
+  let saved=null; try{saved=localStorage.getItem('snj-theme')}catch(e){}
+  if(saved) root.setAttribute('data-theme',saved);
+  document.getElementById('themeBtn').onclick=()=>{
+    const cur=root.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    const next=cur==='dark'?'light':'dark';
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('snj-theme',next)}catch(e){}
+  };
+})();
+
+/* ===================================================================== NAV : scrollspy, progression, filtre */
+(function(){
+  const links=[...document.querySelectorAll('#toc a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  const prog=document.getElementById('progress');
+  function onScroll(){
+    const y=scrollY+120; let idx=0;
+    secs.forEach((s,i)=>{ if(s && s.offsetTop<=y) idx=i; });
+    links.forEach((a,i)=>a.classList.toggle('active',i===idx));
+    const h=document.documentElement.scrollHeight-innerHeight;
+    prog.style.width=(h>0?scrollY/h*100:0)+'%';
+  }
+  addEventListener('scroll',onScroll,{passive:true}); onScroll();
+  links.forEach(a=>a.addEventListener('click',()=>document.querySelector('aside').classList.remove('open')));
+  document.getElementById('navSearch').addEventListener('input',e=>{
+    const q=e.target.value.trim().toLowerCase();
+    links.forEach((a,i)=>{
+      const txt=(a.textContent+' '+(secs[i]?secs[i].textContent:'')).toLowerCase();
+      a.parentElement.classList.toggle('hidden', !!q && !txt.includes(q));
+    });
+  });
+})();
+
+/* ===================================================================== ONGLETS + COPIER */
+document.querySelectorAll('.tabs').forEach(tabs=>{
+  tabs.addEventListener('click',e=>{
+    const b=e.target.closest('.tab'); if(!b) return;
+    tabs.querySelectorAll('.tab').forEach(t=>{t.classList.remove('on');document.getElementById(t.dataset.pane).classList.remove('on')});
+    b.classList.add('on'); document.getElementById(b.dataset.pane).classList.add('on');
+  });
+});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.copy'); if(!b) return;
+  const txt=b.parentElement.querySelector('pre').innerText;
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>{b.textContent='Copié ✓';setTimeout(()=>b.textContent='Copier',1400)}).catch(()=>{b.textContent='—'});
+});
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ===================================================================== ARBORESCENCE */
+const TREE={n:'snj_pro_frontend',t:'dir',d:{role:"Racine du projet Angular créé avec l'Angular CLI (ng new --ssr). On y trouve la configuration du build (angular.json, tsconfig), les dépendances (package.json), le code (src/), les fichiers statiques (public/) et les scripts utilitaires.",why:"C'est la structure standard d'un projet Angular : tout développeur Angular s'y retrouve immédiatement.",files:['angular.json','package.json','package-lock.json','tsconfig*.json','README.md','.editorconfig','.prettierrc','.gitignore']},c:[
+ {n:'.vscode',t:'dir',d:{role:"Réglages VS Code partagés : extensions recommandées (Angular Language Service), tâches et configurations de débogage.",why:"Même confort pour tous les développeurs qui ouvrent le projet."}},
+ {n:'docs',t:'dir',d:{role:"Documentation : ce guide (guide-complet-frontend.html).",why:"Comprendre le projet sans lire tout le code ; à mettre à jour à chaque modification."}},
+ {n:'public',t:'dir',d:{role:"Fichiers statiques copiés tels quels à la racine du site (angular.json › assets).",why:"Images référencées par une URL fixe (src=\"logo_snj.png\"), sans passer par la compilation.",files:['logo_snj.png (emblème)','logo_nom_app.png (nom, fond clair)','logo_nom_app_blanc.png (nom, fond sombre)','favicon.ico']}},
+ {n:'scripts',t:'dir',d:{role:"Scripts Node exécutés à la main.",files:['generer-modeles.js : génère src/app/models/api.models.ts depuis les DTO Java (npm run modeles)']}},
+ {n:'src',t:'dir',open:true,d:{role:"Le code source de l'application.",why:"Seul ce dossier est compilé (tsconfig.app.json › include: src/**/*.ts)."},c:[
+  {n:'index.html',t:'file',d:{role:"L'unique page HTML de la SPA : <app-root> y est remplacé par l'application. Charge la police Inter et applique le thème avant le premier rendu (script en tête).",why:"Une SPA n'a qu'une page ; le routeur change le contenu sans recharger."}},
+  {n:'main.ts',t:'file',d:{role:"Point d'entrée navigateur : bootstrapApplication(App, appConfig).",ex:"bootstrapApplication(App, appConfig).catch(err => console.error(err));"}},
+  {n:'main.server.ts',t:'file',d:{role:"Point d'entrée du rendu serveur (SSR) : même App, configuration fusionnée avec app.config.server.ts."}},
+  {n:'server.ts',t:'file',d:{role:"Serveur Express de production : sert les fichiers de dist/…/browser et délègue le reste à AngularNodeAppEngine. Port 4000 (variable PORT).",why:"Généré par --ssr. En RenderMode.Client il ne fait que servir la coquille."}},
+  {n:'styles.css',t:'file',d:{role:"Feuille de style globale : jetons de couleur (:root), thème sombre (:root[data-theme=dark]), typographie, boutons, cartes, formulaires, tableaux, pastilles, utilitaires.",why:"Le design system des maquettes, partagé par tous les écrans."}},
+  {n:'environments',t:'dir',cnt:2,d:{role:"Configuration par environnement : export const environments = { production, apiUrl }.",why:"angular.json remplace environments.ts par environments.development.ts en configuration development (ng serve).",files:['environments.ts','environments.development.ts']}},
+  {n:'app',t:'dir',open:true,d:{role:"L'application : configuration, routes, composant racine et les cinq familles de dossiers.",files:['app.ts','app.html','app.css','app.config.ts','app.config.server.ts','app.routes.ts','app.routes.server.ts','app.spec.ts']},c:[
+   {n:'app.ts',t:'file',d:{role:"Composant racine <app-root> (template app.html : <router-outlet/>, <app-toasts/>, <app-selecteurs/>). Injecte ThemeService.",ex:"templateUrl: './app.html',\nstyleUrl: './app.css'"}},
+   {n:'app.config.ts',t:'file',d:{role:"Fournisseurs globaux : routeur, HttpClient + intercepteur JWT, locale fr-FR, gestion des erreurs.",why:"Remplace l'ancien AppModule des projets à NgModule."}},
+   {n:'app.routes.ts',t:'file',d:{role:"Table de TOUTES les routes, par sections commentées : publiques / isolées / espace de gestion (membres, cohortes, mobilisations…), gardes, data.roles, chargement à la demande."}},
+   {n:'app.routes.server.ts',t:'file',d:{role:"Mode de rendu par route côté serveur : RenderMode.Client pour toutes."}},
+   {n:'core',t:'dir',d:{role:"Socle technique sans interface : gardes, intercepteurs, services.",why:"Isoler « comment on parle au backend » de « comment on affiche »."},c:[
+    {n:'guards',t:'dir',cnt:2,d:{role:"Fonctions CanActivateFn exécutées avant d'entrer sur une route.",files:['auth.guard.ts : authGuard, invitesGuard','role.guard.ts : roleGuard (data.roles)']}},
+    {n:'interceptors',t:'dir',cnt:2,d:{role:"HttpInterceptorFn : ajoute le jeton, gère le 401.",files:['session.interceptor.ts : sessionInterceptor','erreur.interceptor.ts : erreurInterceptor']}},
+    {n:'services',t:'dir',cnt:25,d:{role:"Services injectables (providedIn: 'root'), un fichier par service (nom.service.ts).",type:"@Injectable + inject(HttpClient) + apiUrl = `${environments.apiUrl}/…` ; méthodes qui renvoient des Observable typés",files:['AuthService','MembreService','CohorteService','ReferentielService','StatistiqueService','RechercheService','CompetenceService','MobilisationService','NotificationService','ActualiteService','OpportuniteService','DocumentService','DemandeService','ActiviteService','ImportService','HistoriqueService','UtilisateurService','CompteService','AccesPublicService','MessagerieService','SouvenirService','ShellService','ConfirmationService','ThemeService','ToastService']}}
+   ]},
+   {n:'layout',t:'dir',d:{role:"La coquille commune aux écrans.",files:['main-layout','auth-layout','sidebar','topbar','recherche (Ctrl K)','notifications-panel','logo']}},
+   {n:'models',t:'dir',cnt:8,d:{role:"api.models.ts : interfaces et types générés depuis les DTO Java ; *.model.ts écrits à la main (cohorte, membre, auth, toast, confirmation, theme, graphique).",why:"Un seul contrat de données entre front et back ; le compilateur signale tout écart.",type:"export interface …, export namespace ActiviteDTOs { … }, types union pour les enums"}},
+   {n:'pages',t:'dir',d:{role:"Un dossier par module fonctionnel ; les routes sont toutes dans app.routes.ts.",type:"Composants autonomes : nom.ts + nom.html + nom.css (classe Nom, sans suffixe Component)",files:['tableau-de-bord','membres','cohortes','competences','mobilisations','activites','souvenirs','notifications','actualites','opportunites','documents','demandes','import','statistiques','historique','utilisateurs','parametres','messagerie','auth','acces-refuse']},c:[
+    {n:'activites',t:'dir',d:{role:"US14 — activités et présences : liste, fiche avec QR, saisie manuelle, registre complet, création/modification, et projection/ plein écran.",files:['activites.ts/.html/.css','projection/projection.ts/.html/.css']}},
+    {n:'membres',t:'dir',d:{role:"Liste filtrable, création en 6 étapes, profil, modification, export, ajout au parcours.",files:['liste','nouveau','profil','modifier','export-membres','ajout-parcours']}},
+    {n:'auth',t:'dir',d:{role:"Écrans publics : connexion, code SMS, mot de passe oublié, nouveau mot de passe / invitation.",files:['connexion','verification','mot-de-passe-oublie','nouveau-mot-de-passe','auth.css']}}
+   ]},
+   {n:'shared',t:'dir',d:{role:"Briques réutilisables, sans logique métier propre.",files:['components/ (icon, avatar, modal, charts/{bar-chart,donut,ring,area-chart}, pagination, pill, qr-code, robustesse, selecteurs, toasts)','pipes/format.pipes.ts','utils/ (format, libelles, categories, texte-enrichi, http)']}}
+  ]}
+ ]},
+ {n:'angular.json',t:'file',d:{role:"Configuration de l'Angular CLI : build, serve, test (chapitre 5)."}},
+ {n:'package.json',t:'file',d:{role:"Dépendances et scripts npm (chapitre 4)."}},
+ {n:'tsconfig.json',t:'file',d:{role:"Options TypeScript communes + options du compilateur Angular ; tsconfig.app.json et tsconfig.spec.json en héritent."}},
+ {n:'dist',t:'dir',d:{role:"Sortie du build (browser/ et server/). Généré, ignoré par Git."}},
+ {n:'node_modules',t:'dir',d:{role:"Paquets installés par npm install. Généré, ignoré par Git."}}
+]};
+(function(){
+  const tree=document.getElementById('tree'), det=document.getElementById('treeDetail');
+  let sel=null;
+  function show(node,el){
+    if(sel) sel.classList.remove('sel'); sel=el; el.classList.add('sel');
+    const d=node.d||{};
+    det.innerHTML=`<span class="tag ${node.t==='dir'?'o':'b'}">${node.t==='dir'?'Dossier':'Fichier'}</span>${node.cnt?`<span class="tag">${node.cnt} fichier(s)</span>`:''}
+      <h3>${esc(node.n)}</h3><p>${esc(d.role||'')}</p>
+      ${d.why?`<div class="why"><b>Pourquoi ?</b> ${esc(d.why)}</div>`:''}
+      ${d.type?`<p><b>Type de contenu :</b> ${esc(d.type)}</p>`:''}
+      ${d.files?`<b>Contenu :</b><div class="files">${d.files.map(f=>`<span class="tag">${esc(f)}</span>`).join('')}</div>`:''}
+      ${d.ex?`<div class="code" style="margin-top:12px"><pre>${esc(d.ex)}</pre></div>`:''}`;
+  }
+  function build(node,parent,depth){
+    const li=document.createElement('li');
+    const n=node.n;
+    const ic=node.t==='dir'?'📁':n.endsWith('.ts')?'🅰️':n.endsWith('.json')?'🧾':n.endsWith('.html')?'🌐':n.endsWith('.css')?'🎨':'📄';
+    const span=document.createElement('span'); span.className='node';
+    span.innerHTML=`<span class="ic">${node.c?(node.open||depth===0?'▾':'▸'):''}</span>${ic} ${esc(n)}${node.cnt?` <span class="cnt">(${node.cnt})</span>`:''}`;
+    li.appendChild(span);
+    if(node.c){
+      const ul=document.createElement('ul'); node.c.forEach(c=>build(c,ul,depth+1)); li.appendChild(ul);
+      if(!(node.open||depth===0)) li.classList.add('closed');
+    }
+    span.onclick=()=>{
+      if(node.c){ li.classList.toggle('closed'); span.querySelector('.ic').textContent=li.classList.contains('closed')?'▸':'▾'; }
+      show(node,span);
+    };
+    parent.appendChild(li);
+    return span;
+  }
+  const ul=document.createElement('ul'); tree.appendChild(ul);
+  show(TREE,build(TREE,ul,0));
+})();
+
+/* ===================================================================== EXPLICATION LIGNE À LIGNE */
+function lineExplainer(linesId,detailId,src,blocks){
+  const box=document.getElementById(linesId), det=document.getElementById(detailId);
+  const lines=src.split('\n'); const map={};
+  blocks.forEach((b,i)=>{ for(let l=b.from;l<=b.to;l++) map[l]=i; });
+  box.innerHTML=lines.map((l,i)=>`<span class="ln ${map[i+1]!==undefined?'blk':'dim'}" data-l="${i+1}">${esc(l)||' '}</span>`).join('');
+  box.addEventListener('click',e=>{
+    const ln=e.target.closest('.ln'); if(!ln) return; const bi=map[+ln.dataset.l]; if(bi===undefined) return;
+    const b=blocks[bi];
+    box.querySelectorAll('.ln').forEach(x=>x.classList.toggle('on',map[+x.dataset.l]===bi));
+    det.innerHTML=`<span class="tag o">${esc(b.tag||'')}</span><h3 style="margin-top:6px">${esc(b.title)}</h3>${b.html}`;
+  });
+  box.querySelector('.ln.blk')?.click();
+}
+const PKG=`{
+  "name": "snj-pro-web",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "modeles": "node scripts/generer-modeles.js",
+    "serve:ssr:snj_pro_web": "node dist/snj_pro_web/server/server.mjs"
+  },
+  "private": true,
+  "packageManager": "npm@11.18.0",
+  "dependencies": {
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/platform-server": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@angular/ssr": "^21.2.19",
+    "express": "^5.1.0",
+    "qrcode": "^1.5.4",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.19",
+    "@angular/cli": "^21.2.19",
+    "@angular/compiler-cli": "^21.2.0",
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.17.19",
+    "@types/qrcode": "^1.5.6",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
+}`;
+lineExplainer('pkgLines','pkgDetail',PKG,[
+ {from:2,to:3,tag:'Identité',title:'name / version',html:"<p>Nom du paquet npm et version (non publiée : <code>0.0.0</code>).</p>"},
+ {from:5,to:5,tag:'Script',title:'ng',html:"<p>Permet <code>npm run ng -- generate component …</code> sans installer la CLI globalement.</p>"},
+ {from:6,to:6,tag:'Script',title:'start → ng serve',html:"<p>Serveur de développement sur <code>http://localhost:4200</code>, recompilation et rechargement à chaque sauvegarde. Configuration <code>development</code> (pas de minification, source maps).</p>"},
+ {from:7,to:8,tag:'Script',title:'build / watch',html:"<p><code>ng build</code> : build de <b>production</b> (minifié, noms de fichiers hachés pour le cache) dans <code>dist/snj_pro_web</code>. <code>watch</code> : rebuild de développement continu.</p>"},
+ {from:9,to:9,tag:'Script',title:'test → ng test',html:"<p>Lance Vitest via le builder <code>@angular/build:unit-test</code>, dans un DOM jsdom.</p>"},
+ {from:10,to:10,tag:'Script',title:'modeles',html:"<p>Régénère <code>src/app/models/api.models.ts</code> depuis les DTO Java. Chemin du backend : variable <code>SNJ_BACK</code> (chapitre 14).</p>"},
+ {from:11,to:11,tag:'Script',title:'serve:ssr',html:"<p>Démarre le serveur Express produit par le build (<code>server.mjs</code>), port 4000.</p>"},
+ {from:13,to:14,tag:'npm',title:'private / packageManager',html:"<p><code>private</code> empêche une publication accidentelle sur npm. <code>packageManager</code> fige la version de npm attendue (Corepack).</p>"},
+ {from:16,to:22,tag:'Angular',title:'Paquets du framework',html:"<ul class='clean'><li><b>core</b> : composants, injection, signaux.</li><li><b>common</b> : <code>HttpClient</code>, pipes, <code>DOCUMENT</code>, <code>isPlatformBrowser</code>, locales.</li><li><b>compiler</b> : compilateur des templates (utilisé au build).</li><li><b>forms</b> : <code>ngModel</code>.</li><li><b>router</b> : navigation, gardes, lazy loading.</li><li><b>platform-browser</b> : démarrage dans le navigateur, <code>DomSanitizer</code>.</li><li><b>platform-server</b> : rendu côté serveur.</li></ul>"},
+ {from:23,to:24,tag:'SSR',title:'@angular/ssr + express',html:"<p>Moteur de rendu serveur et serveur HTTP Node utilisés par <code>server.ts</code>.</p>"},
+ {from:25,to:25,tag:'Lib',title:'qrcode',html:"<p>Génère le QR code de présence en SVG (<code>QRCode.toString(texte, {type:'svg'})</code>). Déclarée dans <code>allowedCommonJsDependencies</code> car publiée en CommonJS.</p>"},
+ {from:26,to:27,tag:'Lib',title:'rxjs / tslib',html:"<p><b>RxJS</b> : Observables (HTTP, événements). <b>tslib</b> : fonctions d'aide TypeScript partagées (<code>importHelpers</code>).</p>"},
+ {from:29,to:31,tag:'Build',title:'@angular/build, cli, compiler-cli',html:"<p>La CLI (<code>ng</code>), le système de build (esbuild + Vite) et le compilateur AOT qui transforme les templates en JavaScript.</p>"},
+ {from:32,to:34,tag:'Types',title:'@types/*',html:"<p>Définitions TypeScript pour Express, Node et qrcode (ces bibliothèques sont écrites en JavaScript).</p>"},
+ {from:35,to:35,tag:'Tests',title:'jsdom',html:"<p>DOM simulé dans Node pour exécuter les tests de composants sans navigateur.</p>"},
+ {from:36,to:36,tag:'Qualité',title:'prettier',html:"<p>Formateur de code (<code>.prettierrc</code>).</p>"},
+ {from:37,to:38,tag:'Langage / tests',title:'typescript / vitest',html:"<p>Le compilateur TypeScript (version imposée par Angular 21 : ~5.9) et le lanceur de tests Vitest.</p>"}
+]);
+
+const NGJ=`"snj_pro_web": {
+  "projectType": "application",
+  "sourceRoot": "src",
+  "prefix": "app",
+  "architect": {
+    "build": {
+      "builder": "@angular/build:application",
+      "options": {
+        "browser": "src/main.ts",
+        "tsConfig": "tsconfig.app.json",
+        "assets": [{ "glob": "**/*", "input": "public" }],
+        "styles": ["src/styles.css"],
+        "server": "src/main.server.ts",
+        "allowedCommonJsDependencies": ["qrcode"],
+        "outputMode": "server",
+        "ssr": { "entry": "src/server.ts" }
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            { "type": "initial", "maximumWarning": "1.5MB", "maximumError": "3MB" },
+            { "type": "anyComponentStyle", "maximumWarning": "12kB", "maximumError": "24kB" }
+          ],
+          "outputHashing": "all"
+        },
+        "development": { "optimization": false, "extractLicenses": false, "sourceMap": true }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": { "builder": "@angular/build:dev-server", "defaultConfiguration": "development" },
+    "test":  { "builder": "@angular/build:unit-test" }
+  }
+}`;
+lineExplainer('ngLines','ngDetail',NGJ,[
+ {from:2,to:4,tag:'Projet',title:'Type, dossier source, préfixe',html:"<p>Une application (pas une bibliothèque), code dans <code>src/</code>. <code>prefix: app</code> : les sélecteurs générés commencent par <code>app-</code> (<code>app-sidebar</code>, <code>app-icon</code>…).</p>"},
+ {from:7,to:7,tag:'Builder',title:'@angular/build:application',html:"<p>Le système de build moderne (esbuild) qui produit à la fois le code navigateur et le code serveur.</p>"},
+ {from:9,to:10,tag:'Entrées',title:'browser / tsConfig',html:"<p>Point d'entrée navigateur (<code>main.ts</code>) et fichier tsconfig à utiliser.</p>"},
+ {from:11,to:11,tag:'Assets',title:'assets : public/',html:"<p>Tout le contenu de <code>public/</code> est copié à la racine du site : <code>public/logo_snj.png</code> est servi sous <code>/logo_snj.png</code>.</p>"},
+ {from:12,to:12,tag:'Styles',title:'styles globaux',html:"<p><code>src/styles.css</code> est injecté dans toutes les pages (non encapsulé, contrairement aux styles des composants).</p>"},
+ {from:13,to:16,tag:'SSR',title:'server / outputMode / ssr.entry',html:"<p>Active le rendu serveur : point d'entrée <code>main.server.ts</code>, serveur Express <code>server.ts</code>. <code>allowedCommonJsDependencies</code> évite l'avertissement de build pour <code>qrcode</code>.</p>"},
+ {from:19,to:25,tag:'Prod',title:'Configuration production',html:"<p><b>Budgets</b> : alerte si le JavaScript initial dépasse 1,5 Mo (erreur à 3 Mo) ou si la feuille de style d'un composant dépasse 12 ko (erreur à 24 ko). <b>outputHashing</b> : noms de fichiers avec empreinte (<code>main-ABC123.js</code>) pour un cache navigateur sûr.</p>"},
+ {from:26,to:26,tag:'Dev',title:'Configuration development',html:"<p>Pas d'optimisation, source maps pour déboguer le TypeScript dans le navigateur.</p>"},
+ {from:28,to:28,tag:'Défaut',title:'defaultConfiguration',html:"<p><code>ng build</code> = production par défaut ; <code>ng serve</code> = développement.</p>"},
+ {from:30,to:31,tag:'Cibles',title:'serve / test',html:"<p>Serveur de développement (Vite) et tests unitaires (Vitest).</p>"}
+]);
+
+/* ===================================================================== PAS-À-PAS GÉNÉRIQUE */
+function stepper(id,steps){
+  const box=document.getElementById(id); let cur=0;
+  box.innerHTML=`<div class="steps">${steps.map((s,i)=>`<div class="step" data-i="${i}"><span class="num">${i+1}</span><span>${esc(s.t)}</span></div>`).join('')}</div>
+    <div class="card step-body"><div class="where"></div><div class="txt"></div><div class="step-nav"><button class="btn prev">← Précédent</button><button class="btn pri next">Suivant →</button></div></div>`;
+  const items=[...box.querySelectorAll('.step')];
+  function go(i){
+    cur=i; items.forEach((el,j)=>{el.classList.toggle('on',j===i);el.classList.toggle('done',j<i)});
+    box.querySelector('.where').textContent=steps[i].w||'';
+    box.querySelector('.txt').innerHTML=steps[i].h;
+    box.querySelector('.prev').disabled=i===0; box.querySelector('.next').disabled=i===steps.length-1;
+  }
+  items.forEach(el=>el.onclick=()=>go(+el.dataset.i));
+  box.querySelector('.prev').onclick=()=>go(cur-1); box.querySelector('.next').onclick=()=>go(cur+1);
+  go(0);
+}
+stepper('bootStepper',[
+ {t:"Le navigateur charge index.html",w:'src/index.html',h:"<p>Le serveur (ng serve ou Express) renvoie <code>index.html</code>. Un script en tête lit <code>localStorage['snj.theme']</code> et pose <code>data-theme=\"dark|light\"</code> sur <code>&lt;html&gt;</code> <b>avant</b> l'affichage : pas de flash blanc en mode sombre.</p>"},
+ {t:"main.ts démarre Angular",w:'src/main.ts',h:"<p><code>bootstrapApplication(App, appConfig)</code> crée l'injecteur racine avec les fournisseurs d'<code>app.config.ts</code> (routeur, HttpClient + intercepteur, locale) puis rend <code>App</code> dans <code>&lt;app-root&gt;</code>.</p>"},
+ {t:"Services racine instanciés",w:'App · ThemeService · AuthService',h:"<p><code>App</code> injecte <code>ThemeService</code> (thème appliqué partout, y compris à la connexion). <code>AuthService</code> relit la session stockée : si un jeton existe, l'utilisateur est déjà « connecté ».</p>"},
+ {t:"Le routeur résout l'URL",w:'app.routes.ts',h:"<p>Pour <code>/membres</code> : <code>authGuard</code> vérifie la connexion et le rôle, puis le chunk JavaScript de la page est téléchargé (<code>loadComponent</code>) et affiché dans le <code>&lt;router-outlet&gt;</code> de <code>MainLayout</code>.</p>"},
+ {t:"La coquille charge le contexte",w:'MainLayout.ngOnInit',h:"<p><code>auth.rafraichir()</code> (<code>GET /auth/me</code> + <code>/auth/permissions</code>) met à jour nom, photo, rôle et filtre le menu ; <code>shell.rafraichir()</code> charge les badges ; <code>shell.chargerPhoto()</code> récupère la photo protégée.</p>"},
+ {t:"La page appelle l'API",w:'pages/… → services → HttpClient',h:"<p>La page appelle son service ; l'intercepteur ajoute le jeton ; la réponse met à jour un signal ; seul le template concerné est redessiné.</p>"}
+]);
+stepper('authStepper',[
+ {t:"Saisie identifiant + mot de passe",w:'pages/auth/connexion',h:"<p><code>auth.login(identifiant, motDePasse, seSouvenir)</code> → <code>POST /api/auth/login</code> (<code>{username, password}</code>). Aucun jeton n'est encore envoyé (route publique).</p>"},
+ {t:"Double authentification éventuelle",w:'AuthService.deuxiemeFacteur',h:"<p>Si la réponse contient <code>deuxiemeFacteurRequis</code>, le signal <code>deuxiemeFacteur</code> mémorise l'identifiant et le téléphone masqué ; l'écran <code>/verification</code> demande le code SMS (<code>POST /auth/login/code/verifier</code>, option « faire confiance à cet appareil »). « Recevoir un code par SMS » permet aussi une connexion sans mot de passe.</p>"},
+ {t:"Ouverture de session",w:'AuthService.ouvrirSession',h:"<p>La réponse (<code>AuthResponse</code> : <code>token</code>, rôle, nom…) est placée dans le signal <code>utilisateur</code> et enregistrée dans <code>localStorage</code> (« Rester connecté ») ou <code>sessionStorage</code>. Les permissions du rôle sont chargées (<code>GET /auth/permissions</code>).</p>"},
+ {t:"Chaque requête porte le jeton",w:'sessionInterceptor',h:"<p>Toute requête vers <code>environments.apiUrl</code> est clonée avec <code>Authorization: Bearer &lt;jwt&gt;</code>. Le backend (<code>JwtAuthenticationFilter</code>) vérifie signature, expiration et révocation.</p>"},
+ {t:"Gardes et menus",w:'authGuard · roleGuard · peutVoir',h:"<p>Les gardes lisent <code>auth.connecte()</code> et <code>auth.role()</code> ; la barre latérale filtre ses entrées avec <code>auth.peutVoir(module)</code>.</p>"},
+ {t:"Expiration : 401",w:'erreurInterceptor · catchError',h:"<p>Jeton expiré (24 h) ou révoqué : le backend répond 401 ; l'intercepteur efface la session et redirige vers <code>/connexion?expire=1</code>. L'adresse demandée est conservée dans <code>?retour=</code> par <code>authGuard</code> pour y revenir après connexion.</p>"},
+ {t:"Déconnexion",w:'AuthService.logout',h:"<p><code>POST /auth/logout</code> (le backend met le jeton sur liste noire), puis effacement local et retour à la connexion — même si l'appel échoue (<code>finalize</code>).</p>"}
+]);
+stepper('themeStepper',[
+ {t:"Préférence enregistrée",w:"localStorage['snj.theme']",h:"<p>Valeurs : <code>clair</code>, <code>sombre</code> ou absence (= <code>systeme</code>, suit le réglage de l'OS via <code>prefers-color-scheme</code>).</p>"},
+ {t:"Avant le premier rendu",w:'index.html',h:"<p>Le script en tête calcule le thème effectif et pose <code>&lt;html data-theme=\"dark\"&gt;</code> ou <code>\"light\"</code>.</p>"},
+ {t:"ThemeService prend le relais",w:'core/services/theme.service.ts',h:"<p>Signaux <code>preference</code> et <code>systemeSombre</code> (écoute de <code>matchMedia</code>), <code>computed sombre</code>, et un <code>effect</code> qui repose l'attribut à chaque changement. <code>choisir(p)</code> enregistre la préférence.</p>"},
+ {t:"Le CSS bascule",w:'styles.css',h:"<p><code>:root[data-theme=\"dark\"] { --bg: #0D1310; --surface: #141C17; --text: #E3EBE6; … color-scheme: dark; }</code> : toutes les variables changent, donc tous les composants. <code>color-scheme</code> adapte aussi les contrôles natifs restants (barres de défilement, suggestions).</p>"},
+ {t:"Le menu Apparence",w:'layout/topbar',h:"<p>Bouton soleil/lune dans la barre du haut : Clair, Sombre, Système (l'option active est cochée).</p>"}
+]);
+stepper('selStepper',[
+ {t:"Écoute globale",w:'afterNextRender · document',h:"<p>Au premier rendu (jamais côté serveur), le composant ajoute des écouteurs <b>en phase de capture</b> sur <code>document</code> : <code>mousedown</code>, <code>click</code>, <code>keydown</code>, <code>scroll</code>, et <code>resize</code>.</p>"},
+ {t:"Bloquer la popup native",w:'surMouseDown / surClick',h:"<p>Sur un <code>&lt;select&gt;</code> : <code>preventDefault()</code> au <code>mousedown</code> empêche la liste native, on garde le focus. Sur un champ date/heure : <code>preventDefault()</code> au <code>click</code> empêche le calendrier natif (le comportement par défaut du navigateur ne s'exécute pas si l'événement est annulé).</p>"},
+ {t:"Ouvrir le panneau",w:'ouvrir() · placer()',h:"<p>Les options sont lues depuis <code>select.options</code> (ou la valeur, <code>min</code>, <code>max</code> de l'input). Le panneau est en <code>position: fixed</code> sous le champ, ou au-dessus s'il manque de place ; il suit le défilement et passe au-dessus des modales (z-index 300).</p>"},
+ {t:"Écrire la valeur",w:'choisir() · ecrire()',h:"<p>Pour un select : <code>selectedIndex</code> puis événements <code>input</code> et <code>change</code> ; pour un input : <code>value</code> puis <code>input</code>/<code>change</code>. <code>ngModel</code> et les <code>(change)</code> des templates réagissent exactement comme avec la popup native.</p>"},
+ {t:"Clavier",w:'surKeyDown',h:"<p>Ouvrir : Entrée, Espace, Alt+↓, F4. Dans la liste : ↑ ↓ Début Fin, saisie de lettres (sans accents), Entrée pour choisir. Échap ferme sans fermer la modale en dessous (<code>stopPropagation</code>). Calendrier : vues jours → mois → années en cliquant sur le titre.</p>"}
+]);
+
+/* ===================================================================== DÉCORATEURS & API */
+const FAM={dec:'Décorateurs',sig:'Signaux',di:'Injection',cmp:'Composants',tpl:'Templates',rt:'Routeur',rx:'RxJS / cycle de vie'};
+const ANN=[
+ ['@Component','dec',57,"Déclare un composant : sélecteur, template, styles, imports (composants autonomes), stratégie de détection.","@Component({\n  selector: 'app-activites',\n  imports: [FormsModule, Icon, Modal],\n  changeDetection: ChangeDetectionStrategy.OnPush,\n  templateUrl: './activites.html',\n  styleUrl: './activites.css'\n})\nexport class Activites { … }"],
+ ['@Injectable','dec',25,"Rend une classe injectable. providedIn: 'root' = une seule instance pour toute l'application (singleton), créée à la première utilisation.","@Injectable({ providedIn: 'root' })\nexport class ThemeService { … }"],
+ ['@Pipe','dec',8,"Déclare un pipe utilisable dans les templates ({{ valeur | nombre }}). Classe qui implémente transform().","@Pipe({ name: 'nombre' })\nexport class NombrePipe implements PipeTransform {\n  transform(v?: number | null): string { return nombre(v); }\n}"],
+ ['@HostListener','dec',5,"Écoute un événement sur l'élément hôte ou sur document/window. Utilisé pour Échap (modale), Ctrl K et clic extérieur (barre du haut).","@HostListener('document:keydown.escape') echap() { this.fermer.emit(); }"],
+ ['host: { … }','cmp',3,"Liaisons sur l'élément hôte du composant, directement dans @Component (alternative moderne à @HostBinding).","host: { '[class.menu-reduit]': 'shell.menuReduit()' }"],
+ ['ChangeDetectionStrategy.OnPush','cmp',56,"Le composant n'est revérifié que si un signal lu change, un événement survient ou une entrée change. Indispensable sans zone.js.","changeDetection: ChangeDetectionStrategy.OnPush"],
+ ['input() / input.required()','cmp',53,"Entrée d'un composant sous forme de signal (remplace @Input). Lue en l'appelant : this.taille().","readonly taille = input(38);\nreadonly name = input.required<string>();"],
+ ['output<T>()','cmp',7,"Événement émis vers le parent (remplace @Output + EventEmitter).","readonly fermer = output<void>();\n…\nthis.fermer.emit();"],
+ ['viewChild()','cmp',7,"Référence à un élément du template (#panneau) sous forme de signal.","private readonly panneau = viewChild<ElementRef<HTMLElement>>('panneau');"],
+ ['signal()','sig',108,"Valeur réactive modifiable : .set(), .update(). Base de l'état des écrans.","protected readonly activites = signal<ActiviteDTOs.Resume[]>([]);\nthis.activites.set(liste);"],
+ ['computed()','sig',150,"Valeur dérivée, mémorisée, recalculée quand ses dépendances changent.","protected readonly peutGerer = computed(() =>\n  this.auth.aRole('ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', …));"],
+ ['effect()','sig',3,"Effet de bord relancé quand les signaux lus changent (thème, ouverture automatique du groupe de menu actif).","effect(() => document.documentElement\n  .setAttribute('data-theme', this.sombre() ? 'dark' : 'light'));"],
+ ['toSignal()','sig',1,"Convertit un Observable en signal (désabonnement automatique).","private readonly url = toSignal(router.events.pipe(…), { initialValue: router.url });"],
+ ['inject()','di',228,"Récupère une dépendance (service, Router, DOCUMENT…) dans un champ ou le constructeur. Remplace l'injection par paramètres de constructeur.","private readonly service = inject(ActiviteService);\nprivate readonly toast = inject(ToastService);"],
+ ['PLATFORM_ID / isPlatformBrowser','di',3,"Savoir si le code tourne dans le navigateur ou sur le serveur (SSR) avant d'utiliser localStorage, window…","private readonly navigateur = isPlatformBrowser(inject(PLATFORM_ID));"],
+ ['DOCUMENT','di',2,"Le document injecté (compatible SSR) au lieu de la variable globale document.","private readonly document = inject(DOCUMENT);"],
+ ['@if / @else','tpl',301,"Affichage conditionnel. Peut nommer le résultat : @if (selection(); as a) { … }.","@if (qr(); as q) { <app-qr-code [contenu]=\"q.contenuQr\" /> }\n@else { <p>QR désactivé</p> }"],
+ ['@for … track … @empty','tpl',186,"Boucle ; track identifie chaque élément (obligatoire), @empty quand la liste est vide.","@for (p of pointages(); track p.id) { <tr>…</tr> }\n@empty { <tr><td>Aucun pointage</td></tr> }"],
+ ['@switch / @case','tpl',9,"Choix multiple dans le template (vues du calendrier, étapes d'assistant).","@switch (vueCal()) { @case ('jours') { … } @case ('mois') { … } }"],
+ ['[(ngModel)]','tpl',224,"Liaison bidirectionnelle d'un champ de formulaire (FormsModule).","<input class=\"input\" [(ngModel)]=\"nouvelle.titre\" />"],
+ ['routerLink','rt',52,"Lien de navigation interne (sans rechargement), avec queryParams éventuels.","<a routerLink=\"/parametres\" [queryParams]=\"{ onglet: 'profil' }\">Mon profil</a>"],
+ ['loadComponent','rt',43,"Chargement à la demande d'un écran.","{ path: 'import', loadComponent: () => import('./pages/import/import').then(m => m.Import) }"],
+ ['CanActivateFn','rt',3,"Garde fonctionnelle : renvoie true, false ou une UrlTree de redirection.","export const authGuard: CanActivateFn = (_r, state) =>\n  inject(AuthService).connecte() ? true\n  : inject(Router).createUrlTree(['/connexion'], { queryParams: { retour: state.url } });"],
+ ['HttpInterceptorFn','rt',2,"Fonction qui voit passer toutes les requêtes HTTP (ajout du jeton, gestion du 401).","export const sessionInterceptor: HttpInterceptorFn = (req, next) => next(req.clone({ setHeaders: { Authorization: 'Bearer …' } }));"],
+ ['takeUntilDestroyed()','rx',12,"Opérateur RxJS : se désabonne quand le composant est détruit.","this.saisieRecherche.pipe(debounceTime(250), switchMap(q => …), takeUntilDestroyed()).subscribe(…);"],
+ ['afterNextRender()','rx',3,"Exécute du code après le prochain rendu, uniquement dans le navigateur (mesures du DOM, écouteurs globaux).","afterNextRender(() => document.addEventListener('mousedown', …, true));"],
+ ['ngOnInit / ngOnDestroy','rx',41,"Cycle de vie : chargement initial des données ; nettoyage (minuteries).","ngOnInit() { this.charger(); }\nngOnDestroy() { clearInterval(this.horloge); }"],
+ ['forkJoin / switchMap / debounceTime','rx',23,"Appels parallèles (badges du menu), annulation de la recherche précédente, attente de la fin de frappe.","forkJoin({ membres: …, demandes: … }).subscribe(r => …)"]
+];
+(function(){
+  const grid=document.getElementById('annGrid'), fil=document.getElementById('annFilters'), search=document.getElementById('annSearch');
+  let fam='all';
+  fil.innerHTML=`<button class="chip on" data-f="all">Tous (${ANN.length})</button>`+Object.entries(FAM).map(([k,v])=>`<button class="chip" data-f="${k}">${v} (${ANN.filter(a=>a[1]===k).length})</button>`).join('');
+  function render(){
+    const q=search.value.trim().toLowerCase();
+    grid.innerHTML=ANN.filter(a=>(fam==='all'||a[1]===fam)&&(!q||(a[0]+' '+a[3]).toLowerCase().includes(q)))
+      .sort((a,b)=>b[2]-a[2])
+      .map(a=>`<div class="ann"><span class="ct">×${a[2]}</span><div class="n">${esc(a[0])}</div><p>${esc(a[3])}</p><div class="more"><span class="tag">${FAM[a[1]]}</span><pre>${esc(a[4])}</pre></div></div>`).join('')||'<p class="sub">Aucun résultat.</p>';
+  }
+  fil.addEventListener('click',e=>{const c=e.target.closest('.chip'); if(!c) return; fam=c.dataset.f; fil.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c)); render();});
+  search.addEventListener('input',render);
+  grid.addEventListener('click',e=>{const c=e.target.closest('.ann'); if(c) c.classList.toggle('open');});
+  render();
+})();
+
+/* ===================================================================== ROUTES */
+const ROUTES=[
+ ['/connexion','Public','invitesGuard','Connexion'],
+ ['/verification','Public','—','Verification (code SMS)'],
+ ['/mot-de-passe-oublie','Public','—','MotDePasseOublie'],
+ ['/reinitialiser-mot-de-passe?jeton=…','Public','—','NouveauMotDePasse'],
+ ['/invitation?jeton=…','Public','—','NouveauMotDePasse (activation)'],
+ ['/acces-refuse','Isolée','—','AccesRefuse'],
+ ['/activites/:id/projection','Isolée','authGuard','Projection (plein écran)'],
+ ['/tableau-de-bord','Gestion','authGuard','TableauDeBord'],
+ ['/membres','Gestion','authGuard','MembresListe'],
+ ['/membres/nouveau','Gestion','authGuard + roleGuard(ADMIN_SYSTEME, ADMIN_SNJ, RESPONSABLE_COHORTE)','NouveauMembre'],
+ ['/membres/:id','Gestion','authGuard','ProfilMembre'],
+ ['/membres/:id/modifier','Gestion','authGuard + roleGuard(ADMIN_SYSTEME, ADMIN_SNJ, RESPONSABLE_COHORTE)','ModifierMembre'],
+ ['/cohortes · /cohortes/:id','Gestion','authGuard','CohortesListe · CohorteDetail'],
+ ['/competences','Gestion','authGuard','Competences'],
+ ['/mobilisations · /mobilisations/:id','Gestion','authGuard','MobilisationsListe · MobilisationDetail'],
+ ['/mobilisations/nouvelle · /:id/edition','Gestion','authGuard + roleGuard(ADMIN_SYSTEME, ADMIN_SNJ, RESP_REGIONAL, RESP_COHORTE)','MobilisationAssistant'],
+ ['/activites','Gestion','authGuard','Activites (US14)'],
+ ['/souvenirs?id=…','Gestion','authGuard','Souvenirs (galerie, visionneuse, modération)'],
+ ['/notifications · /notifications/historique','Gestion','authGuard','NouvelleNotification · HistoriqueEnvois'],
+ ['/actualites','Gestion','authGuard','ActualitesListe'],
+ ['/actualites/nouvelle · /actualites/:id','Gestion','authGuard + roleGuard(ADMIN_SYSTEME, ADMIN_SNJ, DIRECTION)','EditeurActualite'],
+ ['/opportunites · /opportunites/:id','Gestion','authGuard','OpportunitesListe · OpportuniteDetail'],
+ ['/opportunites/nouvelle · /:id/modifier','Gestion','authGuard + roleGuard(ADMIN_SYSTEME, ADMIN_SNJ, PARTENAIRE)','OpportuniteForm'],
+ ['/documents','Gestion','authGuard','Documents'],
+ ['/demandes','Gestion','authGuard','Demandes'],
+ ['/import','Gestion','authGuard','Import'],
+ ['/statistiques','Gestion','authGuard','Statistiques'],
+ ['/historique','Gestion','authGuard','HistoriqueOperations'],
+ ['/utilisateurs','Gestion','authGuard','Utilisateurs'],
+ ['/parametres?onglet=profil|securite|notifications','Gestion','authGuard','Parametres'],
+ ['/messagerie','Gestion','authGuard','Messagerie'],
+ ['** (toute autre URL)','—','—','redirection vers /tableau-de-bord']
+];
+(function(){
+  const t=document.getElementById('routeTable'), s=document.getElementById('routeSearch');
+  function render(){
+    const q=s.value.trim().toLowerCase();
+    t.innerHTML='<tr><th>Route</th><th>Zone</th><th>Gardes</th><th>Composant</th></tr>'+ROUTES.filter(r=>!q||r.join(' ').toLowerCase().includes(q))
+      .map(r=>`<tr><td><code>${esc(r[0])}</code></td><td><span class="tag ${r[1]==='Public'?'b':r[1]==='Gestion'?'g':'o'}">${r[1]}</span></td><td style="font-size:13px">${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join('');
+  }
+  s.addEventListener('input',render); render();
+})();
+
+/* ===================================================================== SIMULATEUR D'ACCÈS */
+(function(){
+  const ROLES={ANON:'Non connecté',ROLE_ADMIN_SYSTEME:'Administrateur',ROLE_ADMIN_SNJ:'Agent SNJ',ROLE_DIRECTION:'Direction',ROLE_RESPONSABLE_REGIONAL:'Responsable régional',ROLE_RESPONSABLE_COHORTE:'Responsable de cohorte',ROLE_PARTENAIRE:'Partenaire',ROLE_MEMBRE:'Membre'};
+  const TOUS=['MEMBRES','COHORTES','COMPETENCES','MOBILISATION','NOTIFICATIONS','ACTUALITES','OPPORTUNITES','DOCUMENTS','DEMANDES','ACTIVITES','IMPORT','STATISTIQUES','HISTORIQUE','UTILISATEURS'];
+  const VOIR={ROLE_ADMIN_SYSTEME:TOUS,ROLE_ADMIN_SNJ:TOUS,ROLE_DIRECTION:['STATISTIQUES','ACTUALITES','COMPETENCES','DOCUMENTS'],
+    ROLE_RESPONSABLE_REGIONAL:['MEMBRES','MOBILISATION','NOTIFICATIONS','DEMANDES','ACTIVITES','COHORTES','COMPETENCES','STATISTIQUES','DOCUMENTS'],
+    ROLE_RESPONSABLE_COHORTE:['MEMBRES','ACTIVITES','NOTIFICATIONS','DEMANDES','MOBILISATION','COHORTES','COMPETENCES','STATISTIQUES','DOCUMENTS'],
+    ROLE_PARTENAIRE:['OPPORTUNITES'],ROLE_MEMBRE:[]};
+  const G_MEM=['ROLE_ADMIN_SYSTEME','ROLE_ADMIN_SNJ','ROLE_RESPONSABLE_COHORTE'], G_MOB=['ROLE_ADMIN_SYSTEME','ROLE_ADMIN_SNJ','ROLE_RESPONSABLE_REGIONAL','ROLE_RESPONSABLE_COHORTE'],
+        G_ACT=['ROLE_ADMIN_SYSTEME','ROLE_ADMIN_SNJ','ROLE_DIRECTION'], G_OPP=['ROLE_ADMIN_SYSTEME','ROLE_ADMIN_SNJ','ROLE_PARTENAIRE'];
+  const R=[
+   {p:'/connexion',pub:true},{p:'/tableau-de-bord'},{p:'/membres',m:'MEMBRES'},{p:'/membres/nouveau',m:'MEMBRES',g:G_MEM},{p:'/cohortes',m:'COHORTES'},
+   {p:'/competences',m:'COMPETENCES'},{p:'/mobilisations',m:'MOBILISATION'},{p:'/mobilisations/nouvelle',m:'MOBILISATION',g:G_MOB},{p:'/activites',m:'ACTIVITES'},
+   {p:'/notifications',m:'NOTIFICATIONS'},{p:'/actualites',m:'ACTUALITES'},{p:'/actualites/nouvelle',m:'ACTUALITES',g:G_ACT},{p:'/opportunites',m:'OPPORTUNITES'},
+   {p:'/opportunites/nouvelle',m:'OPPORTUNITES',g:G_OPP},{p:'/documents',m:'DOCUMENTS'},{p:'/demandes',m:'DEMANDES'},{p:'/import',m:'IMPORT'},
+   {p:'/statistiques',m:'STATISTIQUES'},{p:'/historique',m:'HISTORIQUE'},{p:'/utilisateurs',m:'UTILISATEURS'},{p:'/parametres'},{p:'/messagerie'}
+  ];
+  const sr=document.getElementById('simRole'), sp=document.getElementById('simRoute'), out=document.getElementById('simOut');
+  sr.innerHTML=Object.entries(ROLES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+  sp.innerHTML=R.map((r,i)=>`<option value="${i}">${r.p}</option>`).join('');
+  sr.value='ROLE_RESPONSABLE_COHORTE'; sp.value='8';
+  function run(){
+    const role=sr.value, r=R[+sp.value]; let cls='ok', html='';
+    if(r.pub){
+      if(role==='ANON'||role==='ROLE_MEMBRE'){html=`<b>✅ Affichée.</b> <code>invitesGuard</code> laisse passer : personne n'est connecté à l'espace de gestion.`;}
+      else {cls='mid'; html=`<b>↪ Redirigé vers /tableau-de-bord.</b> <code>invitesGuard</code> : inutile de se reconnecter.`;}
+    } else if(role==='ANON'){cls='ko'; html=`<b>⛔ Redirigé vers /connexion?retour=${esc(r.p)}</b> par <code>authGuard</code> (aucun jeton). Après connexion, retour automatique à la page demandée.`;}
+    else if(role==='ROLE_MEMBRE'){cls='ko'; html=`<b>⛔ Redirigé vers /acces-refuse?raison=membre</b> par <code>authGuard</code> : les membres utilisent l'application mobile.`;}
+    else if(r.g && !r.g.includes(role)){cls='ko'; html=`<b>⛔ Redirigé vers /acces-refuse</b> par <code>roleGuard</code> : rôles autorisés = ${r.g.map(x=>ROLES[x]).join(', ')}.`;}
+    else {
+      const visible=!r.m||VOIR[role].includes(r.m);
+      html=`<b>✅ Page affichée.</b> ${r.g?'<code>roleGuard</code> accepte ce rôle. ':''}`;
+      if(!visible){cls='mid'; html+=`<br>⚠️ L'entrée de menu est <b>masquée</b> (droit « voir » absent sur le module <code>${r.m}</code> par défaut) : la page n'est atteignable que par l'URL, et le backend refusera probablement les données (403 → message « Vous n'avez pas les droits »).`;}
+      else html+=`<br>L'entrée de menu est visible${r.m?` (droit « voir » sur <code>${r.m}</code>)`:''}. Les boutons d'action restent filtrés dans l'écran, et chaque appel est revérifié par <code>@PreAuthorize</code> côté backend.`;
+    }
+    out.innerHTML=`<div class="verdict ${cls}">${html}</div>`;
+  }
+  document.getElementById('simGo').onclick=run; sr.onchange=run; sp.onchange=run; run();
+})();
+
+/* ===================================================================== MODULES */
+const MODS=[
+ ['Tableau de bord','/tableau-de-bord','TableauDeBord','StatistiqueService','GET /statistiques/tableau-de-bord…'],
+ ['Membres','/membres, /membres/nouveau, /membres/:id, /:id/modifier','MembresListe, NouveauMembre (6 étapes), ProfilMembre, ModifierMembre, ExportMembres, AjoutParcours','MembreService, CohorteService, CompetenceService, ReferentielService, DocumentService, MessagerieService','/membres/filtres, /membres, /membres/{id}, /membres/export…'],
+ ['Cohortes','/cohortes, /cohortes/:id','CohortesListe, CohorteDetail, CohorteForm','CohorteService, MembreService, UtilisateurService','/cohortes…'],
+ ['Compétences','/competences','Competences','CompetenceService','/competences/referentiel…'],
+ ['Mobilisation','/mobilisations, /nouvelle, /:id, /:id/edition','MobilisationsListe, MobilisationAssistant, MobilisationDetail','MobilisationService, CohorteService, ReferentielService','/mobilisations…'],
+ ['Activités & présences (US14)','/activites, /activites/:id/projection','Activites, Projection','ActiviteService, MembreService, MobilisationService','/activites, /activites/{id}/qr, /projection, /presences (GET, POST, DELETE), /presences/export, /terminer'],
+ ['Souvenirs de formation','/souvenirs','Souvenirs','SouvenirService, CohorteService','/souvenirs (liste, statistiques, CRUD multipart), /souvenirs/{id}/valider|rejeter, /souvenirs/{id}/medias, /souvenirs/medias/{id}/fichier'],
+ ['Notifications','/notifications, /notifications/historique','NouvelleNotification, HistoriqueEnvois','NotificationService, MembreService, CohorteService','/notifications…'],
+ ['Actualités','/actualites, /nouvelle, /:id','ActualitesListe, EditeurActualite','ActualiteService, NotificationService','/actualites…'],
+ ['Opportunités','/opportunites, /nouvelle, /:id, /:id/modifier','OpportunitesListe, OpportuniteForm, OpportuniteDetail','OpportuniteService','/opportunites…, candidatures'],
+ ['Documents','/documents','Documents','DocumentService','/documents, /dossiers…'],
+ ['Demandes','/demandes','Demandes','DemandeService','/demandes…'],
+ ['Import & doublons','/import','Import (assistant 4 étapes)','ImportService, CohorteService','/import/sessions…'],
+ ['Statistiques & rapports','/statistiques','Statistiques','StatistiqueService','/statistiques…, rapports PDF'],
+ ['Historique','/historique','HistoriqueOperations','HistoriqueService, UtilisateurService','/historique…'],
+ ['Utilisateurs & rôles','/utilisateurs','Utilisateurs','UtilisateurService','/utilisateurs, /roles, invitations'],
+ ['Paramètres','/parametres','Parametres','CompteService, AuthService','/auth/me, mot de passe, 2FA, sessions, préférences'],
+ ['Messagerie','/messagerie','Messagerie','MessagerieService','/messagerie…'],
+ ['Recherche globale','Ctrl K','Recherche','RechercheService','/recherche…'],
+ ['Connexion & comptes','/connexion, /verification, /mot-de-passe-oublie, /reinitialiser…, /invitation','Connexion, Verification, MotDePasseOublie, NouveauMotDePasse','AuthService, AccesPublicService','/auth/login, /auth/login/code/*, /auth/logout, /auth/mot-de-passe-oublie…']
+];
+(function(){
+  const t=document.getElementById('modTable'), s=document.getElementById('modSearch');
+  function render(){
+    const q=s.value.trim().toLowerCase();
+    t.innerHTML='<tr><th>Module</th><th>Routes</th><th>Composants</th><th>Services</th><th>Endpoints (préfixe /api)</th></tr>'+MODS.filter(m=>!q||m.join(' ').toLowerCase().includes(q))
+      .map(m=>`<tr><td><b>${esc(m[0])}</b></td><td style="font-size:13px"><code>${esc(m[1])}</code></td><td style="font-size:13px">${esc(m[2])}</td><td style="font-size:13px">${esc(m[3])}</td><td style="font-size:13px"><code>${esc(m[4])}</code></td></tr>`).join('');
+  }
+  s.addEventListener('input',render); render();
+})();
+
+/* ===================================================================== JETONS DE COULEUR */
+const TOK=[
+ ['fond','--bg','#F7F9F8','#0D1310','Fond de page'],['fond','--surface','#FFFFFF','#141C17','Cartes, modales, champs'],['fond','--surface-2','#FAFBFA','#18211B',"En-têtes de tableau, barres d'outils"],
+ ['fond','--surface-selected','#F2F7F3','#1A2B20','Ligne / option sélectionnée'],['fond','--muted-bg','#EDF1EE','#1C2620','Fonds neutres, pistes de graphiques'],['fond','--sidebar-bg','#124D2D','#0F2418','Barre latérale'],
+ ['texte','--text','#0F1E16','#E3EBE6','Texte principal'],['texte','--text-2','#5A6B62','#9CAEA3','Texte secondaire'],['texte','--text-3','#94A39A','#6C7F74','Texte discret, placeholders'],
+ ['ligne','--border','#E2E8E4','#243029','Bordures'],['ligne','--border-strong','#C2D6C9','#34443A','Bordures appuyées'],
+ ['marque','--primary','#124D2D','#33905A','Vert SNJ : boutons, liens, sélection'],['marque','--secondary','#6FA334','#7DB443','Vert lime : succès, progression'],['marque','--tint','#E7F0EA','#18301F','Fond vert léger'],['marque','--lime-bg','#EEF6E4','#1A2914','Fond lime'],['marque','--lime-text','#3E6A16','#A6D46A','Texte sur fond lime'],
+ ['statut','--blue','#2E6BE6','#6B98F2','Information'],['statut','--gold','#E8A600','#E8B93A','Avertissement'],['statut','--red','#DC3F36','#EC6159','Erreur, danger'],['statut','--violet','#7A56E8','#A28AF0','Accent'],['statut','--teal','#0E8A9A','#36B5C5','Accent']
+];
+(function(){
+  const t=document.getElementById('tokTable'), f=document.getElementById('tokFilters');
+  const fams=[...new Set(TOK.map(x=>x[0]))]; let cur='all';
+  f.innerHTML=`<button class="chip on" data-f="all">Tous</button>`+fams.map(x=>`<button class="chip" data-f="${x}">${x}</button>`).join('');
+  const sw=c=>`<span style="display:inline-block;width:18px;height:18px;border-radius:5px;vertical-align:middle;margin-right:6px;border:1px solid rgba(128,128,128,.35);background:${c}"></span><code>${c}</code>`;
+  function render(){
+    t.innerHTML='<tr><th>Variable</th><th>Clair</th><th>Sombre</th><th>Usage</th></tr>'+TOK.filter(x=>cur==='all'||x[0]===cur)
+      .map(x=>`<tr><td><code class="tok" style="cursor:pointer" title="Copier">var(${x[1]})</code></td><td>${sw(x[2])}</td><td>${sw(x[3])}</td><td>${esc(x[4])}</td></tr>`).join('');
+  }
+  f.addEventListener('click',e=>{const c=e.target.closest('.chip'); if(!c) return; cur=c.dataset.f; f.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c)); render();});
+  t.addEventListener('click',e=>{const c=e.target.closest('.tok'); if(!c) return; navigator.clipboard?.writeText(c.textContent); const o=c.textContent; c.textContent='copié ✓'; setTimeout(()=>c.textContent=o,1000);});
+  render();
+})();
+
+/* ===================================================================== CHECK-LIST */
+const CHK=[
+ ['Installer Node.js 20+ et l\'Angular CLI','npm i -g @angular/cli (ou npx ng …).'],
+ ['Créer le projet','ng new snj_pro_web --ssr --style=css : composants autonomes par défaut ; supprimer zone.js (zoneless) et configurer RenderMode.Client dans app.routes.server.ts.'],
+ ['Installer les dépendances','npm i qrcode ; npm i -D @types/qrcode prettier ; déclarer qrcode dans allowedCommonJsDependencies.'],
+ ['Poser le design system','src/styles.css : jetons :root (couleurs de la charte), thème :root[data-theme=dark], composants CSS (btn, card, table, field, pill…). Police Inter dans index.html.'],
+ ['Écrire le socle','src/environments (apiUrl + fileReplacements dans angular.json), shared/utils/http.ts (toParams, formulaire, enregistrerFichier, urlLocale, messageErreur), ToastService.'],
+ ['Générer les modèles','Copier scripts/generer-modeles.js et lancer SNJ_BACK=… npm run modeles.'],
+ ['Authentification','AuthService (signaux utilisateur/permissions, login, 2FA, stockage local/session, logout), sessionInterceptor + erreurInterceptor, gardes authGuard/invitesGuard/roleGuard ; provideHttpClient(withFetch(), withInterceptors([erreurInterceptor, sessionInterceptor])).'],
+ ['Composants partagés','icon, avatar, modal, pagination, pill, charts, qr-code, toasts + ConfirmationService, pipes de format, selecteurs.'],
+ ['La coquille','MainLayout (sidebar + topbar + router-outlet), AuthLayout, ShellService, ThemeService et menu Apparence.'],
+ ['Les routes','app.routes.ts unique avec loadComponent, title, gardes et data.roles, regroupées par sections commentées.'],
+ ['Les écrans','Un service par domaine dans core/services, puis chaque page : signaux d\'état, appels au service, toasts, modales.'],
+ ['Tests et build','ng test, ng build ; vérifier les budgets ; servir dist/ (Express ou serveur statique) et configurer CORS côté backend.'],
+ ['Documenter','Mettre à jour ce guide (et son journal) à chaque modification.']
+];
+(function(){
+  const box=document.getElementById('checklist'); let st={}; try{st=JSON.parse(localStorage.getItem('snj-front-chk')||'{}')}catch(e){}
+  box.innerHTML=CHK.map((c,i)=>`<label class="check"><input type="checkbox" data-i="${i}" ${st[i]?'checked':''}><div><b>${i+1}. ${esc(c[0])}</b><details><summary>Détails</summary><p style="margin:6px 0 0">${esc(c[1])}</p></details></div></label>`).join('');
+  function maj(){
+    const n=Object.values(st).filter(Boolean).length;
+    document.getElementById('chkCount').textContent=`${n} / ${CHK.length}`;
+    document.getElementById('chkBar').style.width=(n/CHK.length*100)+'%';
+    box.querySelectorAll('.check').forEach((el,i)=>el.classList.toggle('done',!!st[i]));
+  }
+  box.addEventListener('change',e=>{const i=e.target.dataset.i; if(i===undefined) return; st[i]=e.target.checked; try{localStorage.setItem('snj-front-chk',JSON.stringify(st))}catch(_){}; maj();});
+  maj();
+})();
+
+/* ===================================================================== QUIZ */
+const QUIZ=[
+ ["Où le jeton JWT est-il ajouté aux requêtes ?",["Dans chaque service","Dans sessionInterceptor","Dans authGuard","Dans index.html"],1,"L'intercepteur fonctionnel sessionInterceptor clone chaque requête vers environments.apiUrl avec l'en-tête Authorization."],
+ ["Que se passe-t-il sur une réponse 401 hors des routes de connexion ?",["Rien","Le jeton est rafraîchi","La session locale est effacée et l'utilisateur renvoyé vers /connexion?expire=1","Un toast rouge seulement"],2,"Il n'y a pas de refresh token : la session est effacée et on retourne à la connexion."],
+ ["Pourquoi presque tout l'état des écrans est-il dans des signal() ?",["Par mode","Parce que l'application est zoneless et en OnPush : les signaux déclenchent le rendu","Pour le SSR","Parce que RxJS est interdit"],1,"Sans zone.js, Angular redessine un composant OnPush quand un signal qu'il lit change."],
+ ["Comment ajouter un champ renvoyé par un nouveau DTO du backend ?",["Modifier api.models.ts à la main","Relancer npm run modeles (avec SNJ_BACK)","Ajouter un any","Redémarrer ng serve"],1,"api.models.ts est généré ; une modification manuelle serait écrasée."],
+ ["Un responsable régional voit-il « Utilisateurs & rôles » dans le menu ?",["Oui","Non : la barre latérale filtre avec peutVoir('UTILISATEURS') et ce rôle n'a pas le droit « voir » par défaut","Seulement en mode sombre","Seulement si le menu est réduit"],1,"Les entrées sont filtrées par la matrice des permissions chargée depuis /auth/permissions."],
+ ["Masquer un bouton côté front suffit-il à protéger une action ?",["Oui","Non, le backend revérifie chaque appel (@PreAuthorize, périmètre)"],1,"Le filtrage front n'est que du confort ; la sécurité est assurée par le backend."],
+ ["Comment écrire une couleur dans un nouveau composant ?",["#FFFFFF","white","var(--surface)","rgb(255,255,255)"],2,"Les variables CSS changent avec le thème ; une couleur en dur resterait claire en mode sombre."],
+ ["À quoi sert loadComponent dans une route ?",["À précharger toutes les pages","À télécharger le code de l'écran seulement quand on y navigue","À protéger la route","À définir le titre"],1,"C'est le lazy loading : un chunk JavaScript par écran."],
+ ["Pourquoi un <select> natif affiche-t-il un panneau aux couleurs de SNJPro ?",["Grâce au CSS de .select","Parce que Selecteurs intercepte mousedown et affiche son propre panneau","Grâce à Angular Material","Grâce au navigateur"],1,"Les popups natives ne se stylent pas en CSS ; elles sont remplacées par app-selecteurs."],
+ ["Où un responsable consulte-t-il toutes les présences d'une activité ?",["Seulement dans l'export","Bouton « Voir toutes les présences » : registre paginé dans /activites","Dans l'historique","Dans Statistiques"],1,"US14 : registre paginé (GET /activites/{id}/presences), avec retrait d'un pointage et export Excel."]
+];
+(function(){
+  const box=document.getElementById('quizBox'); let ok=0, done=0;
+  box.innerHTML=QUIZ.map((q,i)=>`<div class="card q" data-i="${i}"><b>${i+1}. ${esc(q[0])}</b><div class="opts">${q[1].map((o,j)=>`<button class="opt" data-j="${j}">${esc(o)}</button>`).join('')}</div><div class="fb">${esc(q[3])}</div></div>`).join('');
+  box.addEventListener('click',e=>{
+    const b=e.target.closest('.opt'); if(!b) return; const card=b.closest('.q'); if(card.dataset.done) return;
+    const q=QUIZ[+card.dataset.i], j=+b.dataset.j; card.dataset.done=1; done++;
+    card.querySelectorAll('.opt').forEach((x,k)=>{ if(k===q[2]) x.classList.add('good'); else if(k===j) x.classList.add('bad'); });
+    if(j===q[2]) ok++; card.querySelector('.fb').style.display='block';
+    document.getElementById('quizScore').textContent=`Score : ${ok} / ${done}`;
+  });
+})();
+</script>
+</body>
+</html>
