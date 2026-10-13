@@ -1,0 +1,35 @@
+@if (!envoye()) {
+  <div class="haut">
+    <a routerLink="/connexion" class="retour"><app-icon name="chevron-left" [size]="16" />Retour à la connexion</a>
+    <div class="pastille"><app-icon name="lock" [size]="22" /></div>
+    <h1>Mot de passe oublié ?</h1>
+    <p class="intro">Saisissez l'adresse e-mail de votre compte. Nous vous enverrons un lien pour choisir un nouveau mot de passe.</p>
+    <form (ngSubmit)="envoyer()" #f="ngForm">
+      <div class="field">
+        <label for="email">Adresse e-mail</label>
+        <div class="input-icon">
+          <app-icon name="mail" [size]="17" />
+          <input id="email" name="email" type="email" class="input" [(ngModel)]="email" required email placeholder="prenom.nom@snj-pro.ml" />
+        </div>
+      </div>
+      @if (erreur()) { <div class="notice error"><app-icon name="alert-circle" [size]="16" />{{ erreur() }}</div> }
+      <button class="btn btn-primary btn-lg btn-block" type="submit" [disabled]="f.invalid || chargement()">
+        {{ chargement() ? 'Envoi…' : 'Envoyer le lien de réinitialisation' }}
+      </button>
+      <div class="notice ok">
+        <app-icon name="shield-check" [size]="17" />
+        <div><strong>Le lien est valable 30 minutes.</strong><br />Pensez à vérifier vos courriers indésirables.</div>
+      </div>
+    </form>
+  </div>
+  <p class="bas">Vous n'avez plus accès à votre e-mail ? Contactez votre administrateur.</p>
+} @else {
+  <div class="haut">
+    <div class="succes"><span><i><app-icon name="check" [size]="24" [stroke]="3" /></i></span></div>
+    <h1>Vérifiez votre boîte mail</h1>
+    <p class="intro">Un lien de réinitialisation a été envoyé à {{ email }}. Il est valable 30 minutes.</p>
+    <a routerLink="/connexion" class="btn btn-primary btn-lg btn-block mt-24">Retour à la connexion</a>
+    <button type="button" class="link center mt-20" (click)="envoyer(true)" [disabled]="chargement()">Renvoyer l'e-mail</button>
+  </div>
+  <p class="bas">Pensez à vérifier vos courriers indésirables.</p>
+}
