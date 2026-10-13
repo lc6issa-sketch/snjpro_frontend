@@ -6,7 +6,10 @@ import { MainLayout } from './layout/main-layout/main-layout';
 import { AuthLayout } from './layout/auth-layout/auth-layout';
 
 // Rôles autorisés sur les écrans de saisie (transmis au roleGuard via data.roles)
+const GESTION_MEMBRES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_RESPONSABLE_COHORTE'];
+const GESTION_MOBILISATIONS: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'];
 const REDACTEURS_ACTUALITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION'];
+const GESTION_OPPORTUNITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_PARTENAIRE'];
 
 export const routes: Routes = [
   // Redirection de la racine avant le bloc AuthLayout (path ''), sinon celui-ci capture « / » et s'affiche sans formulaire
@@ -152,6 +155,13 @@ export const routes: Routes = [
         path: 'messagerie',
         title: 'Messagerie · SNJPro',
         loadComponent: () => import('./pages/messagerie/messagerie').then(m => m.Messagerie),
+      },
+
+      // ----- Tableau de bord -----
+      {
+        path: 'tableau-de-bord',
+        title: 'Tableau de bord · SNJPro',
+        loadComponent: () => import('./pages/tableau-de-bord/tableau-de-bord').then(m => m.TableauDeBord),
       },
     ],
   },
