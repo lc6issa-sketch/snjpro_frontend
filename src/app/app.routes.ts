@@ -100,6 +100,13 @@ export const routes: Routes = [
         title: 'Compétences · SNJPro',
         loadComponent: () => import('./pages/competences/competences').then(m => m.Competences),
       },
+
+      // ----- Import & doublons -----
+      {
+        path: 'import',
+        title: 'Import de données · SNJPro',
+        loadComponent: () => import('./pages/import/import').then(m => m.Import),
+      },
     ],
   },
 
