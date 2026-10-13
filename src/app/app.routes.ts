@@ -88,6 +88,11 @@ export const routes: Routes = [
         title: 'Utilisateurs & rôles · SNJPro',
         loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs),
       },
+      {
+        path: 'parametres',
+        title: 'Paramètres · SNJPro',
+        loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres),
+      },
     ],
   },
 

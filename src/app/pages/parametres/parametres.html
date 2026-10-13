@@ -1,0 +1,95 @@
+<div class="page">
+  <div class="page-head"><div><h1>Paramètres</h1><p class="sub">Gérez votre compte, votre sécurité et vos préférences</p></div></div>
+  <div class="mise">
+    <nav class="card menu">
+      <button type="button" [class.active]="onglet() === 'profil'" (click)="changerOnglet('profil')"><app-icon name="user" [size]="17" />Mon profil</button>
+      <button type="button" [class.active]="onglet() === 'securite'" (click)="changerOnglet('securite')"><app-icon name="lock" [size]="17" />Sécurité</button>
+      <button type="button" [class.active]="onglet() === 'notifications'" (click)="changerOnglet('notifications')"><app-icon name="bell" [size]="17" />Notifications</button>
+    </nav>
+
+    <div class="stack">
+      @switch (onglet()) {
+        @case ('profil') {
+          <section class="card">
+            <div class="corps">
+              <h2>Mon profil</h2><p class="muted small">Ces informations sont visibles par les autres utilisateurs.</p>
+              <div class="row photo">
+                <app-avatar [nom]="auth.nomComplet()" [photo]="shell.photo()" [size]="70" />
+                <div><strong>Photo de profil</strong><p class="muted small">JPG ou PNG · 2 Mo maximum</p></div>
+                <label class="btn btn-secondary btn-sm">Changer la photo<input type="file" accept="image/png,image/jpeg" hidden (change)="changerPhoto($event)" /></label>
+              </div>
+              <div class="form-grid">
+                <div class="field"><label for="pr">Prénom</label><input id="pr" class="input" [(ngModel)]="compte.prenom" /></div>
+                <div class="field"><label for="no">Nom</label><input id="no" class="input" [(ngModel)]="compte.nom" /></div>
+                <div class="field"><label for="em">Adresse e-mail</label><div class="input-icon"><app-icon name="mail" [size]="16" /><input id="em" type="email" class="input" [(ngModel)]="compte.email" /></div></div>
+                <div class="field"><label for="te">Téléphone</label><div class="input-icon"><app-icon name="phone" [size]="16" /><input id="te" class="input" inputmode="tel" [(ngModel)]="compte.telephone" placeholder="+223 76 45 12 08" /></div></div>
+                <div class="field"><label for="ro">Rôle</label><div class="input-icon"><input id="ro" class="input" [value]="auth.libelleRole()" disabled /><span class="suffix"><app-icon name="lock" [size]="15" /></span></div></div>
+                <div class="field"><label for="pe">Périmètre</label><div class="input-icon"><input id="pe" class="input" [value]="perimetre()" disabled /><span class="suffix"><app-icon name="lock" [size]="15" /></span></div></div>
+              </div>
+            </div>
+            <div class="action-bar bord"><span></span><button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="enregistrerProfil()">Enregistrer</button></div>
+          </section>
+        }
+        @case ('securite') {
+          <section class="card corps">
+            <h2>Mot de passe</h2><p class="muted small">Utilisez au moins 8 caractères, avec des lettres et des chiffres.</p>
+            <div class="field mt-16" style="max-width: 340px"><label for="an">Mot de passe actuel</label>
+              <div class="input-icon"><app-icon name="lock" [size]="16" /><input id="an" type="password" class="input" [(ngModel)]="ancien" autocomplete="current-password" /></div></div>
+            <div class="form-grid mt-16">
+              <div class="field"><label for="nv">Nouveau mot de passe</label>
+                <div class="input-icon"><app-icon name="lock" [size]="16" /><input id="nv" type="password" class="input" [ngModel]="nouveau()" (ngModelChange)="nouveau.set($event)" autocomplete="new-password" /></div></div>
+              <div class="field"><label for="cf">Confirmer le mot de passe</label>
+                <div class="input-icon"><app-icon name="lock" [size]="16" /><input id="cf" type="password" class="input" [(ngModel)]="confirmation2" autocomplete="new-password" /></div>
+                <div class="row" style="justify-content: flex-end; margin-top: 8px"><button type="button" class="btn btn-primary" [disabled]="!ancien || !nouveau() || envoi()" (click)="changerMotDePasse()">Mettre à jour</button></div></div>
+            </div>
+          </section>
+          <section class="card corps">
+            <div class="row-between">
+              <div class="row"><div><h2>Double authentification</h2><p class="muted small">Un code SMS est demandé à chaque nouvelle connexion.</p></div></div>
+              <label class="switch"><input type="checkbox" [(ngModel)]="deuxFacteurs" (ngModelChange)="basculerDeuxFacteurs($event)" aria-label="Double authentification" /></label>
+            </div>
+            <div class="ligne-tel mt-16">
+              <app-icon name="smartphone" [size]="16" />
+              @if (modifierTelephone) {
+                <input class="input input-sm grow" inputmode="tel" [(ngModel)]="telephone2fa" placeholder="76 45 12 08" aria-label="Téléphone pour les codes" />
+                <button type="button" class="btn btn-primary btn-sm" (click)="basculerDeuxFacteurs(deuxFacteurs)">Enregistrer</button>
+              } @else {
+                <span class="grow small">Codes envoyés au {{ telephoneMasque() }}</span>
+                <button type="button" class="link" (click)="modifierTelephone = true">Modifier</button>
+              }
+            </div>
+          </section>
+          <section class="card corps">
+            <div class="row-between"><h2>Sessions actives</h2><button type="button" class="link link-danger" (click)="deconnecterAutres()">Déconnecter les autres sessions</button></div>
+            <div class="mt-12">
+              @for (s of sessions(); track s.id) {
+                <div class="session">
+                  <div class="grow"><strong class="small">{{ s.appareil || 'Appareil inconnu' }}</strong><p class="muted xs">{{ s.adresseIp }} · {{ s.dateCreation | relatif }}</p></div>
+                  @if (s.sessionActuelle) { <span class="pill green dot">Session actuelle</span> }
+                  @else { <button type="button" class="btn btn-secondary btn-sm" (click)="deconnecter(s)">Déconnecter</button> }
+                </div>
+              } @empty { <p class="muted small">Aucune session enregistrée.</p> }
+            </div>
+          </section>
+        }
+        @case ('notifications') {
+          <section class="card">
+            <div class="corps"><h2>Notifications</h2><p class="muted small">Choisissez comment être prévenu des événements importants.</p></div>
+            <table class="table">
+              <thead><tr><th>Événement</th><th class="centre">Application</th><th class="centre">E-mail</th><th class="centre">SMS</th></tr></thead>
+              <tbody>
+                @for (p of preferences(); track p.evenement) {
+                  <tr><td>{{ p.libelle }}</td>
+                    <td class="centre"><span class="checkbox"><input type="checkbox" [checked]="p.application" (change)="basculer(p, 'application')" [attr.aria-label]="'Application · ' + p.libelle" /></span></td>
+                    <td class="centre"><span class="checkbox"><input type="checkbox" [checked]="p.email" (change)="basculer(p, 'email')" [attr.aria-label]="'E-mail · ' + p.libelle" /></span></td>
+                    <td class="centre"><span class="checkbox"><input type="checkbox" [checked]="p.sms" (change)="basculer(p, 'sms')" [attr.aria-label]="'SMS · ' + p.libelle" /></span></td></tr>
+                }
+              </tbody>
+            </table>
+            <div class="action-bar bord"><span></span><button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="enregistrerPreferences()">Enregistrer</button></div>
+          </section>
+        }
+      }
+    </div>
+  </div>
+</div>
