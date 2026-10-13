@@ -1,0 +1,90 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <a class="link" routerLink="/actualites">← Retour</a>
+      <h1>{{ actualiteId() ? (f.titre || 'Actualité') : 'Nouvelle actualité' }}</h1>
+      <p class="sub">{{ enregistreA() ? 'Brouillon enregistré à ' + heureEnregistrement() : detail()?.resume?.statut === 'PUBLIEE' ? 'Actualité publiée · les modifications sont visibles immédiatement' : 'Brouillon non enregistré' }}</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-secondary" [disabled]="envoi()" (click)="enregistrer()">Enregistrer</button>
+      @if (detail()?.resume?.statut !== 'PUBLIEE') {
+        <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="publier()">{{ f.statut === 'PROGRAMMEE' ? 'Programmer' : 'Publier' }}</button>
+      }
+    </div>
+  </div>
+
+  <div class="mise">
+    <section class="card">
+      <div class="corps">
+        <label class="depot" [class.over]="survol()" (dragover)="$event.preventDefault(); survol.set(true)" (dragleave)="survol.set(false)" (drop)="deposer($event)">
+          @if (image()) {
+            <img class="miniature" [src]="image()" alt="Image de couverture" />
+            <strong>Image de couverture ajoutée</strong>
+            <span class="btn btn-secondary mt-8">Changer l'image</span>
+          } @else {
+            <span class="rond"><app-icon name="upload" [size]="26" /></span>
+            <strong>Glissez-déposez l'image de couverture ici</strong>
+            <span class="muted small">JPG, PNG ou WEBP</span>
+            <span class="btn btn-secondary mt-8">Parcourir les fichiers</span>
+          }
+          <input type="file" hidden accept="image/png,image/jpeg,image/webp" (change)="choisirImage($event)" />
+        </label>
+        <input class="titre" [(ngModel)]="f.titre" (ngModelChange)="maj()" placeholder="Titre de l'actualité" aria-label="Titre" />
+        <input class="sous-titre" [(ngModel)]="f.sousTitre" placeholder="Sous-titre (facultatif)" aria-label="Sous-titre" />
+        <textarea class="zone" [(ngModel)]="f.contenu" (ngModelChange)="maj()" rows="14"
+                  placeholder="Rédigez le contenu de l'actualité…" aria-label="Contenu"></textarea>
+      </div>
+      <div class="card-foot"><span>{{ mots() }} mots · {{ minutes() }} min de lecture</span>
+        @if (enregistreA()) { <span class="row ok"><app-icon name="check-circle" [size]="15" />Enregistré</span> }</div>
+    </section>
+
+    <aside class="card">
+      <h3 class="bloc-titre">Paramètres de publication</h3>
+      <div class="corps stack" style="gap: 18px">
+        <div class="field"><label for="cat">Catégorie</label>
+          <select id="cat" class="select" [(ngModel)]="f.categorie" (ngModelChange)="maj()">
+            @for (c of categories; track c.cle) { <option [value]="c.cle">{{ c.libelle }}</option> }</select></div>
+        @if (detail()?.resume?.statut !== 'PUBLIEE') {
+          <div class="field"><span class="label">Statut</span>
+            <div class="segmented block sm">
+              <button type="button" [class.active]="f.statut === 'BROUILLON'" (click)="f.statut = 'BROUILLON'">Brouillon</button>
+              <button type="button" [class.active]="f.statut === 'PROGRAMMEE'" (click)="f.statut = 'PROGRAMMEE'">Programmée</button>
+            </div></div>
+          @if (f.statut === 'PROGRAMMEE') {
+            <div class="field"><label for="dp">Date de publication</label><input id="dp" type="datetime-local" class="input" [(ngModel)]="datePublication" /></div>
+          }
+        }
+        <div class="field"><div class="row-between"><label for="de">Date d'expiration</label><span class="hint">Facultatif</span></div>
+          <input id="de" type="date" class="input" [(ngModel)]="dateExpiration" (ngModelChange)="maj()" /></div>
+        <div class="field"><span class="label">Public visé</span>
+          <label class="radio"><input type="radio" name="cible" [checked]="f.cible === 'TOUS'" (change)="changerCible('TOUS')" />Tous les membres</label>
+          <label class="radio"><input type="radio" name="cible" [checked]="f.cible === 'REGION'" (change)="changerCible('REGION')" />Une ou plusieurs régions</label>
+          @if (f.cible === 'REGION') {
+            <div class="row wrap" style="gap: 6px">@for (r of regions(); track r) { <button type="button" class="tag" [class.soft]="valeurs.includes(r)" (click)="basculerRegion(r)">{{ r }}</button> }</div>
+          }
+          <label class="radio"><input type="radio" name="cible" [checked]="f.cible === 'COHORTE'" (change)="changerCible('COHORTE')" />Une cohorte</label>
+          @if (f.cible === 'COHORTE') {
+            <select class="select" [ngModel]="valeurs[0]" (ngModelChange)="valeurs = [$event]; maj()" aria-label="Cohorte">
+              @for (c of cohortes(); track c.id) { <option [value]="'' + c.id">{{ c.nom }}</option> }</select>
+          }
+        </div>
+      </div>
+      <div class="interrupteurs">
+        <div class="row-between"><div><strong>Notifier les membres</strong><p class="muted xs">Envoi d'une notification push</p></div>
+          <label class="switch"><input type="checkbox" [(ngModel)]="f.notifierMembres" (ngModelChange)="maj()" aria-label="Notifier les membres" /></label></div>
+        <div class="row-between"><div><strong>Épingler « À la une »</strong><p class="muted xs">Affichée en tête de l'application</p></div>
+          <label class="switch"><input type="checkbox" [(ngModel)]="f.epingle" aria-label="Épingler à la une" /></label></div>
+        <div class="row-between"><div><strong>Ouvrir les inscriptions</strong><p class="muted xs">Bouton « S'inscrire » dans l'application</p></div>
+          <label class="switch"><input type="checkbox" [(ngModel)]="f.inscriptionsOuvertes" aria-label="Ouvrir les inscriptions" /></label></div>
+        @if (detail()?.nombreInscrits) { <p class="small strong">{{ detail()?.nombreInscrits }} membre(s) inscrit(s)</p> }
+      </div>
+      <div class="corps">
+        @if (detail()?.resume?.statut === 'PUBLIEE') {
+          <button type="button" class="btn btn-secondary btn-block" (click)="archiver()">Archiver l'actualité</button>
+        } @else {
+          <button type="button" class="btn btn-danger-soft btn-block" (click)="supprimer()">Supprimer le brouillon</button>
+        }
+      </div>
+    </aside>
+  </div>
+</div>

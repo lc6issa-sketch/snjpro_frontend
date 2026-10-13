@@ -1,0 +1,14 @@
+.mise { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.corps { padding: 22px; }
+.depot { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 20px; border: 2px dashed var(--secondary); border-radius: 14px; cursor: pointer; text-align: center; }
+.depot:hover, .depot.over { background: var(--lime-bg); }
+.depot strong { font-size: 16px; margin-top: 10px; }
+.rond { width: 68px; height: 68px; border-radius: 50%; background: var(--lime-bg); color: var(--secondary); display: grid; place-items: center; }
+.miniature { display: block; max-width: 260px; max-height: 150px; border-radius: 8px; object-fit: cover; }
+.titre { width: 100%; border: 0; outline: none; font: inherit; font-size: 24px; font-weight: 700; color: var(--text); margin-top: 24px; }
+.sous-titre { width: 100%; border: 0; outline: none; font: inherit; font-size: 14px; color: var(--text-2); margin-top: 4px; }
+.zone { width: 100%; margin-top: 20px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; outline: none; resize: vertical; font: inherit; font-size: 15px; line-height: 1.75; color: var(--text); min-height: 280px; }
+.ok { color: var(--secondary); font-weight: 600; }
+.bloc-titre { padding: 20px; border-bottom: 1px solid var(--border); font-size: 15px; font-weight: 600; }
+.interrupteurs { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 18px 22px; display: flex; flex-direction: column; gap: 18px; font-size: 14px; }
+@media (max-width: 1100px) { .mise { grid-template-columns: minmax(0, 1fr); } }

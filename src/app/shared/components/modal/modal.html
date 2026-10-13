@@ -1,0 +1,13 @@
+<div class="overlay" (click)="fermer.emit()"></div>
+<section class="panel" role="dialog" aria-modal="true" [style.width.px]="largeur()">
+  <header>
+    @if (icone()) { <span class="ico" [class]="'ico ' + teinte()"><app-icon [name]="icone()!" [size]="20" /></span> }
+    <div class="grow">
+      <h2>{{ titre() }}</h2>
+      @if (sousTitre()) { <p class="muted small mt-4">{{ sousTitre() }}</p> }
+    </div>
+    <button class="close" type="button" (click)="fermer.emit()" aria-label="Fermer"><app-icon name="x" [size]="18" /></button>
+  </header>
+  <div class="body"><ng-content /></div>
+  <ng-content select="[pied]" />
+</section>

@@ -1,0 +1,41 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Actualités</h1><p class="sub">Publiez les informations et annonces du SNJ</p></div>
+    @if (redacteur()) { <div class="actions"><a routerLink="/actualites/nouvelle" class="btn btn-primary">Nouvelle actualité</a></div> }
+  </div>
+  <div class="row-between wrap">
+    <div class="pill-tabs">
+      @for (o of onglets(); track o.libelle) {
+        <button type="button" [class.active]="statut() === o.cle" (click)="filtrer(o.cle)">{{ o.libelle }} <span class="counter">{{ o.nombre }}</span></button>
+      }
+    </div>
+    <div class="search" style="width: 268px"><app-icon name="search" [size]="17" />
+      <input class="input" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" placeholder="Rechercher une actualité…" /></div>
+  </div>
+  <div class="grid grid-3 mt-20">
+    @for (a of filtrees(); track a.id) {
+      <article class="card carte" (click)="ouvrir(a)" (keydown.enter)="ouvrir(a)" tabindex="0">
+        <div class="couv" [style.background]="images()[a.id!] ? 'url(' + images()[a.id!] + ') center/cover' : visuel(a).fond">
+          <i class="c1"></i><i class="c2"></i>
+          <span class="statut"><app-pill [dico]="STATUT" [valeur]="a.statut" /></span>
+          @if (!images()[a.id!]) { <span class="ico"><app-icon [name]="visuel(a).icone" [size]="24" /></span> }
+          @if (a.epingle) { <span class="epingle" title="À la une"><app-icon name="star" [size]="14" /></span> }
+        </div>
+        <div class="contenu">
+          <p class="categorie">{{ categorie(a.categorie) }}</p>
+          <h3>{{ a.titre }}</h3>
+          <p class="muted small extrait">{{ propre(a.extrait || a.sousTitre) }}</p>
+        </div>
+        <div class="pied">
+          <app-avatar [nom]="a.auteur" [size]="26" />
+          <div class="grow"><p class="small strong">{{ a.auteur || '—' }}</p>
+            <p class="faint xs">{{ a.statut === 'BROUILLON' ? (a.dateModification ? 'Modifié ' + (a.dateModification | relatif) : 'Brouillon') : (a.datePublication | dateMoyenne) }}</p></div>
+          @if (a.statut === 'BROUILLON' || a.statut === 'PROGRAMMEE') { <span class="link">Continuer →</span> }
+          @else { <span class="row faint small"><app-icon name="eye" [size]="15" />{{ a.vues | nombre }}</span> }
+        </div>
+      </article>
+    } @empty {
+      <div class="card empty plein"><app-icon name="newspaper" [size]="32" /><p class="title">Aucune actualité</p><p>Publiez une première annonce pour les membres.</p></div>
+    }
+  </div>
+</div>

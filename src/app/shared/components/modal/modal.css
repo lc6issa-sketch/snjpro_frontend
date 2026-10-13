@@ -1,0 +1,18 @@
+:host { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px 16px; }
+.overlay { position: absolute; inset: 0; background: var(--overlay); }
+.panel { position: relative; max-width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column;
+  background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg); }
+header { display: flex; align-items: flex-start; gap: 14px; padding: 24px 24px 20px; border-bottom: 1px solid var(--border); }
+h2 { font-size: 19px; font-weight: 700; }
+.ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--tint); color: var(--primary); }
+.ico.lime { background: var(--lime-bg); color: var(--secondary); }
+.ico.red { background: var(--red-bg); color: var(--red); }
+.ico.gold { background: var(--gold-bg); color: var(--gold); }
+.ico.blue { background: var(--blue-bg); color: var(--blue); }
+.close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--text-2); }
+.close:hover { background: var(--muted-bg); }
+.body { padding: 22px 24px; overflow-y: auto; }
+.body:empty { display: none; }
+:host ::ng-deep [pied] { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 18px 24px; border-top: 1px solid var(--border); }
+@keyframes f { from { opacity: 0; } }
+@keyframes up { from { opacity: 0; transform: translateY(8px) scale(.99); } }
