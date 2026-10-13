@@ -1,0 +1,11 @@
+<span class="muted small">Affichage de {{ debut() }} à {{ fin() }} sur {{ totalTexte() }} {{ libelle() }}</span>
+@if (pages() > 1) {
+  <div class="pager">
+    <button type="button" [disabled]="page() === 0" (click)="aller.emit(page() - 1)" aria-label="Page précédente">‹</button>
+    @for (p of numeros(); track $index) {
+      @if (p === -1) { <button type="button" disabled>…</button> }
+      @else { <button type="button" [class.active]="p === page()" (click)="aller.emit(p)">{{ p + 1 }}</button> }
+    }
+    <button type="button" [disabled]="page() >= pages() - 1" (click)="aller.emit(page() + 1)" aria-label="Page suivante">›</button>
+  </div>
+}
