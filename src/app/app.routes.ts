@@ -189,6 +189,13 @@ export const routes: Routes = [
         data: { roles: GESTION_MEMBRES },
         loadComponent: () => import('./pages/membres/modifier/modifier-membre').then(m => m.ModifierMembre),
       },
+
+      // ----- Cohortes -----
+      {
+        path: 'cohortes',
+        title: 'Cohortes · SNJPro',
+        loadComponent: () => import('./pages/cohortes/liste/cohortes-liste').then(m => m.CohortesListe),
+      },
     ],
   },
 

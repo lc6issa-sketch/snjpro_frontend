@@ -1,0 +1,9 @@
+.barre { gap: 12px; }
+.cohorte { text-align: left; cursor: pointer; padding: 18px; display: flex; flex-direction: column; gap: 0; font: inherit; color: inherit; }
+.cohorte:hover { border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
+h3 { font-size: 17px; font-weight: 700; margin-top: 14px; }
+.chiffres { display: grid; grid-template-columns: repeat(3, 1fr); margin: 18px 0 4px; }
+.chiffres div { display: flex; flex-direction: column; gap: 3px; padding-left: 12px; border-left: 1px solid var(--border); }
+.chiffres div:first-child { padding-left: 0; border-left: 0; }
+.chiffres strong { font-size: 16px; }
+.full { grid-column: 1 / -1; }

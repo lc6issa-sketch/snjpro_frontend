@@ -1,0 +1,34 @@
+<div class="page">
+  <div class="page-head">
+    <div><h1>Cohortes</h1><p class="sub">{{ compteurs()['TOUTES'] ?? 0 }} cohortes · {{ totalMembres() | nombre }} éléments incorporés{{ premiereAnnee() ? ' depuis ' + premiereAnnee() : '' }}</p></div>
+    @if (peutGerer()) { <div class="actions"><button type="button" class="btn btn-primary" (click)="formulaire.set(true)">Nouvelle cohorte</button></div> }
+  </div>
+  <div class="row-between wrap barre">
+    <div class="pill-tabs">
+      @for (o of onglets; track o.libelle) {
+        <button type="button" [class.active]="statut() === o.cle" (click)="statut.set(o.cle)">{{ o.libelle }} <span class="counter">{{ compteurs()[o.compteur] ?? 0 }}</span></button>
+      }
+    </div>
+    <div class="search" style="width: 268px"><app-icon name="search" [size]="17" />
+      <input class="input" [ngModel]="recherche()" (ngModelChange)="recherche.set($event)" placeholder="Rechercher une cohorte…" /></div>
+  </div>
+
+  <div class="grid grid-3 mt-20">
+    @for (c of filtrees(); track c.id) {
+      <button type="button" class="card cohorte" (click)="ouvrir(c)">
+        <div><app-pill [dico]="STATUT" [valeur]="c.statut" /></div>
+        <h3>{{ c.nom }}{{ c.numero && !(c.nom ?? '').includes('N°') ? ' — N°' + c.numero : '' }}</h3>
+        <p class="muted small">{{ c.centre || c.region || 'Centre non renseigné' }}</p>
+        <div class="chiffres">
+          <div><span class="muted xs">Recrues</span><strong>{{ (c.recruesInitiales ?? c.nombreMembres) | nombre }}</strong></div>
+          <div><span class="muted xs">Actifs</span><strong>{{ c.membresActifs | nombre }}</strong></div>
+          <div><span class="muted xs">Compagnies</span><strong>{{ c.nombreCompagnies ?? '—' }}</strong></div>
+        </div>
+        <p class="row muted xs mt-12"><app-icon name="calendar" [size]="13" />{{ periode(c) || 'Dates non renseignées' }}</p>
+      </button>
+    } @empty {
+      <div class="card empty full"><app-icon name="layers" [size]="32" /><p class="title">Aucune cohorte</p><p>Créez la première cohorte pour commencer.</p></div>
+    }
+  </div>
+</div>
+@if (formulaire()) { <app-cohorte-form (fermer)="formulaire.set(false)" (enregistre)="cree($event)" /> }
