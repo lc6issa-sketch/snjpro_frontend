@@ -1,0 +1,11 @@
+.grille { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.bord { padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.infos { display: flex; flex-direction: column; gap: 16px; }
+.infos .row { align-items: flex-start; }
+.barre-situation { display: flex; gap: 3px; height: 10px; border-radius: 6px; overflow: hidden; }
+.carre { width: 10px; height: 10px; border-radius: 3px; }
+.label { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.option { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+.option.choisie { border: 1.5px solid var(--primary); background: var(--surface-selected); }
+tr[ng-reflect-router-link], tr.clickable { cursor: pointer; }
+@media (max-width: 1100px) { .grille { grid-template-columns: minmax(0, 1fr); } }

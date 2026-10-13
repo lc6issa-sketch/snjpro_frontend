@@ -196,6 +196,11 @@ export const routes: Routes = [
         title: 'Cohortes · SNJPro',
         loadComponent: () => import('./pages/cohortes/liste/cohortes-liste').then(m => m.CohortesListe),
       },
+      {
+        path: 'cohortes/:id',
+        title: 'Cohorte · SNJPro',
+        loadComponent: () => import('./pages/cohortes/detail/cohorte-detail').then(m => m.CohorteDetail),
+      },
     ],
   },
 
