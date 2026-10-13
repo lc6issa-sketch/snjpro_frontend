@@ -52,6 +52,12 @@ export const routes: Routes = [
     title: 'Accès non autorisé · SNJPro',
     loadComponent: () => import('./pages/acces-refuse/acces-refuse').then(m => m.AccesRefuse),
   },
+  {
+    path: 'activites/:id/projection',
+    canActivate: [authGuard],
+    title: 'Projection · SNJPro',
+    loadComponent: () => import('./pages/activites/projection/projection').then(m => m.Projection),
+  },
 
   // =========================================================================
   // ESPACE DE GESTION

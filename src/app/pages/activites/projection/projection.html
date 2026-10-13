@@ -1,0 +1,36 @@
+<i class="cercle c1"></i><i class="cercle c2"></i><i class="disque"></i>
+<header>
+  <app-logo [taille]="48" sousTitre="Enregistrement des présences" />
+  <button type="button" class="direct" (click)="fermer()"><i></i>En direct<app-icon name="x" [size]="16" /></button>
+</header>
+@if (p(); as p) {
+  <main>
+    <section class="gauche">
+      <h1>{{ debutTitre() }}<br /><em>{{ finTitre() }}</em></h1>
+      <p class="info"><app-icon name="calendar" [size]="18" />{{ quand() }}</p>
+      @if (p.activite?.lieu) { <p class="info"><app-icon name="map-pin" [size]="18" />{{ p.activite?.lieu }}</p> }
+      <ol>
+        <li><span>1</span>Ouvrez l'application SNJPro</li>
+        <li><span>2</span>Touchez « Scanner une présence »</li>
+        <li><span>3</span>Visez ce QR code</li>
+      </ol>
+    </section>
+    <section class="qr">
+      @if (p.codeQr?.contenuQr) { <app-qr-code [contenu]="p.codeQr?.contenuQr" [taille]="290" /> }
+      @else { <p class="muted">QR code indisponible</p> }
+      <p class="muted">Le code se renouvelle dans</p>
+      <p class="minuteur">0:{{ restant().toString().padStart(2, '0') }}</p>
+      @if (p.codeQr?.code) { <p class="faint small">Code manuel : <strong>{{ p.codeQr?.code }}</strong></p> }
+    </section>
+    <section class="droite">
+      <p class="presents-label">Présents</p>
+      <p class="presents"><strong>{{ p.activite?.compteurs?.presents ?? 0 }}</strong><span>/ {{ p.activite?.compteurs?.inscrits ?? 0 }}</span></p>
+      <div class="barre"><span [style.width.%]="p.activite?.compteurs?.tauxPresence ?? 0"></span></div>
+      <p class="arrivees">Dernières arrivées</p>
+      @for (a of p.dernieresArrivees; track a.id) {
+        <div class="arrivee"><app-avatar [nom]="a.prenom + ' ' + a.nom" [size]="28" /><strong class="grow">{{ a.prenom }} {{ a.nom }}</strong><span>{{ a.dateHeure | heure }}</span></div>
+      } @empty { <p class="faint small">En attente des premiers pointages…</p> }
+    </section>
+  </main>
+}
+<footer>Présence réservée aux membres inscrits · les données sont enregistrées dans l'historique</footer>
