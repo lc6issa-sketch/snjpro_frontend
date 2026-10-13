@@ -60,6 +60,8 @@ export class Utilisateurs implements OnInit {
   protected readonly roleSelectionne = signal<RoleEnum>('ROLE_RESPONSABLE_REGIONAL');
   protected readonly permissions = signal<RoleDTOs.Permission[]>([]);
   protected readonly invitation = signal(false);
+  /** Création avec mot de passe défini par l'admin (compte actif tout de suite) plutôt qu'invitation par e-mail. */
+  protected readonly creationDirecte = signal(false);
   protected readonly edition = signal<UserResponseDTO | null>(null);
   protected readonly envoi = signal(false);
   protected readonly nouveauMdp = signal<string | null>(null);
@@ -110,15 +112,27 @@ export class Utilisateurs implements OnInit {
   }
 
   // ------------------------------------------------------------ invitation
-  protected ouvrirInvitation(): void { this.invite = { role: 'ROLE_ADMIN_SNJ' }; this.invitation.set(true); }
+  protected ouvrirInvitation(): void { this.invite = { role: 'ROLE_ADMIN_SNJ' }; this.creationDirecte.set(false); this.invitation.set(true); }
   protected inviter(): void {
     if (!this.invite.prenom?.trim() || !this.invite.nom?.trim() || !this.invite.email?.trim()) { this.toast.error('Le prénom, le nom et l\'e-mail sont obligatoires.'); return; }
+    const direct = this.creationDirecte();
+    const mdp = this.invite.motDePasse ?? '';
+    if (direct && (mdp.length < 8 || !/[A-Za-z]/.test(mdp) || !/\d/.test(mdp))) { this.toast.error('Le mot de passe doit contenir au moins 8 caractères, dont une lettre et un chiffre.'); return; }
     if (this.invite.role === 'ROLE_RESPONSABLE_REGIONAL' && !this.invite.region) { this.toast.error('Choisissez la région de rattachement.'); return; }
     if (this.invite.role === 'ROLE_RESPONSABLE_COHORTE' && !this.invite.cohorteId) { this.toast.error('Choisissez la cohorte suivie.'); return; }
     this.envoi.set(true);
     const tel = (this.invite.telephone ?? '').replace(/\D/g, '');
-    this.service.inviter({ ...this.invite, telephone: tel ? '+223' + tel.replace(/^223/, '') : undefined }).subscribe({
-      next: () => { this.envoi.set(false); this.invitation.set(false); this.toast.success(`Invitation envoyée à ${this.invite.email}.`); this.charger(); },
+    const corps: InvitationDTO = {
+      ...this.invite, telephone: tel ? '+223' + tel.replace(/^223/, '') : undefined,
+      username: direct ? this.invite.username?.trim() || undefined : undefined,
+      motDePasse: direct ? mdp : undefined, message: direct ? undefined : this.invite.message
+    };
+    this.service.inviter(corps).subscribe({
+      next: u => {
+        this.envoi.set(false); this.invitation.set(false);
+        this.toast.success(direct ? `Compte créé : ${u.username} (actif).` : `Invitation envoyée à ${this.invite.email}.`);
+        this.charger();
+      },
       error: e => { this.envoi.set(false); this.toast.error(messageErreur(e)); }
     });
   }

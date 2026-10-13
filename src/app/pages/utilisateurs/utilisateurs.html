@@ -1,7 +1,7 @@
 <div class="page">
   <div class="page-head">
     <div><h1>Utilisateurs & rôles</h1><p class="sub">{{ comptes().length }} comptes administratifs · {{ rolesAffiches().length }} rôles · {{ invitationsEnAttente() }} invitation{{ invitationsEnAttente() > 1 ? 's' : '' }} en attente</p></div>
-    @if (estAdmin()) { <div class="actions"><button type="button" class="btn btn-primary" (click)="ouvrirInvitation()">Inviter un utilisateur</button></div> }
+    @if (estAdmin()) { <div class="actions"><button type="button" class="btn btn-primary" (click)="ouvrirInvitation()"><app-icon name="plus" [size]="17" />Nouvel utilisateur</button></div> }
   </div>
   <div class="tabs">
     <button type="button" [class.active]="onglet() === 'utilisateurs'" (click)="onglet.set('utilisateurs')">Utilisateurs <span class="counter">{{ comptes().length }}</span></button>
@@ -78,13 +78,26 @@
 </div>
 
 @if (invitation()) {
-  <app-modal titre="Inviter un utilisateur" sousTitre="Un e-mail d'activation lui sera envoyé." icone="user" [largeur]="552" (fermer)="invitation.set(false)">
+  <app-modal titre="Nouvel utilisateur" [sousTitre]="creationDirecte() ? 'Le compte est actif immédiatement.' : 'Un e-mail d\'activation lui sera envoyé.'" icone="user" [largeur]="552" (fermer)="invitation.set(false)">
+    <div class="segmented block" style="margin-bottom: 16px">
+      <button type="button" [class.active]="!creationDirecte()" (click)="creationDirecte.set(false)">Invitation par e-mail</button>
+      <button type="button" [class.active]="creationDirecte()" (click)="creationDirecte.set(true)">Définir le mot de passe maintenant</button>
+    </div>
     <div class="form-grid">
       <div class="field"><label for="ip">Prénom<span class="req">*</span></label><input id="ip" class="input" [(ngModel)]="invite.prenom" /></div>
       <div class="field"><label for="in">Nom<span class="req">*</span></label><input id="in" class="input" [(ngModel)]="invite.nom" /></div>
       <div class="field"><label for="ie">Adresse e-mail<span class="req">*</span></label><div class="input-icon"><app-icon name="mail" [size]="16" /><input id="ie" type="email" class="input" [(ngModel)]="invite.email" /></div></div>
       <div class="field"><label for="it">Téléphone</label><div class="input-icon"><app-icon name="phone" [size]="16" /><input id="it" class="input" inputmode="tel" [(ngModel)]="invite.telephone" placeholder="70 45 12 88" /></div></div>
     </div>
+    @if (creationDirecte()) {
+      <div class="form-grid mt-16">
+        <div class="field"><div class="row-between"><label for="iu">Nom d'utilisateur</label><span class="hint">Facultatif</span></div>
+          <input id="iu" class="input" [(ngModel)]="invite.username" placeholder="ex. regional4" autocomplete="off" /></div>
+        <div class="field"><label for="ipw">Mot de passe<span class="req">*</span></label>
+          <input id="ipw" type="text" class="input" [(ngModel)]="invite.motDePasse" autocomplete="new-password" />
+          <span class="hint">8 caractères min., au moins une lettre et un chiffre.</span></div>
+      </div>
+    }
     <p class="label mt-20">Rôle</p>
     <div class="stack" style="gap: 8px">
       @for (r of rolesInvitables; track r.cle) {
@@ -104,11 +117,17 @@
         <select id="ic" class="select" [(ngModel)]="invite.cohorteId"><option [ngValue]="undefined">Choisir la cohorte…</option>@for (c of cohortes(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}</option> }</select>
         <span class="hint">L'utilisateur ne verra que les membres de cette cohorte.</span></div>
     }
-    <div class="field mt-16"><div class="row-between"><label for="im">Message personnalisé</label><span class="hint">Facultatif</span></div>
-      <input id="im" class="input" [(ngModel)]="invite.message" placeholder="Bienvenue dans SNJPro…" /></div>
+    @if (!creationDirecte()) {
+      <div class="field mt-16"><div class="row-between"><label for="im">Message personnalisé</label><span class="hint">Facultatif</span></div>
+        <input id="im" class="input" [(ngModel)]="invite.message" placeholder="Bienvenue dans SNJPro…" /></div>
+    }
     <div pied>
       <button type="button" class="btn btn-ghost" (click)="invitation.set(false)">Annuler</button>
-      <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="inviter()">Envoyer l'invitation</button>
+      @if (creationDirecte()) {
+        <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="inviter()"><app-icon name="check" [size]="16" />Créer le compte</button>
+      } @else {
+        <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="inviter()"><app-icon name="mail" [size]="16" />Envoyer l'invitation</button>
+      }
     </div>
   </app-modal>
 }
