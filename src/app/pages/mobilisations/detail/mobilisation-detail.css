@@ -1,0 +1,16 @@
+.ico { width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; flex: none; }
+.grille { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.onglets { padding: 18px 18px 0; gap: 24px; }
+.motif { display: block; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+.objectif { font-size: 24px; font-weight: 700; }
+.details { flex-direction: column; align-items: stretch; gap: 12px; }
+.details strong { color: var(--text); max-width: 170px; }
+.jours { display: flex; align-items: flex-end; gap: 10px; height: 170px; }
+.jour { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.jour .v { font-size: 12px; font-weight: 600; }
+.jour .b { width: 100%; max-width: 32px; border-radius: 4px 4px 0 0; background: var(--lime-200); }
+.jour .b.fort { background: var(--secondary); }
+.chiffre { padding: 16px; border-radius: 10px; background: var(--bg); display: flex; flex-direction: column; gap: 2px; }
+.chiffre strong { font-size: 22px; } .chiffre span { font-size: 13px; color: var(--text-2); }
+.vert { color: var(--secondary); } .or { color: var(--gold); }
+@media (max-width: 1100px) { .grille { grid-template-columns: minmax(0, 1fr); } }

@@ -1,0 +1,113 @@
+<div class="page">
+  @if (d(); as d) {
+    <a class="link" routerLink="/mobilisations">← Retour</a>
+    <div class="page-head" style="align-items: center">
+      <div class="row" style="gap: 16px">
+        <span class="ico" [class]="'ico ' + style().teinte"><app-icon [name]="style().icone" [size]="24" /></span>
+        <div><h1>{{ d.informations?.titre }}</h1>
+          <div class="row wrap mt-4"><app-pill [dico]="STATUT" [valeur]="d.statut" />
+            @if (d.informations?.region || d.informations?.lieu) { <span class="pill">{{ d.informations?.region || d.informations?.lieu }}</span> }
+            <span class="pill">{{ periode() }}</span>
+            @if (d.informations?.urgent) { <span class="pill red dot">Urgent</span> }</div></div>
+      </div>
+      @if (peutGerer()) {
+        <div class="actions">
+          @if (d.statut === 'EN_COURS') { <button type="button" class="btn btn-secondary" (click)="relancer()">Relancer les sans réponse</button> }
+          @if (d.statut !== 'CLOTUREE') { <button type="button" class="btn btn-secondary" (click)="cloture.set(true)">Clôturer</button> }
+          <button type="button" class="btn btn-primary" (click)="message()">Envoyer un message</button>
+        </div>
+      }
+    </div>
+
+    <div class="grid grid-4">
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Membres sollicités</p><p class="kpi-value">{{ c()?.sollicites | nombre }}</p>
+          <p class="faint xs mt-12">{{ d.dateEnvoi ? 'Envoyé le ' + (d.dateEnvoi | dateHeure) : 'Envoi programmé' }}</p></div></div>
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Disponibles</p><p class="kpi-value">{{ c()?.disponibles | nombre }}</p>
+          <div class="row mt-12"><div class="progress lime grow"><span [style.width.%]="part(c()?.disponibles)"></span></div><strong class="xs">{{ part(c()?.disponibles) }} %</strong></div></div></div>
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Indisponibles</p><p class="kpi-value">{{ c()?.indisponibles | nombre }}</p>
+          <div class="row mt-12"><div class="progress red grow"><span [style.width.%]="part(c()?.indisponibles)"></span></div><strong class="xs">{{ part(c()?.indisponibles) }} %</strong></div></div></div>
+      <div class="card kpi-inline"><div class="grow"><p class="kpi-label">Sans réponse</p><p class="kpi-value">{{ c()?.sansReponse | nombre }}</p>
+          <p class="faint xs mt-12">{{ d.dateRelance ? 'Relance auto. le ' + court(d.dateRelance) : 'Taux de réponse : ' + (c()?.tauxReponse ?? 0) + ' %' }}</p></div></div>
+    </div>
+
+    <div class="grille mt-20">
+      <div class="card">
+        <div class="tabs onglets">
+          @for (o of onglets(); track o.libelle) {
+            <button type="button" [class.active]="reponse() === o.cle" (click)="filtrer(o.cle)">{{ o.libelle }} <span class="counter">{{ o.nombre | nombre }}</span></button>
+          }
+        </div>
+        <table class="table">
+          <thead><tr><th>Membre</th><th>Région</th><th>Compétence</th><th>Réponse</th><th>Le</th></tr></thead>
+          <tbody>
+            @for (p of participants()?.content; track p.participationId) {
+              <tr class="clickable" [routerLink]="['/membres', p.membreId]">
+                <td><span class="cell-person"><app-avatar [nom]="p.prenom + ' ' + p.nom" [size]="28" /><span class="name">{{ p.prenom }} {{ p.nom }}</span></span></td>
+                <td>{{ p.region || '—' }}</td>
+                <td class="muted">{{ p.competence || '—' }}</td>
+                <td><app-pill [dico]="REPONSE" [valeur]="p.reponse" />@if (p.motif) { <span class="faint xs motif" [title]="p.motif">{{ p.motif }}</span> }</td>
+                <td class="muted">{{ p.dateReponse ? (p.dateReponse | dateHeure) : '—' }}</td>
+              </tr>
+            } @empty { <tr><td colspan="5"><div class="empty">Aucun participant dans cette catégorie.</div></td></tr> }
+          </tbody>
+        </table>
+        <div class="card-foot">
+          <span>Affichage de {{ debut() }} à {{ fin() }} sur {{ participants()?.totalElements | nombre }}</span>
+          <span class="row">
+            @if ((participants()?.totalPages ?? 0) > 1) {
+              <button type="button" class="btn btn-ghost btn-sm" [disabled]="page() === 0" (click)="aller(page() - 1)">‹</button>
+              <button type="button" class="btn btn-ghost btn-sm" [disabled]="participants()?.last" (click)="aller(page() + 1)">›</button>
+            }
+            <button type="button" class="link" (click)="exporter()">Exporter la liste →</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          <div class="card-head"><h3>Objectif de la mobilisation</h3></div>
+          <div class="card-body row" style="gap: 18px">
+            <app-ring [valeur]="d.tauxObjectif ?? 0" [taille]="86" [epaisseur]="11" />
+            <div><p class="objectif">{{ c()?.disponibles | nombre }} / {{ d.objectif ?? d.informations?.nombreVolontaires ?? '—' }}</p><p class="muted small">volontaires confirmés</p></div>
+          </div>
+          <div class="card-foot details">
+            <div class="row-between"><span class="row"><app-icon name="clock" [size]="15" />Rendez-vous</span><strong>{{ rdv() }}</strong></div>
+            <div class="row-between"><span class="row"><app-icon name="map-pin" [size]="15" />Lieu</span><strong>{{ d.informations?.lieu || '—' }}</strong></div>
+            <div class="row-between"><span class="row"><app-icon name="award" [size]="15" />Profils</span><strong class="ellipsis">{{ d.criteres?.competences?.join(', ') || 'Tous profils' }}</strong></div>
+            <div class="row-between"><span class="row"><app-icon name="user" [size]="15" />Créée par</span><strong>{{ d.creePar || '—' }}</strong></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3>Réponses reçues</h3><p class="sub">Par jour depuis l'envoi</p></div></div>
+          <div class="card-body">
+            <div class="jours">
+              @for (j of jours(); track j.libelle; let premier = $first) {
+                <div class="jour"><span class="v">{{ j.valeur }}</span><span class="b" [class.fort]="premier" [style.height.px]="8 + (j.valeur / maxJour()) * 120"></span><span class="faint xs">{{ j.libelle }}</span></div>
+              } @empty { <p class="muted small">Aucune réponse pour l'instant.</p> }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else { <p class="muted">Chargement…</p> }
+</div>
+
+@if (cloture() && d()) {
+  <app-modal titre="Clôturer la mobilisation" [sousTitre]="d()!.informations?.titre + (d()!.informations?.region ? ' · ' + d()!.informations?.region : '')" icone="lock" [largeur]="532" (fermer)="cloture.set(false)">
+    <div class="grid grid-3" style="gap: 10px">
+      <div class="chiffre"><strong class="vert">{{ c()?.disponibles | nombre }}</strong><span>disponibles</span></div>
+      <div class="chiffre"><strong>{{ c()?.indisponibles | nombre }}</strong><span>indisponibles</span></div>
+      <div class="chiffre"><strong class="or">{{ c()?.sansReponse | nombre }}</strong><span>sans réponse</span></div>
+    </div>
+    <div class="stack mt-24" style="gap: 14px">
+      <label class="checkbox"><input type="checkbox" [(ngModel)]="clotureForm.remercierParticipants" />Envoyer un message de remerciement aux participants</label>
+      <label class="checkbox"><input type="checkbox" [(ngModel)]="clotureForm.ajouterAuParcours" />Ajouter la mobilisation au parcours des disponibles</label>
+      <label class="checkbox"><input type="checkbox" [(ngModel)]="exporterApres" />Exporter la liste des participants (Excel)</label>
+    </div>
+    <div class="notice warn mt-20"><app-icon name="alert-triangle" [size]="16" />Les membres ne pourront plus répondre après la clôture.</div>
+    <div pied>
+      <button type="button" class="btn btn-ghost" (click)="cloture.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="cloturer()">Clôturer la mobilisation</button>
+    </div>
+  </app-modal>
+}

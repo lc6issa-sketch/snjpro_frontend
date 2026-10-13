@@ -222,6 +222,11 @@ export const routes: Routes = [
         data: { roles: GESTION_MOBILISATIONS },
         loadComponent: () => import('./pages/mobilisations/assistant/mobilisation-assistant').then(m => m.MobilisationAssistant),
       },
+      {
+        path: 'mobilisations/:id',
+        title: 'Mobilisation · SNJPro',
+        loadComponent: () => import('./pages/mobilisations/detail/mobilisation-detail').then(m => m.MobilisationDetail),
+      },
     ],
   },
 
