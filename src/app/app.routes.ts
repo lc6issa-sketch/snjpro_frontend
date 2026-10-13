@@ -170,6 +170,13 @@ export const routes: Routes = [
         title: 'Membres · SNJPro',
         loadComponent: () => import('./pages/membres/liste/membres-liste').then(m => m.MembresListe),
       },
+      {
+        path: 'membres/nouveau',
+        title: 'Nouveau membre · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: GESTION_MEMBRES },
+        loadComponent: () => import('./pages/membres/nouveau/nouveau-membre').then(m => m.NouveauMembre),
+      },
     ],
   },
 

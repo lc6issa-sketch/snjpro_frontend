@@ -1,0 +1,255 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <a class="link" routerLink="/membres">← Retour</a>
+      <h1>Nouveau membre</h1>
+      <p class="sub">Les champs marqués * sont obligatoires · l'identifiant SNJ est attribué automatiquement</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" (click)="annuler()">Annuler</button>
+    </div>
+  </div>
+
+  <div class="mise">
+    <!-- Formulaire -->
+    <section class="card formulaire">
+      <header class="entete">
+        <div><h2>{{ etapes[etape() - 1].titre }}</h2><p class="muted small">Étape {{ etape() }} sur 6 · {{ etapes[etape() - 1].detail }}</p></div>
+      </header>
+
+      <div class="corps">
+        @switch (etape()) {
+          <!-- 1. Identité -->
+          @case (1) {
+            <div class="form-grid">
+              <div class="field"><label for="nom">Nom<span class="req">*</span></label>
+                <input id="nom" class="input" [class.invalid]="erreurs()['nom']" [(ngModel)]="f.nom" (ngModelChange)="maj()" placeholder="SIDIBÉ" />
+                @if (erreurs()['nom']) { <span class="error">{{ erreurs()['nom'] }}</span> }</div>
+              <div class="field"><label for="prenom">Prénom(s)<span class="req">*</span></label>
+                <input id="prenom" class="input" [class.invalid]="erreurs()['prenom']" [(ngModel)]="f.prenom" (ngModelChange)="maj()" placeholder="Kadiatou" />
+                @if (erreurs()['prenom']) { <span class="error">{{ erreurs()['prenom'] }}</span> }</div>
+              <div class="field"><label for="dn">Date de naissance<span class="req">*</span></label>
+                <input id="dn" type="date" class="input" [class.invalid]="erreurs()['dateNaissance']" [(ngModel)]="f.dateNaissance" />
+                @if (erreurs()['dateNaissance']) { <span class="error">{{ erreurs()['dateNaissance'] }}</span> }</div>
+              <div class="field"><label for="ln">Lieu de naissance<span class="req">*</span></label>
+                <input id="ln" class="input" [class.invalid]="erreurs()['lieuNaissance']" [(ngModel)]="f.lieuNaissance" placeholder="Koutiala" />
+                @if (erreurs()['lieuNaissance']) { <span class="error">{{ erreurs()['lieuNaissance'] }}</span> }</div>
+              <div class="field"><span class="label">Sexe</span>
+                <div class="segmented block">
+                  <button type="button" [class.active]="f.sexe === 'MASCULIN'" (click)="f.sexe = 'MASCULIN'; maj()">Homme</button>
+                  <button type="button" [class.active]="f.sexe === 'FEMININ'" (click)="f.sexe = 'FEMININ'; maj()">Femme</button>
+                </div></div>
+              <div class="field"><label for="nat">Nationalité</label>
+                <select id="nat" class="select" [(ngModel)]="f.nationalite"><option>Malienne</option><option>Autre</option></select></div>
+              <div class="field"><label for="gs">Groupe sanguin</label>
+                <select id="gs" class="select" [(ngModel)]="f.groupeSanguin"><option value="">Non renseigné</option>
+                  @for (g of groupes(); track g) { <option [value]="g">{{ g }}</option> }</select></div>
+              <div class="field"><span class="label">Taille · Poids</span>
+                <div class="row duo">
+                  <input class="input" inputmode="decimal" [(ngModel)]="f.taille" placeholder="1,65 m" aria-label="Taille en mètres" />
+                  <input class="input" inputmode="decimal" [(ngModel)]="f.poids" placeholder="60 kg" aria-label="Poids en kilogrammes" />
+                </div></div>
+              <div class="field"><span class="label">Catégorie</span>
+                <div class="segmented block">
+                  <button type="button" [class.active]="f.categorie === 'FONCTIONNAIRE'" (click)="f.categorie = 'FONCTIONNAIRE'">Fonctionnaire</button>
+                  <button type="button" [class.active]="f.categorie === 'NON_FONCTIONNAIRE'" (click)="f.categorie = 'NON_FONCTIONNAIRE'">Non fonctionnaire</button>
+                </div></div>
+              <div class="field"><label for="dip">Dernier diplôme</label>
+                <select id="dip" class="select" [(ngModel)]="f.dernierDiplome"><option value="">Non renseigné</option>
+                  @for (d of diplomes(); track d) { <option [value]="d">{{ d }}</option> }</select></div>
+              <label class="full photo">
+                @if (apercuPhoto()) { <img [src]="apercuPhoto()" alt="Photo d'identité" /> }
+                <span class="grow"><strong>Photo d'identité</strong><span class="muted small">{{ photo()?.name ?? 'JPG ou PNG · fond clair · 2 Mo maximum' }}</span></span>
+                <span class="btn btn-secondary btn-sm">Choisir une photo</span>
+                <input type="file" accept="image/png,image/jpeg" hidden (change)="choisirPhoto($event)" />
+              </label>
+            </div>
+          }
+
+          <!-- 2. Contact & localisation -->
+          @case (2) {
+            @if (doublons().length) {
+              <div class="alerte-doublon">
+                <div class="grow"><strong>Doublon potentiel détecté</strong>
+                  @for (d of doublons(); track d) { <p class="small">{{ d }}</p> }</div>
+                <button type="button" class="btn btn-secondary btn-sm" (click)="voirFiche(doublons()[0])">Voir la fiche</button>
+              </div>
+            }
+            <p class="section-titre">Contact</p>
+            <div class="form-grid">
+              <div class="field"><label for="tel">Téléphone principal<span class="req">*</span></label>
+                <div class="tel" [class.invalid]="erreurs()['telephone']" [class.alerte]="doublons().length && !erreurs()['telephone']">
+                  <span class="drapeau"></span><span class="indicatif">+223</span>
+                  <input id="tel" inputmode="tel" [(ngModel)]="f.telephone" placeholder="66 12 34 41" />
+                </div>
+                @if (erreurs()['telephone']) { <span class="error">{{ erreurs()['telephone'] }}</span> }</div>
+              <div class="field"><div class="row-between"><label for="email">Adresse e-mail</label><span class="hint">Facultatif</span></div>
+                <div class="input-icon"><app-icon name="mail" [size]="17" />
+                  <input id="email" type="email" class="input" [class.invalid]="erreurs()['email']" [(ngModel)]="f.email" placeholder="k.sidibe@exemple.ml" /></div>
+                @if (erreurs()['email']) { <span class="error">{{ erreurs()['email'] }}</span> }</div>
+              <div class="field"><div class="row-between"><label for="tel2">Téléphone secondaire</label><span class="hint">Facultatif</span></div>
+                <div class="tel"><span class="drapeau"></span><span class="indicatif">+223</span><input id="tel2" inputmode="tel" [(ngModel)]="f.telephoneSecondaire" /></div></div>
+              <div class="field"><div class="row-between"><label for="prev">Personne à prévenir</label><span class="hint">Facultatif</span></div>
+                <div class="input-icon"><app-icon name="user" [size]="17" /><input id="prev" class="input" [(ngModel)]="f.personneAPrevenir" placeholder="Nom et téléphone" /></div></div>
+            </div>
+            <hr class="divider sep" />
+            <p class="section-titre">Localisation actuelle</p>
+            <div class="form-grid">
+              <div class="field"><label for="reg">Région<span class="req">*</span></label>
+                <select id="reg" class="select" [class.invalid]="erreurs()['region']" [(ngModel)]="f.region"><option value="">Choisir…</option>
+                  @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }</select>
+                @if (erreurs()['region']) { <span class="error">{{ erreurs()['region'] }}</span> }</div>
+              <div class="field"><label for="cer">Cercle<span class="req">*</span></label>
+                <input id="cer" class="input" [class.invalid]="erreurs()['cercle']" [(ngModel)]="f.cercle" placeholder="Koutiala" />
+                @if (erreurs()['cercle']) { <span class="error">{{ erreurs()['cercle'] }}</span> }</div>
+              <div class="field"><label for="com">Commune</label><input id="com" class="input" [(ngModel)]="f.commune" /></div>
+              <div class="field"><label for="qua">Quartier</label><input id="qua" class="input" [(ngModel)]="f.quartier" /></div>
+              <div class="field full"><div class="row-between"><label for="adr">Adresse complète</label><span class="hint">Facultatif</span></div>
+                <input id="adr" class="input" [(ngModel)]="f.adresseComplete" placeholder="Rue, porte, repère" /></div>
+            </div>
+          }
+
+          <!-- 3. Cohorte & parcours -->
+          @case (3) {
+            <div class="form-grid">
+              <div class="field"><label for="coh">Cohorte<span class="req">*</span></label>
+                <select id="coh" class="select" [class.invalid]="erreurs()['cohorteId']" [ngModel]="f.cohorteId" (ngModelChange)="choisirCohorte(+$event)">
+                  <option [ngValue]="null" disabled>Choisir…</option>
+                  @for (c of cohortes(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}</option> }</select>
+                @if (erreurs()['cohorteId']) { <span class="error">{{ erreurs()['cohorteId'] }}</span> }</div>
+              <div class="field"><label for="dinc">Date d'incorporation<span class="req">*</span></label>
+                <input id="dinc" type="date" class="input" [class.invalid]="erreurs()['dateIncorporation']" [(ngModel)]="f.dateIncorporation" (ngModelChange)="maj()" />
+                @if (erreurs()['dateIncorporation']) { <span class="error">{{ erreurs()['dateIncorporation'] }}</span> }</div>
+              <div class="field"><label for="cie">Compagnie</label><input id="cie" class="input" [(ngModel)]="f.compagnie" placeholder="3e compagnie" /></div>
+              <div class="field"><label for="sec">Section</label><input id="sec" class="input" [(ngModel)]="f.section" placeholder="Section 2" /></div>
+              <div class="field"><label for="aff">Affectation actuelle</label>
+                <div class="input-icon"><app-icon name="building" [size]="17" /><input id="aff" class="input" [(ngModel)]="f.affectation" (ngModelChange)="maj()" placeholder="Unité régionale de Sikasso" /></div></div>
+              <div class="field"><span class="label">Statut dans le SNJ</span>
+                <div class="segmented block">
+                  <button type="button" [class.active]="f.statut === 'ACTIF'" (click)="f.statut = 'ACTIF'">Actif</button>
+                  <button type="button" [class.active]="f.statut === 'INACTIF'" (click)="f.statut = 'INACTIF'">Inactif</button>
+                </div></div>
+            </div>
+            <hr class="divider sep" />
+            <p class="section-titre">Parcours généré automatiquement</p>
+            <div class="parcours">
+              @for (p of parcoursAuto(); track p.intitule; let der = $last) {
+                <div class="etape-parcours">
+                  <i [class.plein]="der"></i>
+                  <div class="grow"><strong>{{ p.intitule }}</strong><p class="muted small">{{ texte.periode(p) }}</p></div>
+                  <span class="pill" [class.teal]="p.type === 'FORMATION'" [class.violet]="p.type === 'AFFECTATION'" [class.dark]="p.type === 'INCORPORATION'">
+                    {{ p.type === 'FORMATION' ? 'Formation' : p.type === 'AFFECTATION' ? 'Affectation' : 'Incorporation' }}</span>
+                </div>
+              } @empty { <p class="muted small">Choisissez une cohorte pour générer le parcours.</p> }
+            </div>
+            <p class="row muted small mt-12"><app-icon name="info" [size]="15" />D'autres étapes pourront être ajoutées depuis le profil du membre.</p>
+          }
+
+          <!-- 4. Situation professionnelle -->
+          @case (4) {
+            <span class="label">Statut actuel</span>
+            <div class="row wrap puces mt-8">
+              @for (s of statutsPro; track s.cle) {
+                <button type="button" class="choix" [class.actif]="f.statutPro === s.cle" (click)="f.statutPro = s.cle; maj()">
+                  @if (f.statutPro === s.cle) { <app-icon name="check" [size]="15" [stroke]="2.5" /> }{{ s.libelle }}</button>
+              }
+            </div>
+            <div class="form-grid mt-20">
+              <div class="field"><label for="prof">Profession / poste</label>
+                <div class="input-icon"><app-icon name="briefcase" [size]="17" /><input id="prof" class="input" [(ngModel)]="f.profession" placeholder="Comptable" /></div></div>
+              <div class="field"><label for="emp">Employeur</label>
+                <div class="input-icon"><app-icon name="building" [size]="17" /><input id="emp" class="input" [(ngModel)]="f.employeur" /></div></div>
+              <div class="field"><label for="sect">Secteur d'activité</label>
+                <select id="sect" class="select" [(ngModel)]="f.secteur"><option value="">Choisir…</option>
+                  @for (s of secteurs; track s) { <option [value]="s">{{ s }}</option> }</select></div>
+              <div class="field"><label for="dep">En poste depuis</label><input id="dep" type="month" class="input" [(ngModel)]="f.depuis" /></div>
+              <div class="field"><label for="lt">Lieu de travail</label>
+                <div class="input-icon"><app-icon name="map-pin" [size]="17" /><input id="lt" class="input" [(ngModel)]="f.lieuTravail" /></div></div>
+              <div class="field"><label for="ctr">Type de contrat</label>
+                <select id="ctr" class="select" [(ngModel)]="f.contrat"><option value="">Non renseigné</option>
+                  @for (c of ['CDI', 'CDD', 'Stage', 'Indépendant', 'Bénévolat']; track c) { <option [value]="c">{{ c }}</option> }</select></div>
+            </div>
+            <div class="dispo mt-20">
+              <div class="grow"><strong>Disponible pour les mobilisations</strong><p class="small">Le membre pourra être sollicité selon ses compétences.</p></div>
+              <label class="switch"><input type="checkbox" [(ngModel)]="f.disponible" aria-label="Disponible pour les mobilisations" /></label>
+            </div>
+          }
+
+          <!-- 5. Compétences -->
+          @case (5) {
+            <label class="label" for="rc">Ajouter une compétence</label>
+            <div class="recherche-comp mt-8">
+              <div class="search"><app-icon name="search" [size]="17" />
+                <input id="rc" class="input" [ngModel]="rechercheCompetence()" (ngModelChange)="rechercheCompetence.set($event)"
+                       (keydown.enter)="ajouterCompetence(rechercheCompetence())" placeholder="Rechercher : comptabilité, secourisme, maçonnerie…" /></div>
+              @if (rechercheCompetence().trim()) {
+                <div class="menu card">
+                  @for (c of propositions(); track c.id) {
+                    <button type="button" (click)="ajouterCompetence(c.nom!, c.categorie)"><strong>{{ c.nom }}</strong><span class="muted xs">{{ c.categorie }}</span></button>
+                  }
+                  <button type="button" (click)="ajouterCompetence(rechercheCompetence())"><app-icon name="plus" [size]="15" />Ajouter « {{ rechercheCompetence() }} »</button>
+                </div>
+              }
+            </div>
+            <p class="section-titre mt-24">Compétences sélectionnées ({{ f.competences.length }})</p>
+            <div class="liste-comp">
+              @for (c of f.competences; track c.intitule; let i = $index) {
+                <div class="comp">
+                  <div class="grow"><strong>{{ c.intitule }}</strong><p class="muted xs">{{ c.categorie || 'Compétence' }}</p></div>
+                  <div class="segmented sm">
+                    @for (n of niveaux; track n.cle) { <button type="button" [class.active]="c.niveau === n.cle" (click)="niveau(i, n.cle)">{{ n.libelle }}</button> }
+                  </div>
+                  <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="retirerCompetence(i)" aria-label="Retirer"><app-icon name="x" [size]="16" /></button>
+                </div>
+              } @empty { <p class="muted small vide">Aucune compétence ajoutée pour l'instant.</p> }
+            </div>
+            @if (suggestions().length) {
+              <p class="label mt-24">Suggestions</p>
+              <div class="row wrap mt-8">
+                @for (s of suggestions(); track s.id) { <button type="button" class="suggestion" (click)="ajouterCompetence(s.nom!, s.categorie)"><app-icon name="plus" [size]="14" />{{ s.nom }}</button> }
+              </div>
+            }
+          }
+
+          <!-- 6. Vérification -->
+          @case (6) {
+            <div class="recap">
+              <div class="bloc"><div class="row-between"><h4>Identité</h4><button type="button" class="link" (click)="etape.set(1)">Modifier</button></div>
+                <p>{{ f.prenom }} {{ f.nom.toUpperCase() }} · {{ texte.sexe() }}</p><p>{{ texte.naissance() }}</p>
+                <p>{{ joindre([f.groupeSanguin, f.dernierDiplome, f.categorie === 'FONCTIONNAIRE' ? 'Fonctionnaire' : 'Non fonctionnaire'], ' · ') }}</p></div>
+              <div class="bloc"><div class="row-between"><h4>Contact & localisation</h4><button type="button" class="link" (click)="etape.set(2)">Modifier</button></div>
+                <p>+223 {{ chiffres(f.telephone) }}{{ f.email ? ' · ' + f.email : '' }}</p><p>{{ joindre([f.commune || f.cercle, f.region], ', ') }}</p><p>{{ f.adresseComplete }}</p></div>
+              <div class="bloc"><div class="row-between"><h4>Cohorte & parcours</h4><button type="button" class="link" (click)="etape.set(3)">Modifier</button></div>
+                <p>{{ cohorte()?.nom }}</p><p>{{ joindre([f.compagnie, f.section], ' · ') || '—' }}</p>
+                <p>{{ f.statut === 'ACTIF' ? 'Actif' : 'Inactif' }}{{ f.affectation ? ' · ' + f.affectation : '' }}</p></div>
+              <div class="bloc"><div class="row-between"><h4>Situation professionnelle</h4><button type="button" class="link" (click)="etape.set(4)">Modifier</button></div>
+                <p>{{ texte.statutPro() }}{{ f.profession ? ' · ' + f.profession : '' }}</p><p>{{ f.employeur }}</p>
+                <p>{{ f.disponible ? 'Disponible pour les mobilisations' : 'Non disponible pour les mobilisations' }}</p></div>
+              <div class="bloc full"><div class="row-between"><h4>Compétences</h4><button type="button" class="link" (click)="etape.set(5)">Modifier</button></div>
+                <div class="row wrap mt-8">
+                  @for (c of f.competences; track c.intitule) { <span class="tag soft">{{ c.intitule }} · {{ texte.niveau(c.niveau) }}</span> }
+                  @empty { <p class="muted small">Aucune compétence.</p> }</div></div>
+            </div>
+            @if (doublons().length) {
+              <div class="notice warn mt-20"><app-icon name="alert-triangle" [size]="17" />
+                <div><strong>Doublon potentiel :</strong> {{ doublons().join(' · ') }}<br />Vérifiez qu'il ne s'agit pas de la même personne avant de créer la fiche.</div></div>
+            } @else {
+              <div class="notice ok mt-20"><app-icon name="shield-check" [size]="17" />
+                <div><strong>Contrôle terminé : aucun doublon détecté</strong><br />Le téléphone, l'e-mail et l'identité ne correspondent à aucune fiche existante.</div></div>
+            }
+            <label class="checkbox mt-20"><input type="checkbox" [checked]="certifie()" (change)="certifie.set(!certifie())" />Je certifie l'exactitude des informations saisies</label>
+          }
+        }
+      </div>
+
+      <footer class="action-bar">
+        @if (etape() > 1) { <button type="button" class="btn btn-secondary" (click)="precedent()">Précédent</button> }
+        @else { <button type="button" class="btn btn-secondary" (click)="annuler()">Annuler</button> }
+        @if (etape() < 6) { <button type="button" class="btn btn-primary" (click)="continuer()">Continuer</button> }
+        @else {
+          <button type="button" class="btn btn-primary" [disabled]="!certifie() || envoi()" (click)="creer()">{{ envoi() ? 'Création…' : 'Créer le membre' }}</button>
+        }
+      </footer>
+    </section>
+  </div>
+</div>
