@@ -1,0 +1,36 @@
+<app-modal [titre]="cohorte() ? 'Modifier la cohorte' : 'Nouvelle cohorte'"
+           [sousTitre]="cohorte() ? cohorte()!.nom : 'Renseignez les informations de la nouvelle promotion.'" [largeur]="568" (fermer)="fermer.emit()">
+  <div class="form-grid">
+    <div class="field" style="grid-column: span 1"><label for="nom">Nom de la cohorte<span class="req">*</span></label>
+      <input id="nom" class="input" [(ngModel)]="c.nom" placeholder="Cohorte 2026" /></div>
+    <div class="field"><label for="num">Numéro<span class="req">*</span></label>
+      <input id="num" type="number" min="1" class="input" [(ngModel)]="c.numero" /></div>
+    <div class="field"><label for="ctr">Centre de formation<span class="req">*</span></label>
+      <input id="ctr" class="input" list="centres" [(ngModel)]="c.centre" placeholder="Centre de Kati" />
+      <datalist id="centres">@for (x of centres(); track x) { <option [value]="x"></option> }</datalist></div>
+    <div class="field"><label for="an">Année d'incorporation<span class="req">*</span></label>
+      <select id="an" class="select" [(ngModel)]="c.anneeDebut">@for (a of annees; track a) { <option [ngValue]="a">{{ a }}</option> }</select></div>
+    <div class="field"><label for="dd">Date de début</label><input id="dd" type="date" class="input" [(ngModel)]="c.dateDebut" /></div>
+    <div class="field"><label for="df">Date de fin prévue</label><input id="df" type="date" class="input" [(ngModel)]="c.dateFin" /></div>
+    <div class="field"><label for="rec">Nombre initial de recrues</label>
+      <input id="rec" type="number" min="0" class="input" [(ngModel)]="c.recruesInitiales" /></div>
+    <div class="field"><label for="cie">Nombre de compagnies</label><input id="cie" type="number" min="0" class="input" [(ngModel)]="c.nombreCompagnies" /></div>
+    <div class="field"><label for="reg">Région</label>
+      <select id="reg" class="select" [(ngModel)]="c.region"><option [ngValue]="undefined">Non renseignée</option>
+        @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }</select></div>
+    <div class="field"><label for="sec">Nombre de sections</label><input id="sec" type="number" min="0" class="input" [(ngModel)]="c.nombreSections" /></div>
+    @if (!cohorte()) {
+      <div class="field full"><span class="label">Statut</span>
+        <div class="segmented block">
+          @for (s of statuts; track s.cle) { <button type="button" [class.active]="c.statut === s.cle" (click)="c.statut = s.cle">{{ s.libelle }}</button> }
+        </div></div>
+    }
+    <div class="field full"><label for="resp">Responsable de la cohorte</label>
+      <select id="resp" class="select" [(ngModel)]="c.responsableId"><option [ngValue]="undefined">Aucun responsable désigné</option>
+        @for (u of responsables(); track u.id) { <option [ngValue]="u.id">{{ u.prenom }} {{ u.nom }} — Responsable de cohorte</option> }</select></div>
+  </div>
+  <div pied>
+    <button type="button" class="btn btn-ghost" (click)="fermer.emit()">Annuler</button>
+    <button type="button" class="btn btn-primary" [disabled]="!c.nom?.trim() || envoi()" (click)="enregistrer()">{{ cohorte() ? 'Enregistrer' : 'Créer la cohorte' }}</button>
+  </div>
+</app-modal>
