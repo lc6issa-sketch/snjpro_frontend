@@ -248,6 +248,11 @@ export const routes: Routes = [
         data: { roles: GESTION_OPPORTUNITES },
         loadComponent: () => import('./pages/opportunites/form/opportunite-form').then(m => m.OpportuniteForm),
       },
+      {
+        path: 'opportunites/:id',
+        title: 'Opportunité · SNJPro',
+        loadComponent: () => import('./pages/opportunites/detail/opportunite-detail').then(m => m.OpportuniteDetail),
+      },
     ],
   },
 

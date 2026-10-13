@@ -1,0 +1,58 @@
+<div class="page">
+  @if (d(); as d) {
+    <a class="link" routerLink="/opportunites">← Retour</a>
+    <div class="page-head" style="align-items: center">
+      <div class="row" style="gap: 16px">
+        <app-avatar [nom]="r()?.organisation" [size]="50" />
+        <div><h1>{{ r()?.intitule }}</h1>
+          <div class="row wrap mt-4"><app-pill [dico]="STATUT" [valeur]="r()?.statut" />
+            <span class="pill dark">{{ type() }}{{ r()?.typeContrat ? ' · ' + r()?.typeContrat : '' }}</span>
+            <span class="pill">{{ r()?.organisation }}{{ r()?.lieu ? ' · ' + r()?.lieu : '' }}</span></div></div>
+      </div>
+      @if (peutGerer()) {
+        <div class="actions">
+          @if (r()?.statut === 'BROUILLON') { <button type="button" class="btn btn-secondary" (click)="publier()">Publier</button> }
+          @if (r()?.statut === 'OUVERTE') { <button type="button" class="btn btn-secondary" (click)="cloturer()">Clôturer</button> }
+          <a [routerLink]="['/opportunites', r()?.id, 'modifier']" class="btn btn-primary">Modifier</a>
+        </div>
+      }
+    </div>
+    <div class="grid grid-3">
+      <div class="card kpi-inline"><div><p class="kpi-label">Candidatures</p><p class="kpi-value">{{ r()?.nombreCandidatures | nombre }}</p></div></div>
+      <div class="card kpi-inline"><div><p class="kpi-label">Vues</p><p class="kpi-value">{{ r()?.vues | nombre }}</p></div></div>
+      <div class="card kpi-inline"><div><p class="kpi-label">Date limite</p><p class="kpi-value">{{ r()?.dateLimite ? (r()?.dateLimite | dateCourte) : '—' }}</p></div></div>
+    </div>
+    <div class="grille mt-20">
+      <div class="card">
+        <div class="card-head bord"><div><h3>Candidatures</h3><p class="sub">Triées par correspondance avec le profil</p></div></div>
+        <table class="table">
+          <thead><tr><th>Candidat</th><th>Correspondance</th><th>Statut</th><th>Reçue le</th>@if (peutGerer()) { <th></th> }</tr></thead>
+          <tbody>
+            @for (c of candidatures(); track c.id) {
+              <tr>
+                <td><a class="cell-person" [routerLink]="['/membres', c.membreId]"><app-avatar [nom]="c.prenom + ' ' + c.nom" [size]="28" /><span class="name">{{ c.prenom }} {{ c.nom }}</span></a></td>
+                <td><div class="row"><div class="progress lime" style="width: 96px"><span [style.width.%]="c.score ?? 0"></span></div><strong class="xs">{{ c.score ?? 0 }} %</strong></div></td>
+                <td><app-pill [dico]="STATUT_CANDIDATURE" [valeur]="c.statut" /></td>
+                <td class="muted">{{ c.dateCandidature | dateCourte }}</td>
+                @if (peutGerer()) {
+                  <td><select class="select select-sm" style="width: 160px" [value]="c.statut" (change)="changerStatut(c, $any($event.target).value)" aria-label="Changer le statut">
+                    @for (s of statuts; track s.cle) { <option [value]="s.cle">{{ s.libelle }}</option> }</select></td>
+                }
+              </tr>
+            } @empty { <tr><td colspan="5"><div class="empty">Aucune candidature pour l'instant.</div></td></tr> }
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Description du poste</h3></div>
+        <div class="card-body"><p class="description">{{ d.description || 'Aucune description.' }}</p>
+          <p class="strong small mt-20">Compétences recherchées</p>
+          <div class="row wrap mt-8">@for (c of r()?.competences; track c) { <span class="pill green">{{ c }}</span> } @empty { <span class="muted small">Tous profils</span> }</div></div>
+        <div class="card-foot" style="flex-direction: column; align-items: stretch">
+          <dl class="dl"><dt>Publiée par</dt><dd>{{ d.publiePar || '—' }}</dd><dt>Publiée le</dt><dd>{{ r()?.datePublication ? (r()?.datePublication | dateCourte) : 'Non publiée' }}</dd>
+            <dt>Membres notifiés</dt><dd>{{ d.membresNotifies | nombre }}</dd></dl>
+        </div>
+      </div>
+    </div>
+  } @else { <p class="muted">Chargement…</p> }
+</div>
