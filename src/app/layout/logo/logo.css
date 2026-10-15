@@ -6,3 +6,9 @@
 /* align-self : sans lui, la colonne flex étire l'image en largeur et déforme le logo */
 .nom { width: auto; max-width: none; display: block; align-self: flex-start; }
 span { font-size: 12px; opacity: .8; }
+/* Écusson (charte noir et or) : pas de disque, la forme du blason reste visible */
+.embleme.ecusson { border-radius: 0; }
+.nom-texte { font-size: 21px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; color: #141212; opacity: 1; }
+.nom-texte em { font-style: normal; color: #A97415; }
+.nom-texte.sur-sombre { color: #fff; }
+.nom-texte.sur-sombre em { color: #F4BC2C; }
