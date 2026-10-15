@@ -57,6 +57,9 @@
         <div class="field"><div class="row-between"><label for="de">Date d'expiration</label><span class="hint">Facultatif</span></div>
           <input id="de" type="date" class="input" [(ngModel)]="dateExpiration" (ngModelChange)="maj()" /></div>
         <div class="field"><span class="label">Public visé</span>
+          @if (perimetre()) {
+            <div class="notice neutral"><app-icon name="map-pin" [size]="16" />Diffusée aux membres de votre périmètre : {{ libellePerimetre() }}</div>
+          } @else {
           <label class="radio"><input type="radio" name="cible" [checked]="f.cible === 'TOUS'" (change)="changerCible('TOUS')" />Tous les membres</label>
           <label class="radio"><input type="radio" name="cible" [checked]="f.cible === 'REGION'" (change)="changerCible('REGION')" />Une ou plusieurs régions</label>
           @if (f.cible === 'REGION') {
@@ -66,6 +69,7 @@
           @if (f.cible === 'COHORTE') {
             <select class="select" [ngModel]="valeurs[0]" (ngModelChange)="valeurs = [$event]; maj()" aria-label="Cohorte">
               @for (c of cohortes(); track c.id) { <option [value]="'' + c.id">{{ c.nom }}</option> }</select>
+          }
           }
         </div>
       </div>
