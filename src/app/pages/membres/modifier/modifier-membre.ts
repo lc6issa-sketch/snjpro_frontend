@@ -51,9 +51,10 @@ export class ModifierMembre implements OnInit {
       next: r => {
         this.m = {
           nom: r.nom, prenom: r.prenom, sexe: r.sexe, dateNaissance: r.dateNaissance, lieuNaissance: r.lieuNaissance, numeroTelephone: r.numeroTelephone,
-          email: r.email, photoUrl: r.photoUrl, telephoneSecondaire: r.telephoneSecondaire, personneAPrevenir: r.personneAPrevenir, nationalite: r.nationalite,
-          groupeSanguin: r.groupeSanguin, taille: r.taille, poids: r.poids, dernierDiplome: r.dernierDiplome, categorie: r.categorie, compagnie: r.compagnie,
-          section: r.section, dateIncorporation: r.dateIncorporation, disponibleMobilisation: r.disponibleMobilisation !== false, statut: r.statut, cohorteId: r.cohorteId
+          email: r.email, photoUrl: r.photoUrl, telephoneSecondaire: r.telephoneSecondaire, personneAPrevenir: r.personneAPrevenir,
+          personneAPrevenirTelephone: r.personneAPrevenirTelephone, nationalite: r.nationalite, groupeSanguin: r.groupeSanguin, taille: r.taille, poids: r.poids,
+          dernierDiplome: r.dernierDiplome, diplomes: r.diplomes, categorie: r.categorie, compagnie: r.compagnie,
+          section: r.section, brigade: r.brigade, dateIncorporation: r.dateIncorporation, disponibleMobilisation: r.disponibleMobilisation !== false, statut: r.statut, cohorteId: r.cohorteId
         };
         this.loc = { ...(r.localisation ?? { pays: 'Mali' }) };
         this.sit = { ...(r.situationProfessionnelle ?? {}) };
