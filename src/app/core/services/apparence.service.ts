@@ -9,7 +9,7 @@ export const CLE_CHARTE = 'snjpro.charte';
 
 /** Fichiers et nom de chaque logo ; la charte graphique (couleurs) est définie dans styles.css par [data-charte]. */
 export const LOGOS: Record<LogoApplication, { libelle: string; detail: string; embleme: string }> = {
-  VERT: { libelle: 'Logo actuel', detail: 'Charte verte du SNJ', embleme: 'logo_snj.png' },
+  VERT: { libelle: 'Logo vert', detail: 'Charte verte du SNJ (logo d\'origine)', embleme: 'logo_snj.png' },
   OR: { libelle: 'Écusson', detail: 'Charte noir et or', embleme: 'logo_snj_or.svg' }
 };
 
