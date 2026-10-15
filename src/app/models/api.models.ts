@@ -18,6 +18,9 @@ export const EtatColonne_VALUES: EtatColonne[] = ['AUTO', 'A_VERIFIER', 'IGNOREE
 export type TypeCodeVerification = 'CONNEXION' | 'ACTIVATION' | 'REINITIALISATION' | 'VERIFICATION_TELEPHONE' | 'INVITATION';
 export const TypeCodeVerification_VALUES: TypeCodeVerification[] = ['CONNEXION', 'ACTIVATION', 'REINITIALISATION', 'VERIFICATION_TELEPHONE', 'INVITATION'];
 
+export type LogoApplication = 'VERT' | 'OR';
+export const LogoApplication_VALUES: LogoApplication[] = ['VERT', 'OR'];
+
 export type StatutMobilisation = 'BROUILLON' | 'PLANIFIEE' | 'EN_COURS' | 'CLOTUREE';
 export const StatutMobilisation_VALUES: StatutMobilisation[] = ['BROUILLON', 'PLANIFIEE', 'EN_COURS', 'CLOTUREE'];
 
@@ -104,6 +107,10 @@ export const StatutMembreEnum_VALUES: StatutMembreEnum[] = ['ACTIF', 'INACTIF', 
 
 export type StatutProfessionnelEnum = 'EMPLOYE' | 'AUTO_EMPLOYE' | 'CHOMEUR' | 'ETUDIANT' | 'RETRAITE' | 'AUTRE';
 export const StatutProfessionnelEnum_VALUES: StatutProfessionnelEnum[] = ['EMPLOYE', 'AUTO_EMPLOYE', 'CHOMEUR', 'ETUDIANT', 'RETRAITE', 'AUTRE'];
+
+export interface ApparenceDTO {
+  logo?: LogoApplication;
+}
 
 export interface AuthResponse {
   token?: string;
