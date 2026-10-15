@@ -55,11 +55,13 @@
                 <div><p class="k">Sexe</p><p class="v">{{ m.sexe === 'FEMININ' ? 'Femme' : 'Homme' }}</p></div>
                 <div><p class="k">Groupe sanguin</p><p class="v">{{ m.groupeSanguin || '—' }}</p></div>
                 <div><p class="k">Taille · Poids</p><p class="v">{{ m.taille ? (m.taille + ' m') : '—' }} · {{ m.poids ? (m.poids + ' kg') : '—' }}</p></div>
-                <div><p class="k">Dernier diplôme</p><p class="v">{{ m.dernierDiplome || '—' }}</p></div>
+                <div><p class="k">Diplômes</p><p class="v">{{ m.diplomes?.length ? m.diplomes!.join(', ') : (m.dernierDiplome || '—') }}</p></div>
                 <div><p class="k">Catégorie</p><p class="v">{{ m.categorie === 'FONCTIONNAIRE' ? 'Fonctionnaire' : m.categorie ? 'Non fonctionnaire' : '—' }}</p></div>
                 <div><p class="k">E-mail</p><p class="v ellipsis">{{ m.email || '—' }}</p></div>
-                @if (m.compagnie || m.section) { <div><p class="k">Compagnie · Section</p><p class="v">{{ m.compagnie || '—' }} · {{ m.section || '—' }}</p></div> }
-                @if (m.personneAPrevenir) { <div><p class="k">Personne à prévenir</p><p class="v">{{ m.personneAPrevenir }}</p></div> }
+                @if (m.compagnie || m.section || m.brigade) { <div><p class="k">Compagnie · Section · Brigade</p><p class="v">{{ m.compagnie || '—' }} · {{ m.section || '—' }} · {{ m.brigade || '—' }}</p></div> }
+                @if (m.personneAPrevenir || m.personneAPrevenirTelephone) {
+                  <div><p class="k">Personne à prévenir</p><p class="v">{{ m.personneAPrevenir || '—' }}@if (m.personneAPrevenirTelephone) { <br /><span class="muted">{{ m.personneAPrevenirTelephone }}</span> }</p></div>
+                }
               </div>
             </div>
 
