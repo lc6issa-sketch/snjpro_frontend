@@ -23,6 +23,16 @@ export class AuthService {
 
   readonly connecte = computed(() => !!this.utilisateur()?.token);
   readonly role = computed(() => this.utilisateur()?.role ?? null);
+  /**
+   * Périmètre d'un responsable : ses actions (mobilisations, actualités, notifications, activités)
+   * ne concernent que sa région ou sa cohorte. null pour les rôles nationaux.
+   */
+  readonly perimetre = computed<{ type: 'REGION'; region: string } | { type: 'COHORTE'; cohorteId: number } | null>(() => {
+    const u = this.utilisateur();
+    if (u?.role === 'ROLE_RESPONSABLE_REGIONAL' && u.region) return { type: 'REGION', region: u.region };
+    if (u?.role === 'ROLE_RESPONSABLE_COHORTE' && u.cohorteId) return { type: 'COHORTE', cohorteId: u.cohorteId };
+    return null;
+  });
   readonly nomComplet = computed(() => {
     const u = this.utilisateur();
     return u ? `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || (u.username ?? '') : '';
