@@ -19,16 +19,21 @@
 
         <div class="field"><span class="label">Destinataires</span>
           <div class="cibles">
+            @if (perimetre(); as p) {
+            <button type="button" class="cible" [class.active]="f.cible === p.type" (click)="cible(p.type)">
+              <span class="grow"><strong>{{ p.type === 'REGION' ? 'Toute ma région' : 'Toute ma cohorte' }}</strong><span class="muted xs">{{ libellePerimetre() }}</span></span><span class="radio"><input type="radio" [checked]="f.cible === p.type" tabindex="-1" /></span></button>
+            } @else {
             <button type="button" class="cible" [class.active]="f.cible === 'TOUS'" (click)="cible('TOUS')">
               <span class="grow"><strong>Tous les membres</strong><span class="muted xs">Membres non archivés</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'TOUS'" tabindex="-1" /></span></button>
             <button type="button" class="cible" [class.active]="f.cible === 'REGION'" (click)="cible('REGION')">
               <span class="grow"><strong>Par région</strong><span class="muted xs">{{ f.cible === 'REGION' && f.valeurs?.length ? f.valeurs?.join(', ') : 'Choisir une ou plusieurs régions' }}</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'REGION'" tabindex="-1" /></span></button>
             <button type="button" class="cible" [class.active]="f.cible === 'COHORTE'" (click)="cible('COHORTE')">
               <span class="grow"><strong>Par cohorte</strong><span class="muted xs">{{ f.cible === 'COHORTE' ? libelleCohorte() : 'Choisir une cohorte' }}</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'COHORTE'" tabindex="-1" /></span></button>
+            }
             <button type="button" class="cible" [class.active]="f.cible === 'SELECTION'" (click)="cible('SELECTION')">
               <span class="grow"><strong>Sélection manuelle</strong><span class="muted xs">{{ selection().length ? selection().length + ' membre(s) choisi(s)' : 'Depuis la liste des membres' }}</span></span><span class="radio"><input type="radio" [checked]="f.cible === 'SELECTION'" tabindex="-1" /></span></button>
           </div>
-          @switch (f.cible) {
+          @switch (perimetre() && f.cible !== 'SELECTION' ? 'PERIMETRE' : f.cible) {
             @case ('REGION') {
               <div class="row wrap choix-valeurs">@for (r of regions(); track r) { <button type="button" class="tag" [class.soft]="f.valeurs?.includes(r)" (click)="basculerRegion(r)">{{ r }}</button> }</div>
             }
