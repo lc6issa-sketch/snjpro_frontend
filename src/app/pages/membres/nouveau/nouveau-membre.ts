@@ -22,10 +22,10 @@ interface CompetenceChoisie { intitule: string; categorie?: string; niveau: Nive
 
 interface Formulaire {
   nom: string; prenom: string; dateNaissance: string; lieuNaissance: string; sexe: SexeEnum; nationalite: string;
-  groupeSanguin: string; taille: string; poids: string; categorie: 'FONCTIONNAIRE' | 'NON_FONCTIONNAIRE'; dernierDiplome: string;
-  telephone: string; email: string; telephoneSecondaire: string; personneAPrevenir: string;
+  groupeSanguin: string; taille: string; poids: string; categorie: 'FONCTIONNAIRE' | 'NON_FONCTIONNAIRE'; diplomes: string[];
+  telephone: string; email: string; telephoneSecondaire: string; personneAPrevenir: string; personneAPrevenirTelephone: string;
   region: string; cercle: string; commune: string; quartier: string; adresseComplete: string;
-  cohorteId: number | null; dateIncorporation: string; compagnie: string; section: string; affectation: string; statut: 'ACTIF' | 'INACTIF';
+  cohorteId: number | null; dateIncorporation: string; compagnie: string; section: string; brigade: string; affectation: string; statut: 'ACTIF' | 'INACTIF';
   statutPro: StatutProfessionnelEnum | 'FONCTIONNAIRE' | null; profession: string; employeur: string; secteur: string; depuis: string;
   lieuTravail: string; contrat: string; disponible: boolean;
   competences: CompetenceChoisie[];
@@ -33,8 +33,8 @@ interface Formulaire {
 
 const VIDE: Formulaire = {
   nom: '', prenom: '', dateNaissance: '', lieuNaissance: '', sexe: 'FEMININ', nationalite: 'Malienne', groupeSanguin: '', taille: '', poids: '',
-  categorie: 'NON_FONCTIONNAIRE', dernierDiplome: '', telephone: '', email: '', telephoneSecondaire: '', personneAPrevenir: '',
-  region: '', cercle: '', commune: '', quartier: '', adresseComplete: '', cohorteId: null, dateIncorporation: '', compagnie: '', section: '',
+  categorie: 'NON_FONCTIONNAIRE', diplomes: [], telephone: '', email: '', telephoneSecondaire: '', personneAPrevenir: '', personneAPrevenirTelephone: '',
+  region: '', cercle: '', commune: '', quartier: '', adresseComplete: '', cohorteId: null, dateIncorporation: '', compagnie: '', section: '', brigade: '',
   affectation: '', statut: 'ACTIF', statutPro: null, profession: '', employeur: '', secteur: '', depuis: '', lieuTravail: '', contrat: '',
   disponible: true, competences: []
 };
@@ -150,6 +150,7 @@ export class NouveauMembre implements OnInit {
       requis('telephone', 'Le téléphone principal est obligatoire'); requis('region', 'La région est obligatoire'); requis('cercle', 'Le cercle est obligatoire');
       if (this.f.telephone && this.chiffres(this.f.telephone).length !== 8) e['telephone'] = 'Saisissez les 8 chiffres du numéro';
       if (this.f.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.f.email)) e['email'] = 'Adresse e-mail invalide';
+      if (this.f.personneAPrevenirTelephone && this.chiffres(this.f.personneAPrevenirTelephone).length !== 8) e['personneAPrevenirTelephone'] = 'Saisissez les 8 chiffres du numéro';
     }
     if (etape === 3) {
       if (!this.f.cohorteId) e['cohorteId'] = 'Choisissez une cohorte';
@@ -168,6 +169,17 @@ export class NouveauMembre implements OnInit {
     if (c?.dateDebut && !this.f.dateIncorporation) this.f.dateIncorporation = c.dateDebut;
     this.maj();
   }
+
+  /** Diplômes du référentiel pas encore choisis. */
+  protected diplomesDisponibles(): string[] { return this.diplomes().filter(d => !this.f.diplomes.includes(d)); }
+
+  protected ajouterDiplome(d: string): void {
+    if (!d || this.f.diplomes.includes(d)) return;
+    this.f.diplomes = [...this.f.diplomes, d];
+    this.maj();
+  }
+
+  protected retirerDiplome(d: string): void { this.f.diplomes = this.f.diplomes.filter(x => x !== d); this.maj(); }
 
   protected choisirPhoto(ev: Event): void {
     const fichier = (ev.target as HTMLInputElement).files?.[0];
@@ -270,15 +282,18 @@ export class NouveauMembre implements OnInit {
   private dto(): MembreDTO {
     const tel = this.chiffres(this.f.telephone);
     const tel2 = this.chiffres(this.f.telephoneSecondaire);
+    const telPrevenir = this.chiffres(this.f.personneAPrevenirTelephone);
     return {
       nom: this.f.nom.trim().toUpperCase(), prenom: this.f.prenom.trim(), sexe: this.f.sexe, dateNaissance: this.f.dateNaissance,
       lieuNaissance: this.f.lieuNaissance.trim(), numeroTelephone: '+223' + tel, email: this.f.email.trim() || undefined,
-      telephoneSecondaire: tel2 ? '+223' + tel2 : undefined, personneAPrevenir: this.f.personneAPrevenir || undefined,
+      telephoneSecondaire: tel2 ? '+223' + tel2 : undefined, personneAPrevenir: this.f.personneAPrevenir.trim() || undefined,
+      personneAPrevenirTelephone: telPrevenir ? '+223' + telPrevenir : undefined,
       nationalite: this.f.nationalite || undefined, groupeSanguin: this.f.groupeSanguin || undefined,
       taille: this.f.taille ? Number(String(this.f.taille).replace(',', '.')) : undefined,
       poids: this.f.poids ? Number(String(this.f.poids).replace(',', '.')) : undefined,
-      dernierDiplome: this.f.dernierDiplome || undefined, categorie: this.f.categorie,
-      compagnie: this.f.compagnie || undefined, section: this.f.section || undefined, dateIncorporation: this.f.dateIncorporation || undefined,
+      diplomes: this.f.diplomes, categorie: this.f.categorie,
+      compagnie: this.f.compagnie || undefined, section: this.f.section || undefined, brigade: this.f.brigade.trim() || undefined,
+      dateIncorporation: this.f.dateIncorporation || undefined,
       disponibleMobilisation: this.f.disponible, statut: this.f.statut, cohorteId: this.f.cohorteId ?? undefined
     };
   }
@@ -303,8 +318,10 @@ export class NouveauMembre implements OnInit {
     try {
       const brut = localStorage.getItem(CLE_BROUILLON);
       if (!brut) return;
-      const b = JSON.parse(brut) as { f: Formulaire; etape: number; fait: number };
+      const b = JSON.parse(brut) as { f: Formulaire & { dernierDiplome?: string }; etape: number; fait: number };
       this.f = { ...structuredClone(VIDE), ...b.f };
+      // Brouillon enregistré avant la saisie de plusieurs diplômes
+      if (!Array.isArray(this.f.diplomes)) this.f.diplomes = b.f.dernierDiplome ? [b.f.dernierDiplome] : [];
       this.etape.set(b.etape || 1);
       this.fait.set(b.fait || 0);
       this.maj();

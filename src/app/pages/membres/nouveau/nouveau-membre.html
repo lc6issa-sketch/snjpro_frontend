@@ -54,9 +54,15 @@
                   <button type="button" [class.active]="f.categorie === 'FONCTIONNAIRE'" (click)="f.categorie = 'FONCTIONNAIRE'">Fonctionnaire</button>
                   <button type="button" [class.active]="f.categorie === 'NON_FONCTIONNAIRE'" (click)="f.categorie = 'NON_FONCTIONNAIRE'">Non fonctionnaire</button>
                 </div></div>
-              <div class="field"><label for="dip">Dernier diplôme</label>
-                <select id="dip" class="select" [(ngModel)]="f.dernierDiplome"><option value="">Non renseigné</option>
-                  @for (d of diplomes(); track d) { <option [value]="d">{{ d }}</option> }</select></div>
+              <div class="field full"><div class="row-between"><label for="dip">Diplômes</label><span class="hint">Ajoutez tous les diplômes obtenus</span></div>
+                <div class="diplomes">
+                  @for (d of f.diplomes; track d) {
+                    <span class="tag soft">{{ d }}<button type="button" (click)="retirerDiplome(d)" [attr.aria-label]="'Retirer ' + d"><app-icon name="x" [size]="13" /></button></span>
+                  }
+                  <select #dip id="dip" class="select" (change)="ajouterDiplome(dip.value); dip.value = ''">
+                    <option value="">{{ f.diplomes.length ? 'Ajouter un autre diplôme…' : 'Ajouter un diplôme…' }}</option>
+                    @for (d of diplomesDisponibles(); track d) { <option [value]="d">{{ d }}</option> }</select>
+                </div></div>
               <label class="full photo">
                 @if (apercuPhoto()) { <img [src]="apercuPhoto()" alt="Photo d'identité" /> }
                 <span class="grow"><strong>Photo d'identité</strong><span class="muted small">{{ photo()?.name ?? 'JPG ou PNG · fond clair · 2 Mo maximum' }}</span></span>
@@ -89,8 +95,15 @@
                 @if (erreurs()['email']) { <span class="error">{{ erreurs()['email'] }}</span> }</div>
               <div class="field"><div class="row-between"><label for="tel2">Téléphone secondaire</label><span class="hint">Facultatif</span></div>
                 <div class="tel"><span class="drapeau"></span><span class="indicatif">+223</span><input id="tel2" inputmode="tel" [(ngModel)]="f.telephoneSecondaire" /></div></div>
-              <div class="field"><div class="row-between"><label for="prev">Personne à prévenir</label><span class="hint">Facultatif</span></div>
-                <div class="input-icon"><app-icon name="user" [size]="17" /><input id="prev" class="input" [(ngModel)]="f.personneAPrevenir" placeholder="Nom et téléphone" /></div></div>
+            </div>
+            <p class="section-titre mt-24">Personne à prévenir</p>
+            <div class="form-grid">
+              <div class="field"><div class="row-between"><label for="prev">Nom et prénom</label><span class="hint">Facultatif</span></div>
+                <div class="input-icon"><app-icon name="user" [size]="17" /><input id="prev" class="input" [(ngModel)]="f.personneAPrevenir" placeholder="Fatoumata SIDIBÉ" /></div></div>
+              <div class="field"><div class="row-between"><label for="prevtel">Téléphone</label><span class="hint">Facultatif</span></div>
+                <div class="tel" [class.invalid]="erreurs()['personneAPrevenirTelephone']"><span class="drapeau"></span><span class="indicatif">+223</span>
+                  <input id="prevtel" inputmode="tel" [(ngModel)]="f.personneAPrevenirTelephone" placeholder="76 12 34 56" /></div>
+                @if (erreurs()['personneAPrevenirTelephone']) { <span class="error">{{ erreurs()['personneAPrevenirTelephone'] }}</span> }</div>
             </div>
             <hr class="divider sep" />
             <p class="section-titre">Localisation actuelle</p>
@@ -122,6 +135,7 @@
                 @if (erreurs()['dateIncorporation']) { <span class="error">{{ erreurs()['dateIncorporation'] }}</span> }</div>
               <div class="field"><label for="cie">Compagnie</label><input id="cie" class="input" [(ngModel)]="f.compagnie" placeholder="3e compagnie" /></div>
               <div class="field"><label for="sec">Section</label><input id="sec" class="input" [(ngModel)]="f.section" placeholder="Section 2" /></div>
+              <div class="field"><label for="bri">Brigade</label><input id="bri" class="input" [(ngModel)]="f.brigade" placeholder="Brigade 1" /></div>
               <div class="field"><label for="aff">Affectation actuelle</label>
                 <div class="input-icon"><app-icon name="building" [size]="17" /><input id="aff" class="input" [(ngModel)]="f.affectation" (ngModelChange)="maj()" placeholder="Unité régionale de Sikasso" /></div></div>
               <div class="field"><span class="label">Statut dans le SNJ</span>
@@ -216,11 +230,15 @@
             <div class="recap">
               <div class="bloc"><div class="row-between"><h4>Identité</h4><button type="button" class="link" (click)="etape.set(1)">Modifier</button></div>
                 <p>{{ f.prenom }} {{ f.nom.toUpperCase() }} · {{ texte.sexe() }}</p><p>{{ texte.naissance() }}</p>
-                <p>{{ joindre([f.groupeSanguin, f.dernierDiplome, f.categorie === 'FONCTIONNAIRE' ? 'Fonctionnaire' : 'Non fonctionnaire'], ' · ') }}</p></div>
+                <p>{{ joindre([f.groupeSanguin, f.categorie === 'FONCTIONNAIRE' ? 'Fonctionnaire' : 'Non fonctionnaire'], ' · ') }}</p>
+                <p>{{ f.diplomes.length ? 'Diplômes : ' + f.diplomes.join(', ') : 'Aucun diplôme renseigné' }}</p></div>
               <div class="bloc"><div class="row-between"><h4>Contact & localisation</h4><button type="button" class="link" (click)="etape.set(2)">Modifier</button></div>
-                <p>+223 {{ chiffres(f.telephone) }}{{ f.email ? ' · ' + f.email : '' }}</p><p>{{ joindre([f.commune || f.cercle, f.region], ', ') }}</p><p>{{ f.adresseComplete }}</p></div>
+                <p>+223 {{ chiffres(f.telephone) }}{{ f.email ? ' · ' + f.email : '' }}</p><p>{{ joindre([f.commune || f.cercle, f.region], ', ') }}</p><p>{{ f.adresseComplete }}</p>
+                @if (f.personneAPrevenir || f.personneAPrevenirTelephone) {
+                  <p>À prévenir : {{ joindre([f.personneAPrevenir, chiffres(f.personneAPrevenirTelephone) ? '+223 ' + chiffres(f.personneAPrevenirTelephone) : ''], ' · ') }}</p>
+                }</div>
               <div class="bloc"><div class="row-between"><h4>Cohorte & parcours</h4><button type="button" class="link" (click)="etape.set(3)">Modifier</button></div>
-                <p>{{ cohorte()?.nom }}</p><p>{{ joindre([f.compagnie, f.section], ' · ') || '—' }}</p>
+                <p>{{ cohorte()?.nom }}</p><p>{{ joindre([f.compagnie, f.section, f.brigade], ' · ') || '—' }}</p>
                 <p>{{ f.statut === 'ACTIF' ? 'Actif' : 'Inactif' }}{{ f.affectation ? ' · ' + f.affectation : '' }}</p></div>
               <div class="bloc"><div class="row-between"><h4>Situation professionnelle</h4><button type="button" class="link" (click)="etape.set(4)">Modifier</button></div>
                 <p>{{ texte.statutPro() }}{{ f.profession ? ' · ' + f.profession : '' }}</p><p>{{ f.employeur }}</p>
