@@ -198,7 +198,6 @@ export interface InvitationDTO {
   region?: string;
   cohorteId?: number;
   message?: string;
-  /** Facultatif, avec motDePasse : création directe d'un compte actif, sans e-mail. */
   username?: string;
   motDePasse?: string;
 }
@@ -232,14 +231,17 @@ export interface MembreDTO {
   photoUrl?: string;
   telephoneSecondaire?: string;
   personneAPrevenir?: string;
+  personneAPrevenirTelephone?: string;
   nationalite?: string;
   groupeSanguin?: string;
   taille?: number;
   poids?: number;
   dernierDiplome?: string;
+  diplomes?: string[];
   categorie?: string;
   compagnie?: string;
   section?: string;
+  brigade?: string;
   dateIncorporation?: string;
   disponibleMobilisation?: boolean;
   statut?: StatutMembreEnum;
@@ -272,14 +274,17 @@ export interface MembreResponseDTO {
   telephoneSecondaire?: string;
   telephoneVerifie?: boolean;
   personneAPrevenir?: string;
+  personneAPrevenirTelephone?: string;
   nationalite?: string;
   groupeSanguin?: string;
   taille?: number;
   poids?: number;
   dernierDiplome?: string;
+  diplomes?: string[];
   categorie?: string;
   compagnie?: string;
   section?: string;
+  brigade?: string;
   dateIncorporation?: string;
   disponibleMobilisation?: boolean;
   statut?: StatutMembreEnum;
@@ -388,6 +393,7 @@ export namespace ActiviteDTOs {
   export interface Pointage {
     qr?: string;
     code?: string;
+    scanneLe?: string;
   }
   export interface Compteurs {
     inscrits?: number;
@@ -940,6 +946,11 @@ export namespace MessagerieDTOs {
     service?: string;
     enLigne?: boolean;
     delaiReponse?: string;
+    identifiantSnj?: string;
+    cohorteNom?: string;
+    memeCohorte?: boolean;
+    region?: string;
+    localisation?: string;
   }
 }
 
