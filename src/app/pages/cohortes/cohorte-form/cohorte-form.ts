@@ -30,7 +30,6 @@ export class CohorteForm implements OnInit {
     { cle: 'EN_FORMATION', libelle: 'En formation' }, { cle: 'EN_RESERVE', libelle: 'En réserve' }, { cle: 'LIBEREE', libelle: 'Libérée' }
   ];
   protected readonly centres = signal<string[]>([]);
-  protected readonly regions = signal<string[]>([]);
   protected readonly responsables = signal<UserResponseDTO[]>([]);
   protected readonly envoi = signal(false);
   protected c: CohorteDTO = { anneeDebut: new Date().getFullYear(), statut: 'EN_FORMATION' };
@@ -39,7 +38,6 @@ export class CohorteForm implements OnInit {
     const existante = this.cohorte();
     if (existante) this.c = { ...existante };
     this.referentiel.centres().subscribe(c => this.centres.set(c));
-    this.referentiel.regionsMali().subscribe(r => this.regions.set(r));
     this.utilisateurs.lister('ROLE_RESPONSABLE_COHORTE', true).subscribe({ next: u => this.responsables.set(u), error: () => this.responsables.set([]) });
   }
 
