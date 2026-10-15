@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { Subject, debounceTime, switchMap, catchError, of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CohorteService } from '../../../core/services/cohorte.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ReferentielService } from '../../../core/services/referentiel.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { CohorteDTO, MobilisationDTOs, SexeEnum, StatutMembreEnum } from '../../../models/api.models';
@@ -35,6 +36,7 @@ export class MobilisationAssistant implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
+  protected readonly perimetre = inject(AuthService).perimetre;
 
   protected readonly typesBesoin = TYPES_BESOIN;
   protected readonly prises = PRISES_EN_CHARGE;
@@ -87,6 +89,7 @@ export class MobilisationAssistant implements OnInit {
     this.referentiel.regionsMali().subscribe(r => this.regions.set(r));
     this.referentiel.competences().subscribe(c => this.competencesDispo.set(c));
     this.cohorteService.lister().subscribe(c => this.cohortes.set(c.filter(x => x.statut !== 'ARCHIVEE')));
+    this.verrouillerPerimetre();
     const id = this.id();
     if (id) {
       this.service.obtenir(+id).subscribe({
@@ -95,6 +98,7 @@ export class MobilisationAssistant implements OnInit {
           this.mobilisationId.set(+id);
           this.info = { ...d.informations, priseEnCharge: d.informations?.priseEnCharge ?? [] };
           this.criteres = { ...this.criteres, ...d.criteres, regions: d.criteres?.regions ?? [], competences: d.criteres?.competences ?? [], cohorteIds: d.criteres?.cohorteIds ?? [], statutsMembre: d.criteres?.statutsMembre?.length ? d.criteres.statutsMembre : ['ACTIF'], ageMin: d.criteres?.ageMin ?? 18, ageMax: d.criteres?.ageMax ?? 35, sexe: d.criteres?.sexe ?? undefined, toutesCompetences: !!d.criteres?.toutesCompetences };
+          this.verrouillerPerimetre();
           this.envoiForm = { ...this.envoiForm, ...(d.envoi ?? {}) };
           if (!this.envoiForm.message) this.envoiForm.message = this.messageParDefaut();
           this.etape.set(2);
@@ -164,8 +168,16 @@ export class MobilisationAssistant implements OnInit {
   protected sexe(s: SexeEnum | undefined): void { this.criteres.sexe = s; this.maj(); }
   protected reinitialiser(): void {
     this.criteres = { regions: [], competences: [], toutesCompetences: false, cohorteIds: [], statutsMembre: ['ACTIF'], ageMin: 18, ageMax: 35, telephoneVerifieUniquement: false, exclureDejaMobilises: false };
+    this.verrouillerPerimetre();
     this.exclus.set(new Set());
     this.maj();
+  }
+
+  /** Responsable : la mobilisation ne concerne que sa région ou sa cohorte (imposé aussi par le serveur). */
+  private verrouillerPerimetre(): void {
+    const p = this.perimetre();
+    if (p?.type === 'REGION') { this.info.region = p.region; this.criteres.regions = [p.region]; }
+    if (p?.type === 'COHORTE') this.criteres.cohorteIds = [p.cohorteId];
   }
   protected basculerMembre(id: number): void {
     this.exclus.update(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });

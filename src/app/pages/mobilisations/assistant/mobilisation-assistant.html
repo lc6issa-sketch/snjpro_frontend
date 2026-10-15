@@ -28,7 +28,7 @@
             <div class="field"><label for="lieu">Lieu</label>
               <div class="input-icon"><app-icon name="map-pin" [size]="16" /><input id="lieu" class="input" [(ngModel)]="info.lieu" placeholder="CSRéf de Sikasso" /></div></div>
             <div class="field"><label for="reg">Région</label>
-              <select id="reg" class="select" [(ngModel)]="info.region"><option [ngValue]="undefined">Choisir…</option>
+              <select id="reg" class="select" [(ngModel)]="info.region" [disabled]="perimetre()?.type === 'REGION'"><option [ngValue]="undefined">Choisir…</option>
                 @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }</select></div>
             <div class="field"><label for="vol">Volontaires recherchés</label>
               <div class="input-icon"><app-icon name="users" [size]="16" /><input id="vol" type="number" min="1" class="input" [(ngModel)]="info.nombreVolontaires" /></div></div>
@@ -72,12 +72,17 @@
           <div class="row-between bloc-titre"><h3>Critères de sélection</h3><button type="button" class="link" (click)="reinitialiser()">Réinitialiser</button></div>
           <div class="criteres">
             <div class="field"><span class="label">Régions</span>
+              @if (perimetre()?.type === 'REGION') {
+                <div class="row wrap">@for (r of criteres.regions; track r) { <span class="tag">{{ r }}</span> }</div>
+                <span class="hint">Limitée à votre région</span>
+              } @else {
               <div class="row wrap">
                 @for (r of criteres.regions; track r) { <span class="tag">{{ r }}<button type="button" (click)="retirerRegion(r)" aria-label="Retirer"><app-icon name="x" [size]="13" [stroke]="2.5" /></button></span> }
                 <select class="ajout" [(ngModel)]="regionAjout" (ngModelChange)="ajouterRegion($event)"><option value="">+ Ajouter</option>
                   @for (r of regions(); track r) { @if (!criteres.regions?.includes(r)) { <option [value]="r">{{ r }}</option> } }</select>
               </div>
-              @if (!criteres.regions?.length) { <span class="hint">Toutes les régions</span> }</div>
+              @if (!criteres.regions?.length) { <span class="hint">Toutes les régions</span> }
+              }</div>
             <div class="field"><span class="label">Compétences requises</span>
               <div class="row wrap">
                 @for (c of criteres.competences; track c) { <span class="tag soft">{{ c }}<button type="button" (click)="retirerCompetence(c)" aria-label="Retirer"><app-icon name="x" [size]="13" [stroke]="2.5" /></button></span> }
@@ -89,8 +94,10 @@
                 <label class="radio"><input type="radio" name="tc" [value]="true" [(ngModel)]="criteres.toutesCompetences" (ngModelChange)="maj()" />Toutes</label>
               </div></div>
             <div class="field"><label for="coh">Cohortes</label>
-              <select id="coh" class="select" [ngModel]="criteres.cohorteIds?.[0] ?? ''" (ngModelChange)="choisirCohorte($event)"><option value="">Toutes les cohortes</option>
-                @for (c of cohortes(); track c.id) { <option [value]="c.id">{{ c.nom }}</option> }</select></div>
+              <select id="coh" class="select" [ngModel]="criteres.cohorteIds?.[0] ?? ''" (ngModelChange)="choisirCohorte($event)" [disabled]="perimetre()?.type === 'COHORTE'">
+                @if (perimetre()?.type !== 'COHORTE') { <option value="">Toutes les cohortes</option> }
+                @for (c of cohortes(); track c.id) { <option [value]="c.id">{{ c.nom }}</option> }</select>
+              @if (perimetre()?.type === 'COHORTE') { <span class="hint">Limitée à votre cohorte</span> }</div>
             <div class="field"><span class="label">Statut du membre</span>
               <div class="row" style="gap: 22px">
                 @for (s of statutsMembre; track s.cle) { <label class="checkbox"><input type="checkbox" [checked]="criteres.statutsMembre?.includes(s.cle)" (change)="basculerStatut(s.cle)" />{{ s.libelle }}</label> }
