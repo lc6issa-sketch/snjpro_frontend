@@ -9,4 +9,4 @@
 .blanc { background: #fff; color: var(--primary); }
 .sombre { background: rgba(255,255,255,.1); color: #fff; }
 .sombre:hover { background: rgba(255,255,255,.18); }
-.fermer { border: 0; background: none; color: #C9DDD0; cursor: pointer; margin-left: 50px; display: grid; }
+.fermer { border: 0; background: none; color: var(--sur-sombre-doux); cursor: pointer; margin-left: 50px; display: grid; }

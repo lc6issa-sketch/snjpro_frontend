@@ -1,5 +1,5 @@
 .entete { overflow: hidden; }
-.bandeau { position: relative; height: 92px; background: linear-gradient(135deg, #0A2A17, #124D2D 60%, #1F6B3C); overflow: hidden; }
+.bandeau { position: relative; height: 92px; background: linear-gradient(135deg, var(--sombre-1), var(--sombre-2) 60%, var(--sombre-3)); overflow: hidden; }
 .bandeau i { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,.08); }
 .bandeau .c1 { width: 260px; height: 260px; right: 40px; top: -150px; }
 .bandeau .c2 { width: 120px; height: 120px; right: 230px; top: 50px; background: rgba(255,255,255,.04); border: 0; }

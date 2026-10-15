@@ -34,9 +34,9 @@
 .scene { position: relative; height: 460px; border-radius: var(--radius-lg); background: #0B0F0D; overflow: hidden; display: grid; place-items: center; }
 .scene img, .scene video { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
 .scene video { width: 100%; height: 100%; }
-.audio { display: flex; flex-direction: column; align-items: center; gap: 14px; color: #E4EFE7; padding: 24px; text-align: center; }
-.audio .onde { width: 110px; height: 110px; border-radius: 50%; display: grid; place-items: center; background: rgba(166, 212, 106, .14); color: #A6D46A;
-  box-shadow: 0 0 0 14px rgba(166, 212, 106, .06); }
+.audio { display: flex; flex-direction: column; align-items: center; gap: 14px; color: var(--sur-sombre); padding: 24px; text-align: center; }
+.audio .onde { width: 110px; height: 110px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--secondary-light) 14%, transparent); color: var(--secondary-light);
+  box-shadow: 0 0 0 14px color-mix(in srgb, var(--secondary-light) 6%, transparent); }
 .audio p { font-size: 13px; opacity: .8; }
 .audio audio { width: min(380px, 100%); }
 .chargement { color: rgba(255, 255, 255, .6); }

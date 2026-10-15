@@ -46,6 +46,19 @@
   --sidebar-bg: #124D2D;
   --overlay: rgba(10, 30, 20, .42);
 
+  /* Fonds sombres de la marque (page de connexion, bandeaux, projection) et textes posés dessus */
+  --sombre-1: #0A2A17;
+  --sombre-2: #124D2D;
+  --sombre-3: #1F6B3C;
+  --sur-sombre: #E4EFE7;
+  --sur-sombre-clair: #D5E5DA;
+  --sur-sombre-doux: #C9DDD0;
+  --sur-sombre-pied: #B6CDBE;
+  --sur-sombre-attenue: #A9C7B4;
+  --sur-sombre-discret: #8DB09B;
+  --accent-sombre: #B5DB86;
+  --badge-hero-texte: #2F5A12;
+
   --radius-sm: 6px;
   --radius: 8px;
   --radius-md: 10px;
