@@ -29,8 +29,9 @@
                 <input id="prenom" class="input" [class.invalid]="erreurs()['prenom']" [(ngModel)]="f.prenom" (ngModelChange)="maj()" placeholder="Kadiatou" />
                 @if (erreurs()['prenom']) { <span class="error">{{ erreurs()['prenom'] }}</span> }</div>
               <div class="field"><label for="dn">Date de naissance<span class="req">*</span></label>
-                <input id="dn" type="date" class="input" [class.invalid]="erreurs()['dateNaissance']" [(ngModel)]="f.dateNaissance" />
-                @if (erreurs()['dateNaissance']) { <span class="error">{{ erreurs()['dateNaissance'] }}</span> }</div>
+                <input id="dn" type="date" class="input" [max]="naissanceMax" [class.invalid]="erreurs()['dateNaissance']" [(ngModel)]="f.dateNaissance" />
+                @if (erreurs()['dateNaissance']) { <span class="error">{{ erreurs()['dateNaissance'] }}</span> }
+                @else { <span class="hint">{{ ageMinimum }} ans minimum</span> }</div>
               <div class="field"><label for="ln">Lieu de naissance<span class="req">*</span></label>
                 <input id="ln" class="input" [class.invalid]="erreurs()['lieuNaissance']" [(ngModel)]="f.lieuNaissance" placeholder="Koutiala" />
                 @if (erreurs()['lieuNaissance']) { <span class="error">{{ erreurs()['lieuNaissance'] }}</span> }</div>
@@ -112,7 +113,7 @@
                 <select id="reg" class="select" [class.invalid]="erreurs()['region']" [(ngModel)]="f.region"><option value="">Choisir…</option>
                   @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }</select>
                 @if (erreurs()['region']) { <span class="error">{{ erreurs()['region'] }}</span> }</div>
-              <div class="field"><label for="cer">Cercle<span class="req">*</span></label>
+              <div class="field"><div class="row-between"><label for="cer">Cercle</label><span class="hint">Facultatif</span></div>
                 <input id="cer" class="input" [class.invalid]="erreurs()['cercle']" [(ngModel)]="f.cercle" placeholder="Koutiala" />
                 @if (erreurs()['cercle']) { <span class="error">{{ erreurs()['cercle'] }}</span> }</div>
               <div class="field"><label for="com">Commune</label><input id="com" class="input" [(ngModel)]="f.commune" /></div>

@@ -45,6 +45,10 @@ export class Competences implements OnInit {
   protected form: CompetenceReferentielDTOs.Edition = {};
 
   protected readonly peutGerer = computed(() => this.auth.aRole('ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ'));
+  /** Responsable de cohorte : compétences de sa cohorte par défaut, les autres cohortes à la demande. */
+  protected readonly responsableCohorte = computed(() => this.auth.aRole('ROLE_RESPONSABLE_COHORTE'));
+  protected readonly toutes = signal(false);
+  protected readonly maCohorte = computed(() => this.responsableCohorte() && !this.toutes());
   protected readonly total = computed(() => this.categories().reduce((s, c) => s + (c.nombreCompetences ?? 0), 0) || this.competences().length);
   protected readonly filtrees = computed(() => {
     const q = this.recherche().trim().toLowerCase();
@@ -54,7 +58,9 @@ export class Competences implements OnInit {
   protected readonly max = computed(() => Math.max(1, ...this.competences().map(c => c.nombreMembres ?? 0)));
   protected readonly style = styleCategorie;
 
-  ngOnInit(): void { this.charger(); this.service.categories().subscribe(c => this.categories.set(c)); }
+  ngOnInit(): void { this.recharger(); }
+
+  protected basculerCohortes(): void { this.toutes.update(t => !t); this.categorie.set(null); this.page.set(0); this.recharger(); }
 
   protected choisir(c: string | null): void { this.categorie.set(c); this.page.set(0); this.charger(); }
   protected trier(t: string): void { this.tri.set(t); this.charger(); }
@@ -95,6 +101,6 @@ export class Competences implements OnInit {
   protected voirMembre(id: number): void { this.selection.set(null); this.router.navigate(['/membres', id]); }
   protected tousLesMembres(c: CompetenceReferentielDTOs.Competence): void { this.selection.set(null); this.router.navigate(['/membres'], { queryParams: { competence: c.nom } }); }
 
-  private recharger(): void { this.charger(); this.service.categories().subscribe(c => this.categories.set(c)); }
-  private charger(): void { this.service.lister(this.categorie(), undefined, this.tri()).subscribe(c => this.competences.set(c)); }
+  private recharger(): void { this.charger(); this.service.categories(this.toutes()).subscribe(c => this.categories.set(c)); }
+  private charger(): void { this.service.lister(this.categorie(), undefined, this.tri(), this.toutes()).subscribe(c => this.competences.set(c)); }
 }

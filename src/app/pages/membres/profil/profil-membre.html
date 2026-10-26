@@ -4,7 +4,7 @@
   @if (m(); as m) {
     <!-- En-tête du profil -->
     <section class="card entete">
-      <div class="bandeau"><i class="c1"></i><i class="c2"></i></div>
+      <div class="bandeau"></div>
       <div class="identite">
         <label class="photo" [class.modifiable]="peutModifier()" title="Changer la photo">
           @if (photo()) { <img [src]="photo()" [alt]="nomComplet()" /> } @else { <app-avatar [nom]="nomComplet()" [size]="88" /> }
@@ -23,7 +23,7 @@
           <div class="row wrap meta">
             @if (m.localisation?.region) { <span><app-icon name="map-pin" [size]="15" />{{ m.localisation?.cercle || m.localisation?.region }}, Mali</span> }
             @if (m.situationProfessionnelle?.profession) { <span><app-icon name="briefcase" [size]="15" />{{ m.situationProfessionnelle?.profession }}</span> }
-            @if (m.numeroTelephone) { <span><app-icon name="smartphone" [size]="15" />{{ m.numeroTelephone | telMasque }}</span> }
+            @if (m.numeroTelephone) { <span><app-icon name="smartphone" [size]="15" />{{ m.numeroTelephone | telephone }}</span> }
             @if (m.dateIncorporation) { <span><app-icon name="calendar" [size]="15" />Incorporé{{ m.sexe === 'FEMININ' ? 'e' : '' }} le {{ m.dateIncorporation | dateCourte }}</span> }
           </div>
         </div>

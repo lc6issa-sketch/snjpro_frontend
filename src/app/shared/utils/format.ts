@@ -104,6 +104,15 @@ export function taille(octets?: number | null): string {
   return `${nombre(octets / 1024 ** 3, 1)} Go`;
 }
 
+/** +22376123412 -> « +223 76 12 34 12 » (numéro complet, fiche du membre) */
+export function telephone(t?: string | null): string {
+  if (!t) return '—';
+  const c = t.replace(/\s/g, '');
+  const local = c.startsWith('+223') ? c.slice(4) : c;
+  if (local.length !== 8 || /\D/.test(local)) return t;
+  return `+223 ${local.match(/../g)!.join(' ')}`;
+}
+
 /** +22376123412 -> « +223 76 •• •• 12 » */
 export function telMasque(t?: string | null): string {
   if (!t) return '—';

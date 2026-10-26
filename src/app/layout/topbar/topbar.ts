@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { Icon } from '../../shared/components/icon/icon';
 import { Avatar } from '../../shared/components/avatar/avatar';
 import { ShellService } from '../../core/services/shell.service';
+import { MODES_THEME, ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-topbar',
@@ -15,6 +16,8 @@ import { ShellService } from '../../core/services/shell.service';
 export class Topbar {
   protected readonly auth = inject(AuthService);
   protected readonly shell = inject(ShellService);
+  protected readonly theme = inject(ThemeService);
+  protected readonly modes = MODES_THEME;
   private readonly router = inject(Router);
   protected readonly menu = signal(false);
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpEventType } from '@angular/common/http';
-import { Subject, debounceTime } from 'rxjs';
+import { Observable, Subject, catchError, debounceTime, forkJoin, map, of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CohorteService } from '../../core/services/cohorte.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -22,8 +22,11 @@ const EXT_VIDEO = ['mp4', 'm4v', 'webm', 'mov', '3gp'];
 const EXT_AUDIO = ['mp3', 'wav', 'ogg', 'oga', 'm4a', 'aac', 'opus'];
 const MAX_FICHIERS = 10;
 const MAX_OCTETS = 100 * 1024 * 1024;
+/** Image de couverture d'une vidéo ou d'un son. */
+const EXT_COUVERTURE = ['jpg', 'jpeg', 'png', 'webp'];
+const MAX_COUVERTURE = 5 * 1024 * 1024;
 
-interface FichierLocal { fichier: File; type: TypeMedia; apercu: string | null; }
+interface FichierLocal { fichier: File; type: TypeMedia; apercu: string | null; couverture?: File; apercuCouverture?: string; }
 
 /**
  * Souvenirs de formation : galerie de photos, vidéos et sons rattachés aux cohortes.
@@ -49,6 +52,7 @@ export class Souvenirs implements OnInit, OnDestroy {
   protected readonly STATUT = STATUT_SOUVENIR;
   protected readonly TAILLE = 12;
   protected readonly acceptes = [...EXT_PHOTO, ...EXT_VIDEO, ...EXT_AUDIO].map(e => '.' + e).join(',');
+  protected readonly acceptesCouverture = EXT_COUVERTURE.map(e => '.' + e).join(',');
 
   protected readonly peutGerer = computed(() => this.auth.aRole('ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'));
 
@@ -77,6 +81,9 @@ export class Souvenirs implements OnInit, OnDestroy {
   // URLs locales (blob:) des fichiers, par identifiant de média
   protected readonly urls = signal<Record<number, string>>({});
   private readonly enCours = new Set<number>();
+  // URLs locales des images de couverture (vidéos et sons), par identifiant de média
+  protected readonly couvertures = signal<Record<number, string>>({});
+  private readonly couverturesEnCours = new Set<number>();
 
   // Visionneuse
   protected readonly ouvert = signal<SouvenirDTOs.Resume | null>(null);
@@ -109,7 +116,8 @@ export class Souvenirs implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     Object.values(this.urls()).forEach(u => URL.revokeObjectURL(u));
-    this.fichiers().forEach(f => f.apercu && URL.revokeObjectURL(f.apercu));
+    Object.values(this.couvertures()).forEach(u => URL.revokeObjectURL(u));
+    this.viderFichiers();
   }
 
   // ------------------------------------------------------------ liste
@@ -127,8 +135,13 @@ export class Souvenirs implements OnInit, OnDestroy {
           this.souvenirs.set(p.content ?? []);
           this.total.set(p.totalElements ?? 0);
           this.chargement.set(false);
-          // vignettes : première photo de chaque souvenir
-          (p.content ?? []).forEach(s => { const ph = s.medias?.find(m => m.type === 'PHOTO'); if (ph?.id) this.chargerUrl(ph.id); });
+          // vignettes : première photo de chaque souvenir, sinon couverture de la première vidéo / du premier son
+          (p.content ?? []).forEach(s => {
+            const ph = s.medias?.find(m => m.type === 'PHOTO');
+            if (ph?.id) { this.chargerUrl(ph.id); return; }
+            const cv = s.medias?.find(m => m.couverture);
+            if (cv?.id) this.chargerCouverture(cv.id);
+          });
         },
         error: e => { this.chargement.set(false); this.toast.error(messageErreur(e)); }
       });
@@ -141,7 +154,30 @@ export class Souvenirs implements OnInit, OnDestroy {
 
   protected couverture(s: SouvenirDTOs.Resume): string | null {
     const ph = s.medias?.find(m => m.type === 'PHOTO');
-    return ph?.id ? this.urls()[ph.id] ?? null : null;
+    if (ph?.id) return this.urls()[ph.id] ?? null;
+    const cv = s.medias?.find(m => m.couverture);
+    return cv?.id ? this.couvertures()[cv.id] ?? null : null;
+  }
+
+  /** Image de couverture d'une vidéo ou d'un son (null si aucune). */
+  protected couvertureMedia(m?: SouvenirDTOs.Media | null): string | null {
+    return m?.id && m.couverture ? this.couvertures()[m.id] ?? null : null;
+  }
+
+  private chargerCouverture(mediaId: number): void {
+    if (this.couvertures()[mediaId] || this.couverturesEnCours.has(mediaId)) return;
+    this.couverturesEnCours.add(mediaId);
+    this.service.couverture(mediaId).subscribe({
+      next: u => { this.couverturesEnCours.delete(mediaId); this.couvertures.update(c => ({ ...c, [mediaId]: u })); },
+      error: () => this.couverturesEnCours.delete(mediaId)
+    });
+  }
+
+  /** Oublie la couverture en cache (après remplacement ou retrait). */
+  private oublierCouverture(mediaId: number): void {
+    const u = this.couvertures()[mediaId];
+    if (u) URL.revokeObjectURL(u);
+    this.couvertures.update(c => { const { [mediaId]: _, ...reste } = c; return reste; });
   }
   protected iconeCouverture(s: SouvenirDTOs.Resume): string { return s.nombreVideos ? 'video' : s.nombreAudios ? 'mic' : 'image'; }
 
@@ -155,10 +191,13 @@ export class Souvenirs implements OnInit, OnDestroy {
   }
 
   // ------------------------------------------------------------ visionneuse
-  protected ouvrir(s: SouvenirDTOs.Resume): void {
+  protected ouvrir(s: SouvenirDTOs.Resume, index = 0): void {
     this.ouvert.set(s);
-    s.medias?.forEach(m => { if (m.type === 'PHOTO' && m.id) this.chargerUrl(m.id); });   // miniatures
-    this.index.set(0);
+    s.medias?.forEach(m => {   // miniatures
+      if (m.type === 'PHOTO' && m.id) this.chargerUrl(m.id);
+      else if (m.couverture && m.id) this.chargerCouverture(m.id);
+    });
+    this.index.set(Math.min(index, Math.max(0, (s.medias?.length ?? 1) - 1)));
     this.rejet.set(false);
     this.motifRejet = '';
   }
@@ -214,6 +253,36 @@ export class Souvenirs implements OnInit, OnDestroy {
     });
   }
 
+  /** Visionneuse : choisir ou remplacer la couverture de la vidéo / du son affiché. */
+  protected changerCouverture(evt: Event): void {
+    const s = this.ouvert(), m = this.media();
+    const image = (evt.target as HTMLInputElement).files?.[0];
+    (evt.target as HTMLInputElement).value = '';
+    if (!s || !m || !image) return;
+    const erreur = this.controlerCouverture(image);
+    if (erreur) { this.toast.error(erreur); return; }
+    this.service.definirCouverture(s.id!, m.id!, image).subscribe({
+      next: r => { this.oublierCouverture(m.id!); this.toast.success('Image de couverture enregistrée.'); this.apresAction(r, false); this.ouvrir(r, this.index()); },
+      error: e => this.toast.error(messageErreur(e))
+    });
+  }
+
+  protected retirerCouverture(): void {
+    const s = this.ouvert(), m = this.media();
+    if (!s || !m) return;
+    this.service.supprimerCouverture(s.id!, m.id!).subscribe({
+      next: r => { this.oublierCouverture(m.id!); this.toast.success('Image de couverture retirée.'); this.apresAction(r, false); this.ouvrir(r, this.index()); },
+      error: e => this.toast.error(messageErreur(e))
+    });
+  }
+
+  private controlerCouverture(image: File): string | null {
+    const ext = (image.name.split('.').pop() ?? '').toLowerCase();
+    if (!EXT_COUVERTURE.includes(ext)) return 'La couverture doit être une image JPG, PNG ou WEBP.';
+    if (image.size > MAX_COUVERTURE) return 'L\'image de couverture ne doit pas dépasser 5 Mo.';
+    return null;
+  }
+
   private apresAction(r: SouvenirDTOs.Resume, garderOuvert = true): void {
     this.rejet.set(false);
     if (garderOuvert || this.ouvert()) this.ouvert.set(r);
@@ -256,12 +325,44 @@ export class Souvenirs implements OnInit, OnDestroy {
   }
   protected retirerFichier(i: number): void {
     const f = this.fichiers()[i];
-    if (f?.apercu) URL.revokeObjectURL(f.apercu);
+    if (f) liberer(f);
     this.fichiers.update(l => l.filter((_, j) => j !== i));
   }
   private viderFichiers(): void {
-    this.fichiers().forEach(f => f.apercu && URL.revokeObjectURL(f.apercu));
+    this.fichiers().forEach(liberer);
     this.fichiers.set([]);
+  }
+
+  /** Formulaire : couverture facultative d'une vidéo ou d'un son, envoyée après la création. */
+  protected choisirCouvertureLocale(i: number, evt: Event): void {
+    const image = (evt.target as HTMLInputElement).files?.[0];
+    (evt.target as HTMLInputElement).value = '';
+    if (!image) return;
+    const erreur = this.controlerCouverture(image);
+    if (erreur) { this.toast.error(erreur); return; }
+    this.fichiers.update(l => l.map((x, j) => {
+      if (j !== i) return x;
+      if (x.apercuCouverture) URL.revokeObjectURL(x.apercuCouverture);
+      return { ...x, couverture: image, apercuCouverture: URL.createObjectURL(image) };
+    }));
+  }
+  protected retirerCouvertureLocale(i: number): void {
+    this.fichiers.update(l => l.map((x, j) => {
+      if (j !== i) return x;
+      if (x.apercuCouverture) URL.revokeObjectURL(x.apercuCouverture);
+      return { ...x, couverture: undefined, apercuCouverture: undefined };
+    }));
+  }
+
+  /** Envoie les couvertures choisies dans le formulaire (les médias sont dans l'ordre d'envoi) ; renvoie le nombre d'échecs. */
+  private envoyerCouvertures(r: SouvenirDTOs.Resume, locaux: FichierLocal[]): Observable<number> {
+    const appels = locaux.flatMap((x, i) => {
+      const media = r.medias?.[i];
+      return x.couverture && media?.id
+        ? [this.service.definirCouverture(r.id!, media.id, x.couverture).pipe(map(() => 0), catchError(() => of(1)))]
+        : [];
+    });
+    return appels.length ? forkJoin(appels).pipe(map(n => n.reduce((a, b) => a + b, 0))) : of(0);
   }
 
   /** Contrôles côté navigateur (le backend revérifie). */
@@ -289,14 +390,18 @@ export class Souvenirs implements OnInit, OnDestroy {
     }
     if (!this.fichiers().length) { this.envoi.set(false); this.toast.error('Ajoutez au moins une photo, une vidéo ou un son.'); return; }
     this.progression.set(0);
-    this.service.creer(donnees, this.fichiers().map(x => x.fichier)).subscribe({
+    const locaux = this.fichiers();
+    this.service.creer(donnees, locaux.map(x => x.fichier)).subscribe({
       next: ev => {
         if (ev.type === HttpEventType.UploadProgress && ev.total) this.progression.set(Math.round((ev.loaded / ev.total) * 100));
-        if (ev.type === HttpEventType.Response) {
-          this.envoi.set(false); this.progression.set(null); this.formulaire.set(false); this.viderFichiers();
-          this.toast.success('Souvenir publié.');
-          if (this.statut() !== 'PUBLIE') this.statut.set('PUBLIE');
-          this.rafraichir();
+        if (ev.type === HttpEventType.Response && ev.body) {
+          this.envoyerCouvertures(ev.body, locaux).subscribe(echecs => {
+            this.envoi.set(false); this.progression.set(null); this.formulaire.set(false); this.viderFichiers();
+            if (echecs) this.toast.info(`Souvenir publié. ${echecs} image(s) de couverture n'ont pas pu être enregistrées.`);
+            else this.toast.success('Souvenir publié.');
+            if (this.statut() !== 'PUBLIE') this.statut.set('PUBLIE');
+            this.rafraichir();
+          });
         }
       },
       error: e => { this.envoi.set(false); this.progression.set(null); this.toast.error(messageErreur(e)); }
@@ -304,6 +409,11 @@ export class Souvenirs implements OnInit, OnDestroy {
   }
 
   protected icone(t?: TypeMedia): string { return t === 'VIDEO' ? 'video' : t === 'AUDIO' ? 'mic' : 'image'; }
+}
+
+function liberer(f: FichierLocal): void {
+  if (f.apercu) URL.revokeObjectURL(f.apercu);
+  if (f.apercuCouverture) URL.revokeObjectURL(f.apercuCouverture);
 }
 
 function typeDe(nom: string, strict = false): TypeMedia {

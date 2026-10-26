@@ -61,4 +61,18 @@ export class SouvenirService {
   fichier(mediaId: number): Observable<string> {
     return this.http.get(`${this.apiUrl}/medias/${mediaId}/fichier`, { responseType: 'blob' }).pipe(map(urlLocale));
   }
+
+  /** Image de couverture d'une vidéo ou d'un son (remplace l'ancienne). */
+  definirCouverture(id: number, mediaId: number, image: File): Observable<SouvenirDTOs.Resume> {
+    return this.http.post<SouvenirDTOs.Resume>(`${this.apiUrl}/${id}/medias/${mediaId}/couverture`, formulaire({ image }));
+  }
+
+  supprimerCouverture(id: number, mediaId: number): Observable<SouvenirDTOs.Resume> {
+    return this.http.delete<SouvenirDTOs.Resume>(`${this.apiUrl}/${id}/medias/${mediaId}/couverture`);
+  }
+
+  /** URL locale (blob:) de l'image de couverture d'une vidéo ou d'un son. */
+  couverture(mediaId: number): Observable<string> {
+    return this.http.get(`${this.apiUrl}/medias/${mediaId}/couverture`, { responseType: 'blob' }).pipe(map(urlLocale));
+  }
 }

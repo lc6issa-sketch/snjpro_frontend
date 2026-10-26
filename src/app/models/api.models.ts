@@ -1275,6 +1275,8 @@ export namespace SouvenirDTOs {
     nomFichier?: string;
     typeMime?: string;
     taille?: number;
+    /** Vidéo ou son : une image de couverture est disponible. */
+    couverture?: boolean;
   }
   export interface Resume {
     id?: number;
@@ -1397,6 +1399,8 @@ export namespace StatistiqueDTOs {
     sections?: string[];
     masquerDonneesSensibles?: boolean;
     filtres?: MembreFilterDTO;
+    /** Membres cochés : s'il y en a, seuls ceux-là sont exportés. */
+    ids?: number[];
   }
   export interface EstimationExport {
     nombreMembres?: number;

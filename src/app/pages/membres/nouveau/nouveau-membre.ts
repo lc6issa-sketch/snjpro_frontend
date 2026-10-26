@@ -17,6 +17,15 @@ import { ConfirmationService } from '../../../core/services/confirmation.service
 import { ShellService } from '../../../core/services/shell.service';
 
 const CLE_BROUILLON = 'snjpro.brouillon.nouveau-membre';
+/** Âge minimal d'un membre à l'enregistrement. */
+const AGE_MINIMUM = 18;
+
+/** Date de naissance la plus récente possible (aujourd'hui moins AGE_MINIMUM ans), au format AAAA-MM-JJ local. */
+function naissanceMaximale(): string {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - AGE_MINIMUM);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 interface CompetenceChoisie { intitule: string; categorie?: string; niveau: NiveauCompetenceEnum; }
 
@@ -83,6 +92,8 @@ export class NouveauMembre implements OnInit {
   protected readonly etape = signal(1);
   protected readonly fait = signal(0);
   protected readonly erreurs = signal<Record<string, string>>({});
+  protected readonly naissanceMax = naissanceMaximale();
+  protected readonly ageMinimum = AGE_MINIMUM;
   protected readonly doublons = signal<string[]>([]);
   protected readonly cohortes = signal<CohorteDTO[]>([]);
   protected readonly regions = signal<string[]>([]);
@@ -123,7 +134,7 @@ export class NouveauMembre implements OnInit {
     this.referentiel.regionsMali().subscribe(r => this.regions.set(r));
     this.referentiel.diplomes().subscribe(d => this.diplomes.set(d));
     this.referentiel.groupesSanguins().subscribe(g => this.groupes.set(g));
-    this.competenceService.lister(null, undefined, 'MEMBRES').subscribe(c => this.referentielCompetences.set(c));
+    this.competenceService.lister(null, undefined, 'MEMBRES', true).subscribe(c => this.referentielCompetences.set(c));
   }
 
   // ------------------------------------------------------------- navigation
@@ -144,10 +155,10 @@ export class NouveauMembre implements OnInit {
     if (etape === 1) {
       requis('nom', 'Le nom est obligatoire'); requis('prenom', 'Le prénom est obligatoire');
       requis('dateNaissance', 'La date de naissance est obligatoire'); requis('lieuNaissance', 'Le lieu de naissance est obligatoire');
-      if (this.f.dateNaissance && this.f.dateNaissance >= new Date().toISOString().slice(0, 10)) e['dateNaissance'] = 'La date doit être dans le passé';
+      if (this.f.dateNaissance && this.f.dateNaissance > this.naissanceMax) e['dateNaissance'] = `Le membre doit avoir au moins ${AGE_MINIMUM} ans`;
     }
     if (etape === 2) {
-      requis('telephone', 'Le téléphone principal est obligatoire'); requis('region', 'La région est obligatoire'); requis('cercle', 'Le cercle est obligatoire');
+      requis('telephone', 'Le téléphone principal est obligatoire'); requis('region', 'La région est obligatoire');
       if (this.f.telephone && this.chiffres(this.f.telephone).length !== 8) e['telephone'] = 'Saisissez les 8 chiffres du numéro';
       if (this.f.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(this.f.email)) e['email'] = 'Adresse e-mail invalide';
       if (this.f.personneAPrevenirTelephone && this.chiffres(this.f.personneAPrevenirTelephone).length !== 8) e['personneAPrevenirTelephone'] = 'Saisissez les 8 chiffres du numéro';
@@ -260,7 +271,7 @@ export class NouveauMembre implements OnInit {
     const appels: Observable<boolean>[] = [];
     const ok = <T>(o: Observable<T>) => o.pipe(map(() => true), catchError(() => of(false)));
     appels.push(ok(this.membres.creerLocalisation(id, {
-      pays: 'Mali', region: this.f.region, cercle: this.f.cercle, commune: this.f.commune || undefined,
+      pays: 'Mali', region: this.f.region, cercle: this.f.cercle || undefined, commune: this.f.commune || undefined,
       quartier: this.f.quartier || undefined, adresseComplete: this.f.adresseComplete || undefined
     })));
     if (this.f.statutPro) {

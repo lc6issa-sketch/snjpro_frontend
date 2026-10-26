@@ -30,6 +30,8 @@ export class ExportMembres implements OnInit {
   private readonly toast = inject(ToastService);
   readonly filtres = input<MembreFilterDTO>({});
   readonly etiquettes = input<string[]>([]);
+  /** Membres cochés dans la liste : prioritaires sur les filtres. */
+  readonly ids = input<number[]>([]);
   readonly fermer = output<void>();
 
   protected readonly formats: { cle: FormatFichier; titre: string; detail: string; icone: string; teinte: string }[] = [
@@ -45,7 +47,10 @@ export class ExportMembres implements OnInit {
   protected readonly chargement = signal(false);
   protected readonly nombreTexte = computed(() => nombre(this.estimation()?.nombreMembres ?? 0));
   protected readonly tailleTexte = computed(() => taille(this.estimation()?.tailleEstimeeOctets));
-  protected readonly sousTitre = computed(() => `${this.nombreTexte()} membres correspondent aux filtres actifs`);
+  protected readonly sousTitre = computed(() =>
+    this.ids().length ? `${this.nombreTexte()} membres sélectionnés`
+    : this.etiquettes().length || this.filtres().query ? `${this.nombreTexte()} membres correspondent aux filtres actifs`
+    : `${this.nombreTexte()} membres · aucun filtre, tous les membres seront exportés`);
 
   ngOnInit(): void { this.estimer(); }
 
@@ -67,6 +72,6 @@ export class ExportMembres implements OnInit {
   }
 
   private requete() {
-    return { format: this.format(), sections: [...this.sections()], masquerDonneesSensibles: this.masquer, filtres: this.filtres() };
+    return { format: this.format(), sections: [...this.sections()], masquerDonneesSensibles: this.masquer, filtres: this.filtres(), ids: this.ids() };
   }
 }

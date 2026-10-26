@@ -12,7 +12,7 @@ import { Avatar } from '../../../shared/components/avatar/avatar';
 import { Pill } from '../../../shared/components/pill/pill';
 import { Ring } from '../../../shared/components/charts/ring/ring';
 import { Modal } from '../../../shared/components/modal/modal';
-import { DateCourtePipe, DateHeurePipe, DateMoyennePipe, TelMasquePipe } from '../../../shared/pipes/format.pipes';
+import { DateCourtePipe, DateHeurePipe, DateMoyennePipe, TelephonePipe } from '../../../shared/pipes/format.pipes';
 import { NIVEAU_COMPETENCE, STATUT_COHORTE, STATUT_MEMBRE, STATUT_PROFESSIONNEL, TYPE_DOCUMENT, etiquetteAction } from '../../../shared/utils/libelles';
 import { AjoutParcours } from '../ajout-parcours/ajout-parcours';
 import { DocumentService } from '../../../core/services/document.service';
@@ -25,7 +25,7 @@ type Onglet = 'apercu' | 'documents' | 'historique';
 /** Écrans web 17 (Aperçu), 18 (Documents) et 19 (Historique) — Profil d'un membre. */
 @Component({
   selector: 'app-profil-membre',
-  imports: [FormsModule, RouterLink, Icon, Avatar, Pill, Ring, Modal, DateCourtePipe, DateHeurePipe, DateMoyennePipe, TelMasquePipe, AjoutParcours],
+  imports: [FormsModule, RouterLink, Icon, Avatar, Pill, Ring, Modal, DateCourtePipe, DateHeurePipe, DateMoyennePipe, TelephonePipe, AjoutParcours],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profil-membre.html',
   styleUrl: './profil-membre.css'

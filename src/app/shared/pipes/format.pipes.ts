@@ -41,4 +41,9 @@ export class TelMasquePipe implements PipeTransform {
   transform(v?: string | null): string { return f.telMasque(v); }
 }
 
-export const PIPES = [NombrePipe, DateCourtePipe, DateMoyennePipe, DateHeurePipe, HeurePipe, RelatifPipe, TaillePipe, TelMasquePipe] as const;
+@Pipe({ name: 'telephone' })
+export class TelephonePipe implements PipeTransform {
+  transform(v?: string | null): string { return f.telephone(v); }
+}
+
+export const PIPES = [NombrePipe, DateCourtePipe, DateMoyennePipe, DateHeurePipe, HeurePipe, RelatifPipe, TaillePipe, TelMasquePipe, TelephonePipe] as const;
