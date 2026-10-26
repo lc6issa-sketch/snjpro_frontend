@@ -94,9 +94,12 @@
           @if (media(); as m) {
             @if (urls()[m.id!]; as url) {
               @switch (m.type) {
-                @case ('VIDEO') { <video [src]="url" controls playsinline></video> }
+                @case ('VIDEO') { <video [src]="url" [attr.poster]="couvertureMedia(m)" controls playsinline></video> }
                 @case ('AUDIO') {
-                  <div class="audio"><span class="onde"><app-icon name="mic" [size]="44" /></span><p>{{ m.nomFichier }}</p><audio [src]="url" controls></audio></div>
+                  <div class="audio">
+                    @if (couvertureMedia(m); as c) { <img class="pochette" [src]="c" alt="Couverture" /> }
+                    @else { <span class="onde"><app-icon name="mic" [size]="44" /></span> }
+                    <p>{{ m.nomFichier }}</p><audio [src]="url" controls></audio></div>
                 }
                 @default { <img [src]="url" [alt]="m.nomFichier" /> }
               }
@@ -113,6 +116,7 @@
             <div class="miniature" [class.active]="i === index()">
               <button type="button" class="choix" (click)="index.set(i)" [attr.aria-label]="m.nomFichier">
                 @if (m.type === 'PHOTO' && urls()[m.id!]) { <img [src]="urls()[m.id!]" alt="" /> }
+                @else if (couvertureMedia(m); as c) { <img [src]="c" alt="" /><span class="badge-type"><app-icon [name]="icone(m.type)" [size]="11" /></span> }
                 @else { <app-icon [name]="icone(m.type)" [size]="20" /> }
               </button>
               @if (peutGerer() && (s.medias?.length ?? 0) > 1) {
@@ -142,6 +146,22 @@
           <dt>Visible par</dt><dd>{{ s.visibleTous ? 'Tous les membres' : 'Membres de la cohorte' }}</dd>
           @if (media(); as m) { <dt>Fichier</dt><dd class="ellipsis" [title]="m.nomFichier">{{ m.taille | taille }}</dd> }
         </dl>
+        @if (peutGerer() && media(); as m) {
+          @if (m.type !== 'PHOTO') {
+            <div class="bloc-couverture mt-16">
+              <span class="label">Image de couverture</span>
+              <div class="row">
+                @if (couvertureMedia(m); as c) { <img class="vignette-couverture" [src]="c" alt="" /> }
+                @else { <span class="vignette-couverture vide"><app-icon [name]="icone(m.type)" [size]="18" /></span> }
+                <label class="btn btn-secondary btn-sm">
+                  <input type="file" [accept]="acceptesCouverture" (change)="changerCouverture($event)" hidden />
+                  {{ m.couverture ? 'Changer' : 'Ajouter une image' }}</label>
+                @if (m.couverture) { <button type="button" class="btn btn-ghost btn-sm" (click)="retirerCouverture()">Retirer</button> }
+              </div>
+              <span class="hint">Affichée dans la galerie et avant la lecture · JPG, PNG ou WEBP, 5 Mo max.</span>
+            </div>
+          }
+        }
         @if (s.statut === 'REJETE' && s.motifRejet) {
           <div class="notice error mt-16"><app-icon name="alert-circle" [size]="16" /><span><strong>Rejeté :</strong> {{ s.motifRejet }}</span></div>
         }
@@ -205,7 +225,7 @@
             <input type="file" multiple [accept]="acceptes" (change)="choisirFichiers($event)" hidden />
             <app-icon name="upload" [size]="26" />
             <strong>Glissez vos fichiers ici ou cliquez pour parcourir</strong>
-            <span class="muted xs">Photos (JPG, PNG, WebP), vidéos (MP4, WebM, MOV), sons (MP3, WAV, M4A, OGG) · 10 fichiers, 100 Mo chacun</span>
+            <span class="muted xs">Photos (JPG, PNG, WebP), vidéos (MP4, WebM, MOV), sons (MP3, WAV, M4A, OGG) · 10 fichiers, 100 Mo chacun · image de couverture facultative pour les vidéos et les sons</span>
           </label>
           @if (fichiers().length) {
             <div class="apercus">
@@ -213,11 +233,22 @@
                 <div class="apercu">
                   @switch (x.type) {
                     @case ('PHOTO') { <img [src]="x.apercu" alt="" /> }
-                    @case ('VIDEO') { <video [src]="x.apercu" muted></video><span class="badge-type"><app-icon name="video" [size]="12" /></span> }
-                    @default { <span class="icone-audio"><app-icon name="mic" [size]="22" /></span> }
+                    @case ('VIDEO') {
+                      @if (x.apercuCouverture) { <img [src]="x.apercuCouverture" alt="" /> } @else { <video [src]="x.apercu" muted></video> }
+                      <span class="badge-type"><app-icon name="video" [size]="12" /></span> }
+                    @default {
+                      @if (x.apercuCouverture) { <img [src]="x.apercuCouverture" alt="" /><span class="badge-type"><app-icon name="mic" [size]="12" /></span> }
+                      @else { <span class="icone-audio"><app-icon name="mic" [size]="22" /></span> } }
                   }
                   <span class="nom xs ellipsis" [title]="x.fichier.name">{{ x.fichier.name }}</span>
                   <span class="faint xs">{{ x.fichier.size | taille }}</span>
+                  @if (x.type !== 'PHOTO') {
+                    <span class="choix-couverture xs">
+                      <label class="lien"><input type="file" [accept]="acceptesCouverture" (change)="choisirCouvertureLocale(i, $event)" hidden />
+                        {{ x.couverture ? 'Changer la couverture' : '+ Couverture' }}</label>
+                      @if (x.couverture) { <button type="button" class="lien faint" (click)="retirerCouvertureLocale(i)">Retirer</button> }
+                    </span>
+                  }
                   <button type="button" class="retirer" (click)="retirerFichier(i)" aria-label="Retirer"><app-icon name="x" [size]="12" /></button>
                 </div>
               }

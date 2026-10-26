@@ -46,6 +46,20 @@
   --sidebar-bg: #124D2D;
   --overlay: rgba(10, 30, 20, .42);
 
+  /* Fonds sombres de la marque (page de connexion, bandeaux, projection) et textes posés dessus */
+  --sombre-1: #0A2A17;
+  --sombre-2: #124D2D;
+  --sombre-3: #1F6B3C;
+  --sur-sombre: #E4EFE7;
+  --sur-sombre-clair: #D5E5DA;
+  --sur-sombre-doux: #C9DDD0;
+  --sur-sombre-pied: #B6CDBE;
+  --sur-sombre-attenue: #A9C7B4;
+  --sur-sombre-discret: #8DB09B;
+  --accent-sombre: #B5DB86;
+  --badge-hero-texte: #2F5A12;
+  --badge-hero-fond: #EEF6E4;   /* reste clair en mode sombre : posé sur le bandeau vert */
+
   --radius-sm: 6px;
   --radius: 8px;
   --radius-md: 10px;
@@ -63,6 +77,143 @@
   /* Contrôles natifs restants (suggestions datalist, barres de défilement…) : suivent le thème */
   color-scheme: light;
   accent-color: var(--primary);
+}
+
+/* =====================================================================
+   Charte « noir et or » : suit le logo écusson (logo_snj_or.svg) choisi
+   par l'administrateur. Couleurs tirées du logo : noir #141212, or #F4BC2C.
+   La charte verte ci-dessus reste celle du logo historique.
+   ===================================================================== */
+:root[data-charte="or"] {
+  --primary: #1C1915;
+  --primary-dark: #141212;
+  --primary-darker: #0B0A09;
+  --primary-hover: #2B2620;
+  --secondary: #A97415;
+  --secondary-light: #F4BC2C;
+  --bg: #FAF8F3;
+
+  --text: #1A1712;
+  --text-2: #6B6455;
+  --text-3: #A39C8D;
+
+  --border: #ECE6D9;
+  --border-strong: #DDCDA2;
+  --muted-bg: #F3EFE5;
+  --tint: #FBF1D6;
+  --lime-bg: #FDF4D9;
+  --lime-200: #F7DF9A;
+
+  --surface-2: #FCFBF8;
+  --surface-selected: #FBF6E8;
+  --tint-hover: #F6E6B8;
+  --lime-text: #7A5408;
+  --switch-off: #DDD7CB;
+  --sidebar-bg: #141212;
+  --overlay: rgba(20, 18, 18, .45);
+
+  --sombre-1: #0B0A09;
+  --sombre-2: #1C1915;
+  --sombre-3: #3A2D14;
+  --sur-sombre: #F3EEE3;
+  --sur-sombre-clair: #E6DFCF;
+  --sur-sombre-doux: #D2C8B4;
+  --sur-sombre-pied: #BFB49C;
+  --sur-sombre-attenue: #B3A88F;
+  --sur-sombre-discret: #968B73;
+  --accent-sombre: #F4BC2C;
+  --badge-hero-texte: #7A5408;
+  --badge-hero-fond: #FDF4D9;
+
+  --shadow-sm: 0 1px 2px rgba(20, 18, 18, .05), 0 1px 3px rgba(20, 18, 18, .04);
+  --shadow: 0 1px 3px rgba(20, 18, 18, .06);
+  --shadow-lg: 0 12px 28px rgba(20, 18, 18, .16), 0 2px 6px rgba(20, 18, 18, .06);
+  --focus: 0 0 0 3px rgba(233, 175, 36, .32);
+}
+
+/* =====================================================================
+   Mode sombre : choisi par chaque utilisateur (menu du profil, en haut à
+   droite) et posé sur <html> par ThemeService (data-theme="sombre").
+   Les fonds de marque (barre latérale, bandeaux, page de connexion)
+   restent verts ; seuls les fonds, textes et pastels s'assombrissent.
+   ===================================================================== */
+:root[data-theme="sombre"] {
+  /* le vert est éclairci pour rester lisible sur fond foncé (liens, pastilles) */
+  --primary: #2F8A55;
+  --primary-hover: #37985F;
+  --secondary: #7DB443;
+  --secondary-light: #A6D46A;
+  --bg: #0E1512;
+  --surface: #16201B;
+
+  --text: #E6EEE9;
+  --text-2: #A3B3AA;
+  --text-3: #74857C;
+
+  --border: #27342D;
+  --border-strong: #3A4A41;
+  --muted-bg: #1D2722;
+  --tint: #1A3326;
+  --lime-bg: #1E2E16;
+  --lime-200: #34502A;
+
+  --blue-bg: #18243D;   --blue-text: #9DBBF5;
+  --violet-bg: #261F3D; --violet-text: #C3B0FA;
+  --gold-bg: #362C11;   --gold-text: #F5D98A;
+  --red-bg: #3A1D1B;    --red-text: #F2A7A1;
+  --teal-bg: #112E31;   --teal-text: #7FD3DD;
+  --grey-bg: #1F2924;   --grey-text: #B7C4BD;
+
+  --surface-2: #1A2520;
+  --surface-selected: #1C2B23;
+  --tint-hover: #22402F;
+  --lime-text: #A6D46A;
+  --gold-border: #5A4818;
+  --gold-bg-soft: #241F10;
+  --red-bg-hover: #4A2421;
+  --red-border: #7A3631;
+  --switch-off: #3A4741;
+  --sidebar-bg: #0C2618;
+  --overlay: rgba(0, 0, 0, .6);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+  --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, .5), 0 2px 6px rgba(0, 0, 0, .3);
+  --focus: 0 0 0 3px rgba(47, 138, 85, .4);
+
+  color-scheme: dark;
+}
+
+/* Mode sombre avec la charte noir et or */
+:root[data-theme="sombre"][data-charte="or"] {
+  --primary: #9A7420;
+  --primary-hover: #B0862A;
+  --secondary: #C99327;
+  --secondary-light: #F4BC2C;
+  --bg: #12110E;
+  --surface: #1C1A16;
+
+  --text: #EDE8DD;
+  --text-2: #B3AA98;
+  --text-3: #857D6E;
+
+  --border: #2E2A22;
+  --border-strong: #4A4232;
+  --muted-bg: #24211B;
+  --tint: #332A15;
+  --lime-bg: #332A12;
+  --lime-200: #5A4818;
+
+  --grey-bg: #24211B;   --grey-text: #C9C1B0;
+
+  --surface-2: #211E19;
+  --surface-selected: #2A2518;
+  --tint-hover: #44381A;
+  --lime-text: #F4C95A;
+  --switch-off: #4A4232;
+  --sidebar-bg: #0B0A09;
+
+  --focus: 0 0 0 3px rgba(244, 188, 44, .3);
 }
 
 *, *::before, *::after { box-sizing: border-box; }

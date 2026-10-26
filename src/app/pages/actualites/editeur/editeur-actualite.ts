@@ -14,6 +14,7 @@ import { heure } from '../../../shared/utils/format';
 import { ActualiteService } from '../../../core/services/actualite.service';
 import { messageErreur } from '../../../shared/utils/http';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 /** Écran web 38 — Éditeur d'actualité. */
 @Component({
@@ -32,6 +33,15 @@ export class EditeurActualite implements OnInit, OnDestroy {
   private readonly confirmation = inject(ConfirmationService);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
+  private readonly auth = inject(AuthService);
+
+  /** Responsable : l'actualité est diffusée uniquement à sa région ou à sa cohorte (imposé par le serveur). */
+  protected readonly perimetre = this.auth.perimetre;
+  protected readonly libellePerimetre = computed(() => {
+    const p = this.perimetre();
+    if (!p) return '';
+    return p.type === 'REGION' ? `Région de ${p.region}` : (this.cohortes().find(c => c.id === p.cohorteId)?.nom ?? 'Ma cohorte');
+  });
 
   protected readonly categories = Object.entries(CATEGORIE_ACTUALITE).map(([cle, libelle]) => ({ cle: cle as CategorieActualite, libelle }));
   protected readonly actualiteId = signal<number | null>(null);
@@ -56,6 +66,11 @@ export class EditeurActualite implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.referentiel.regionsMali().subscribe(r => this.regions.set(r));
     this.cohorteService.lister().subscribe(c => this.cohortes.set(c.filter(x => x.statut !== 'ARCHIVEE')));
+    const p = this.perimetre();
+    if (p) {
+      this.f.cible = p.type;
+      this.valeurs = [p.type === 'REGION' ? p.region : String(p.cohorteId)];
+    }
     const id = this.id();
     if (id) {
       this.service.obtenir(+id).subscribe({

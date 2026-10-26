@@ -17,7 +17,9 @@
       </label>
     }
   </div>
-  @if (etiquettes().length) {
+  @if (ids().length) {
+    <div class="notice neutral mt-24"><app-icon name="check-circle" [size]="16" />Seuls les {{ ids().length }} membres cochés dans la liste seront exportés.</div>
+  } @else if (etiquettes().length) {
     <p class="label mt-24">Filtres appliqués</p>
     <div class="row wrap mt-8">@for (e of etiquettes(); track e) { <span class="tag soft">{{ e }}</span> }</div>
   }

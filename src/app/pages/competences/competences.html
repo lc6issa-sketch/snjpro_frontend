@@ -1,6 +1,14 @@
 <div class="page">
   <div class="page-head">
-    <div><h1>Compétences</h1><p class="sub">{{ total() | nombre }} compétences référencées dans {{ categories().length }} catégories</p></div>
+    <div><h1>Compétences</h1>
+      <p class="sub">@if (maCohorte()) { {{ total() | nombre }} compétences détenues par les membres de votre cohorte, dans {{ categories().length }} catégories }
+        @else { {{ total() | nombre }} compétences référencées dans {{ categories().length }} catégories{{ responsableCohorte() ? ' (toutes cohortes)' : '' }} }</p></div>
+    @if (responsableCohorte()) {
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" (click)="basculerCohortes()">
+          <app-icon [name]="toutes() ? 'arrow-left' : 'layers'" [size]="16" />{{ toutes() ? 'Revenir à ma cohorte' : 'Voir les autres cohortes' }}</button>
+      </div>
+    }
     @if (peutGerer()) {
       <div class="actions">
         <button type="button" class="btn btn-secondary" (click)="synchroniser()" title="Ajoute au référentiel les compétences saisies dans les profils">Synchroniser</button>
@@ -79,7 +87,8 @@
           <span class="grow"><strong>{{ d.prenom }} {{ d.nom }}</strong><span class="muted xs"> · {{ d.identifiantSnj }}</span><br /><span class="muted xs">{{ d.cohorte }}{{ d.region ? ' · ' + d.region : '' }}</span></span>
           @if (d.niveau) { <span class="pill green">{{ d.niveau }}</span> }
         </button>
-      } @empty { <p class="muted small">Aucun membre.</p> }
+      } @empty { <p class="muted small">{{ responsableCohorte() ? 'Aucun membre de votre cohorte.' : 'Aucun membre.' }}</p> }
+      @if (responsableCohorte() && toutes()) { <p class="muted xs">Seuls les membres de votre cohorte sont affichés ; le total inclut toutes les cohortes.</p> }
     </div>
     <div pied><button type="button" class="btn btn-secondary" (click)="tousLesMembres(s)">Voir dans la liste des membres</button></div>
   </app-modal>

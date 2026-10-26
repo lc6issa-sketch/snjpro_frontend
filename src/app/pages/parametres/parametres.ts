@@ -13,8 +13,16 @@ import { CompteService } from '../../core/services/compte.service';
 import { messageErreur } from '../../shared/utils/http';
 import { ConfirmationService } from '../../core/services/confirmation.service';
 import { ShellService } from '../../core/services/shell.service';
+import { ApparenceService, LOGOS } from '../../core/services/apparence.service';
+import { LogoApplication, LogoApplication_VALUES } from '../../models/api.models';
 
-type Onglet = 'profil' | 'securite' | 'notifications';
+type Onglet = 'profil' | 'securite' | 'notifications' | 'apparence';
+
+/** Aperçu des couleurs de chaque charte (les vraies valeurs sont dans styles.css). */
+const NUANCIERS: Record<LogoApplication, string[]> = {
+  VERT: ['#124D2D', '#6FA334', '#A6D46A', '#E7F0EA'],
+  OR: ['#141212', '#A97415', '#F4BC2C', '#FBF1D6']
+};
 
 /** Écrans web 65 (Sécurité), 66 (Mon profil) et 67 (Préférences de notification). */
 @Component({
@@ -49,8 +57,18 @@ export class Parametres implements OnInit {
 
   protected readonly moi = computed<AuthResponse | null>(() => this.auth.utilisateur());
 
+  // ------------------------------------------------------------ apparence (administrateur système)
+  protected readonly apparence = inject(ApparenceService);
+  protected readonly estAdminSysteme = computed(() => this.auth.aRole('ROLE_ADMIN_SYSTEME'));
+  protected readonly logos = LogoApplication_VALUES.map(cle => ({ cle, ...LOGOS[cle], nuancier: NUANCIERS[cle] }));
+  protected readonly logoChoisi = signal<LogoApplication>(this.apparence.logo());
+
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe(q => { const o = q.get('onglet') as Onglet; if (o) this.onglet.set(o); });
+    this.route.queryParamMap.subscribe(q => {
+      const o = q.get('onglet') as Onglet;
+      if (o) this.onglet.set(o === 'apparence' && !this.estAdminSysteme() ? 'profil' : o);
+      if (o === 'apparence') this.logoChoisi.set(this.apparence.logo());
+    });
     this.service.sessions().subscribe(s => this.sessions.set(s));
     this.service.preferences().subscribe(p => this.preferences.set(p ?? []));
     this.auth.rafraichir().subscribe(() => this.remplir());
@@ -58,6 +76,17 @@ export class Parametres implements OnInit {
   }
 
   protected changerOnglet(o: Onglet): void { this.router.navigate([], { queryParams: { onglet: o }, replaceUrl: true }); }
+
+  /** Le logo s'applique à tous les utilisateurs ; toutes les couleurs de la charte suivent. */
+  protected enregistrerLogo(): void {
+    const logo = this.logoChoisi();
+    if (logo === this.apparence.logo()) return;
+    this.envoi.set(true);
+    this.apparence.changer(logo).subscribe({
+      next: () => { this.envoi.set(false); this.toast.success(`${LOGOS[logo].libelle} appliqué : la charte de l'application a été mise à jour pour tous les utilisateurs.`); },
+      error: e => { this.envoi.set(false); this.toast.error(messageErreur(e)); }
+    });
+  }
 
   private remplir(): void {
     const u = this.moi();

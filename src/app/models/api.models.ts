@@ -18,6 +18,9 @@ export const EtatColonne_VALUES: EtatColonne[] = ['AUTO', 'A_VERIFIER', 'IGNOREE
 export type TypeCodeVerification = 'CONNEXION' | 'ACTIVATION' | 'REINITIALISATION' | 'VERIFICATION_TELEPHONE' | 'INVITATION';
 export const TypeCodeVerification_VALUES: TypeCodeVerification[] = ['CONNEXION', 'ACTIVATION', 'REINITIALISATION', 'VERIFICATION_TELEPHONE', 'INVITATION'];
 
+export type LogoApplication = 'VERT' | 'OR';
+export const LogoApplication_VALUES: LogoApplication[] = ['VERT', 'OR'];
+
 export type StatutMobilisation = 'BROUILLON' | 'PLANIFIEE' | 'EN_COURS' | 'CLOTUREE';
 export const StatutMobilisation_VALUES: StatutMobilisation[] = ['BROUILLON', 'PLANIFIEE', 'EN_COURS', 'CLOTUREE'];
 
@@ -104,6 +107,10 @@ export const StatutMembreEnum_VALUES: StatutMembreEnum[] = ['ACTIF', 'INACTIF', 
 
 export type StatutProfessionnelEnum = 'EMPLOYE' | 'AUTO_EMPLOYE' | 'CHOMEUR' | 'ETUDIANT' | 'RETRAITE' | 'AUTRE';
 export const StatutProfessionnelEnum_VALUES: StatutProfessionnelEnum[] = ['EMPLOYE', 'AUTO_EMPLOYE', 'CHOMEUR', 'ETUDIANT', 'RETRAITE', 'AUTRE'];
+
+export interface ApparenceDTO {
+  logo?: LogoApplication;
+}
 
 export interface AuthResponse {
   token?: string;
@@ -198,7 +205,6 @@ export interface InvitationDTO {
   region?: string;
   cohorteId?: number;
   message?: string;
-  /** Facultatif, avec motDePasse : création directe d'un compte actif, sans e-mail. */
   username?: string;
   motDePasse?: string;
 }
@@ -232,14 +238,17 @@ export interface MembreDTO {
   photoUrl?: string;
   telephoneSecondaire?: string;
   personneAPrevenir?: string;
+  personneAPrevenirTelephone?: string;
   nationalite?: string;
   groupeSanguin?: string;
   taille?: number;
   poids?: number;
   dernierDiplome?: string;
+  diplomes?: string[];
   categorie?: string;
   compagnie?: string;
   section?: string;
+  brigade?: string;
   dateIncorporation?: string;
   disponibleMobilisation?: boolean;
   statut?: StatutMembreEnum;
@@ -272,14 +281,17 @@ export interface MembreResponseDTO {
   telephoneSecondaire?: string;
   telephoneVerifie?: boolean;
   personneAPrevenir?: string;
+  personneAPrevenirTelephone?: string;
   nationalite?: string;
   groupeSanguin?: string;
   taille?: number;
   poids?: number;
   dernierDiplome?: string;
+  diplomes?: string[];
   categorie?: string;
   compagnie?: string;
   section?: string;
+  brigade?: string;
   dateIncorporation?: string;
   disponibleMobilisation?: boolean;
   statut?: StatutMembreEnum;
@@ -388,6 +400,7 @@ export namespace ActiviteDTOs {
   export interface Pointage {
     qr?: string;
     code?: string;
+    scanneLe?: string;
   }
   export interface Compteurs {
     inscrits?: number;
@@ -940,6 +953,11 @@ export namespace MessagerieDTOs {
     service?: string;
     enLigne?: boolean;
     delaiReponse?: string;
+    identifiantSnj?: string;
+    cohorteNom?: string;
+    memeCohorte?: boolean;
+    region?: string;
+    localisation?: string;
   }
 }
 
@@ -1257,6 +1275,8 @@ export namespace SouvenirDTOs {
     nomFichier?: string;
     typeMime?: string;
     taille?: number;
+    /** Vidéo ou son : une image de couverture est disponible. */
+    couverture?: boolean;
   }
   export interface Resume {
     id?: number;
@@ -1379,6 +1399,8 @@ export namespace StatistiqueDTOs {
     sections?: string[];
     masquerDonneesSensibles?: boolean;
     filtres?: MembreFilterDTO;
+    /** Membres cochés : s'il y en a, seuls ceux-là sont exportés. */
+    ids?: number[];
   }
   export interface EstimationExport {
     nombreMembres?: number;

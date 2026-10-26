@@ -1,8 +1,5 @@
 .entete { overflow: hidden; }
-.bandeau { position: relative; height: 92px; background: linear-gradient(135deg, #0A2A17, #124D2D 60%, #1F6B3C); overflow: hidden; }
-.bandeau i { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,.08); }
-.bandeau .c1 { width: 260px; height: 260px; right: 40px; top: -150px; }
-.bandeau .c2 { width: 120px; height: 120px; right: 230px; top: 50px; background: rgba(255,255,255,.04); border: 0; }
+.bandeau { position: relative; height: 92px; background: linear-gradient(135deg, var(--sombre-1), var(--sombre-2) 60%, var(--sombre-3)); overflow: hidden; }
 .identite { display: flex; align-items: flex-start; gap: 22px; padding: 0 22px 20px; flex-wrap: wrap; }
 .photo { position: relative; margin-top: -52px; border-radius: 50%; border: 4px solid var(--surface); background: var(--surface); box-shadow: var(--shadow); flex: none; }
 .photo.modifiable { cursor: pointer; }

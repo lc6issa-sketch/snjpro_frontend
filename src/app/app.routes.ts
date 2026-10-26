@@ -8,7 +8,8 @@ import { AuthLayout } from './layout/auth-layout/auth-layout';
 // Rôles autorisés sur les écrans de saisie (transmis au roleGuard via data.roles)
 const GESTION_MEMBRES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_RESPONSABLE_COHORTE'];
 const GESTION_MOBILISATIONS: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'];
-const REDACTEURS_ACTUALITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION'];
+// Responsables : actualités limitées à leur région ou à leur cohorte
+const REDACTEURS_ACTUALITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'];
 const GESTION_OPPORTUNITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_PARTENAIRE'];
 
 export const routes: Routes = [

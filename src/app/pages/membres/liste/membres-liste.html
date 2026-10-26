@@ -98,4 +98,4 @@
     <button type="button" class="fermer" (click)="viderSelection()" aria-label="Vider la sélection"><app-icon name="x" [size]="17" /></button>
   </div>
 }
-@if (exporter()) { <app-export-membres [filtres]="filtre()" [etiquettes]="etiquettes()" (fermer)="exporter.set(false)" /> }
+@if (exporter()) { <app-export-membres [filtres]="filtre()" [etiquettes]="etiquettes()" [ids]="idsSelection()" (fermer)="exporter.set(false)" /> }

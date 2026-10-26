@@ -46,6 +46,8 @@ export class MembresListe implements OnInit {
   protected readonly chargement = signal(true);
   protected readonly selection = signal(new Set<number>());
   protected readonly exporter = signal(false);
+  /** Membres cochés, transmis à l'export : s'il y en a, seuls ceux-là sont exportés. */
+  protected readonly idsSelection = computed(() => [...this.selection()]);
   protected readonly cohortes = signal<CohorteDTO[]>([]);
   protected readonly regions = signal<string[]>([]);
   protected readonly professions = signal<string[]>([]);

@@ -7,6 +7,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="SNJPro, plateforme de gestion des membres et des cohortes du Service National des Jeunes du Mali.">
   <link rel="icon" type="image/png" href="logo_snj.png">
+  <!-- Charte graphique mémorisée (logo choisi par l'administrateur) appliquée avant le démarrage, sans flash de couleurs -->
+  <script>try { if (localStorage.getItem('snjpro.charte') === 'OR') { document.documentElement.dataset.charte = 'or'; document.querySelector('link[rel="icon"]').href = 'logo_snj_or.svg'; } } catch (e) {}</script>
+  <!-- Mode sombre mémorisé (ou réglage du poste) appliqué avant le démarrage, sans flash blanc -->
+  <script>try { var t = localStorage.getItem('snjpro.theme'); if (t === 'sombre' || (t !== 'clair' && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'sombre'; } catch (e) {}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">

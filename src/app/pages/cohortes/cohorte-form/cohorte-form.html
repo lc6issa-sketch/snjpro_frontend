@@ -15,9 +15,6 @@
     <div class="field"><label for="rec">Nombre initial de recrues</label>
       <input id="rec" type="number" min="0" class="input" [(ngModel)]="c.recruesInitiales" /></div>
     <div class="field"><label for="cie">Nombre de compagnies</label><input id="cie" type="number" min="0" class="input" [(ngModel)]="c.nombreCompagnies" /></div>
-    <div class="field"><label for="reg">Région</label>
-      <select id="reg" class="select" [(ngModel)]="c.region"><option [ngValue]="undefined">Non renseignée</option>
-        @for (r of regions(); track r) { <option [value]="r">{{ r }}</option> }</select></div>
     <div class="field"><label for="sec">Nombre de sections</label><input id="sec" type="number" min="0" class="input" [(ngModel)]="c.nombreSections" /></div>
     @if (!cohorte()) {
       <div class="field full"><span class="label">Statut</span>

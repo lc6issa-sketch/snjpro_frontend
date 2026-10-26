@@ -5,6 +5,9 @@
       <button type="button" [class.active]="onglet() === 'profil'" (click)="changerOnglet('profil')"><app-icon name="user" [size]="17" />Mon profil</button>
       <button type="button" [class.active]="onglet() === 'securite'" (click)="changerOnglet('securite')"><app-icon name="lock" [size]="17" />Sécurité</button>
       <button type="button" [class.active]="onglet() === 'notifications'" (click)="changerOnglet('notifications')"><app-icon name="bell" [size]="17" />Notifications</button>
+      @if (estAdminSysteme()) {
+        <button type="button" [class.active]="onglet() === 'apparence'" (click)="changerOnglet('apparence')"><app-icon name="image" [size]="17" />Apparence</button>
+      }
     </nav>
 
     <div class="stack">
@@ -87,6 +90,29 @@
               </tbody>
             </table>
             <div class="action-bar bord"><span></span><button type="button" class="btn btn-primary" [disabled]="envoi()" (click)="enregistrerPreferences()">Enregistrer</button></div>
+          </section>
+        }
+        @case ('apparence') {
+          <section class="card">
+            <div class="corps">
+              <h2>Logo de l'application</h2>
+              <p class="muted small">Le logo choisi s'affiche pour tous les utilisateurs, dès la page de connexion. Les couleurs de l'application suivent le logo.</p>
+              <div class="logos mt-20">
+                @for (l of logos; track l.cle) {
+                  <button type="button" class="choix-logo" [class.choisi]="logoChoisi() === l.cle" (click)="logoChoisi.set(l.cle)" [attr.aria-pressed]="logoChoisi() === l.cle">
+                    <span class="apercu"><img [src]="l.embleme" [alt]="l.libelle" /></span>
+                    <span class="infos">
+                      <strong>{{ l.libelle }}</strong>
+                      <span class="muted small">{{ l.detail }}</span>
+                      <span class="nuancier">@for (c of l.nuancier; track c) { <i [style.background]="c"></i> }</span>
+                    </span>
+                    @if (apparence.logo() === l.cle) { <span class="pill green dot actuel">Actuel</span> }
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="action-bar bord"><span></span>
+              <button type="button" class="btn btn-primary" [disabled]="envoi() || logoChoisi() === apparence.logo()" (click)="enregistrerLogo()">Appliquer ce logo</button></div>
           </section>
         }
       }

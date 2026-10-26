@@ -29,7 +29,7 @@ export class ActualitesListe implements OnInit, OnDestroy {
   protected readonly statut = signal<StatutActualite | null>(null);
   protected readonly recherche = signal('');
   protected readonly images = signal<Record<number, string>>({});
-  protected readonly redacteur = computed(() => this.auth.aRole('ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION'));
+  protected readonly redacteur = computed(() => this.auth.aRole('ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'));
   protected readonly onglets = computed(() => {
     const c = this.compteurs();
     return [

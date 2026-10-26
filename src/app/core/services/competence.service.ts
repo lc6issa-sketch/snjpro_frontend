@@ -11,12 +11,13 @@ export class CompetenceService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environments.apiUrl}/competences`;
 
-  lister(categorie?: string | null, recherche?: string, tri = 'MEMBRES'): Observable<CompetenceReferentielDTOs.Competence[]> {
-    return this.http.get<CompetenceReferentielDTOs.Competence[]>(this.apiUrl, { params: toParams({ categorie, recherche, tri }) });
+  /** toutes = false : un responsable de cohorte ne reçoit que les compétences des membres de sa cohorte. */
+  lister(categorie?: string | null, recherche?: string, tri = 'MEMBRES', toutes = false): Observable<CompetenceReferentielDTOs.Competence[]> {
+    return this.http.get<CompetenceReferentielDTOs.Competence[]>(this.apiUrl, { params: toParams({ categorie, recherche, tri, toutes }) });
   }
 
-  categories(): Observable<CompetenceReferentielDTOs.Categorie[]> {
-    return this.http.get<CompetenceReferentielDTOs.Categorie[]>(`${this.apiUrl}/categories`);
+  categories(toutes = false): Observable<CompetenceReferentielDTOs.Categorie[]> {
+    return this.http.get<CompetenceReferentielDTOs.Categorie[]>(`${this.apiUrl}/categories`, { params: toParams({ toutes }) });
   }
 
   obtenir(id: number): Observable<CompetenceReferentielDTOs.Competence> {

@@ -7,6 +7,11 @@
     <app-icon name="message-square" [size]="18" />
     @if (shell.messagesNonLus()) { <i class="point"></i> }
   </a>
+  <button type="button" class="rond" (click)="theme.changer(theme.sombre() ? 'clair' : 'sombre')"
+          [title]="theme.sombre() ? 'Passer en mode clair' : 'Passer en mode sombre'"
+          [attr.aria-label]="theme.sombre() ? 'Passer en mode clair' : 'Passer en mode sombre'">
+    <app-icon [name]="theme.sombre() ? 'sun' : 'moon'" [size]="18" />
+  </button>
   <button type="button" class="rond" [class.ouvert]="shell.panneauNotifications()" title="Notifications" aria-label="Notifications"
           (click)="basculerNotifications($event)">
     <app-icon name="bell" [size]="18" />
@@ -26,6 +31,14 @@
         <a routerLink="/parametres" [queryParams]="{ onglet: 'profil' }" (click)="menu.set(false)"><app-icon name="user" [size]="16" />Mon profil</a>
         <a routerLink="/parametres" [queryParams]="{ onglet: 'securite' }" (click)="menu.set(false)"><app-icon name="lock" [size]="16" />Sécurité</a>
         <a routerLink="/parametres" [queryParams]="{ onglet: 'notifications' }" (click)="menu.set(false)"><app-icon name="bell" [size]="16" />Préférences</a>
+        <hr class="divider" />
+        <div class="menu-titre">Apparence</div>
+        @for (m of modes; track m.mode) {
+          <button type="button" [class.choisi]="theme.mode() === m.mode" (click)="theme.changer(m.mode)">
+            <app-icon [name]="m.icone" [size]="16" />{{ m.libelle }}
+            @if (theme.mode() === m.mode) { <app-icon name="check" [size]="15" class="coche" /> }
+          </button>
+        }
         <hr class="divider" />
         <button type="button" class="danger" (click)="auth.logout()"><app-icon name="log-out" [size]="16" />Se déconnecter</button>
       </div>

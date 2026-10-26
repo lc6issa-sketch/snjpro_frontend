@@ -1,9 +1,19 @@
-<span class="embleme" [class.disque]="fond() === 'sombre'" [style.width.px]="taille()" [style.height.px]="taille()">
-  <img src="logo_snj.png" alt="" />
-</span>
+@if (ecusson()) {
+  <span class="embleme ecusson" [style.width.px]="taille() * 0.8" [style.height.px]="taille() * 1.02">
+    <img [src]="embleme()" alt="" />
+  </span>
+} @else {
+  <span class="embleme" [class.disque]="fond() === 'sombre'" [style.width.px]="taille()" [style.height.px]="taille()">
+    <img [src]="embleme()" alt="" />
+  </span>
+}
 @if (avecNom()) {
   <div class="txt">
-    <img class="nom" [src]="fond() === 'sombre' ? 'logo_nom_app_blanc.png' : 'logo_nom_app.png'" alt="SNJPro" [style.height.px]="taille() * 0.46" />
+    @if (ecusson()) {
+      <span class="nom-texte" [class.sur-sombre]="fond() === 'sombre'" [style.font-size.px]="taille() * 0.56">SNJ<em>Pro</em></span>
+    } @else {
+      <img class="nom" [src]="fond() === 'sombre' ? 'logo_nom_app_blanc.png' : 'logo_nom_app.png'" alt="SNJPro" [style.height.px]="taille() * 0.46" />
+    }
     @if (sousTitre()) { <span>{{ sousTitre() }}</span> }
   </div>
 }

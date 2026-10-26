@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject, debounceTime, switchMap, of, catchError } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CohorteService } from '../../../core/services/cohorte.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { MembreService } from '../../../core/services/membre.service';
 import { ReferentielService } from '../../../core/services/referentiel.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -33,6 +34,13 @@ export class NouvelleNotification implements OnInit {
   private readonly referentiel = inject(ReferentielService);
   private readonly toast = inject(ToastService);
   private readonly route = inject(ActivatedRoute);
+  /** Responsable : destinataires limités à sa région ou à sa cohorte (imposé aussi par le serveur). */
+  protected readonly perimetre = inject(AuthService).perimetre;
+  protected readonly libellePerimetre = computed(() => {
+    const p = this.perimetre();
+    if (!p) return '';
+    return p.type === 'REGION' ? `Toute la région de ${p.region}` : `Toute la cohorte ${this.cohortes().find(c => c.id === p.cohorteId)?.nom ?? ''}`.trim();
+  });
 
   protected readonly types = TYPES;
   protected readonly regions = signal<string[]>([]);
@@ -71,6 +79,7 @@ export class NouvelleNotification implements OnInit {
     if (q.get('type')) this.f.type = q.get('type') as TypeNotification;
     if (q.get('titre')) this.f.titre = q.get('titre')!;
     const ids = (q.get('membres') ?? '').split(',').filter(x => /^\d+$/.test(x));
+    this.appliquerPerimetre();
     if (ids.length) {
       this.f.cible = 'SELECTION';
       this.f.valeurs = ids;
@@ -86,7 +95,16 @@ export class NouvelleNotification implements OnInit {
     this.f.cible = c;
     this.f.valeurs = c === 'SELECTION' ? this.selection().map(m => String(m.id)) : [];
     if (c === 'COHORTE' && this.cohortes().length) this.f.valeurs = [String(this.cohortes()[0].id)];
+    if (c !== 'SELECTION') this.appliquerPerimetre();
     this.maj();
+  }
+
+  /** Responsable : « tout mon périmètre » = sa région ou sa cohorte. */
+  private appliquerPerimetre(): void {
+    const p = this.perimetre();
+    if (!p || this.f.cible === 'SELECTION') return;
+    this.f.cible = p.type;
+    this.f.valeurs = [p.type === 'REGION' ? p.region : String(p.cohorteId)];
   }
 
   protected basculerRegion(r: string): void {
@@ -120,6 +138,7 @@ export class NouvelleNotification implements OnInit {
         this.envoi.set(false);
         this.toast.success(brouillon ? 'Brouillon enregistré.' : this.programmer ? 'Notification programmée.' : `Notification envoyée à ${nombre(r.nombreDestinataires)} membres.`);
         this.f = { type: 'INFORMATION', titre: '', message: '', cible: 'TOUS', valeurs: [], canalApplication: true, canalSms: true, canalEmail: false };
+        this.appliquerPerimetre();
         this.selection.set([]);
         this.programmer = false;
         this.maj();
