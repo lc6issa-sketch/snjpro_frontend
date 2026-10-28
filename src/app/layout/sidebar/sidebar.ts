@@ -31,6 +31,7 @@ const MENU: Entree[] = [
     { libelle: 'Demandes', icone: 'file-text', lien: '/demandes', module: 'DEMANDES', badge: 'demandes' }
   ] },
   { libelle: 'Données', icone: 'bar-chart', enfants: [
+    { libelle: 'Statistiques', icone: 'pie-chart', lien: '/statistiques', module: 'STATISTIQUES' },
     { libelle: 'Import & doublons', icone: 'upload', lien: '/import', module: 'IMPORT', badge: 'import', alerte: true },
     { libelle: 'Historique', icone: 'history', lien: '/historique', module: 'HISTORIQUE' }
   ] },

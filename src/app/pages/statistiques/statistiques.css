@@ -1,0 +1,92 @@
+.page-head .btn { gap: 8px; }
+.menu-zone { position: relative; }
+.menu { position: absolute; right: 0; top: calc(100% + 8px); width: 220px; padding: 6px; box-shadow: var(--shadow-lg); z-index: 30; }
+.menu button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border-radius: 8px; border: 0; background: none; cursor: pointer; font-size: 14px; color: var(--text); font-weight: 500; }
+.menu button:hover { background: var(--bg); }
+.menu-titre { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); padding: 6px 10px 4px; }
+
+/* Barre de filtres */
+.filtres { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; margin-bottom: 20px; }
+.filtre { position: relative; display: flex; align-items: center; flex: 0 1 220px; min-width: 170px; color: var(--text-2); }
+.filtre app-icon { position: absolute; left: 12px; pointer-events: none; z-index: 1; }
+.filtre .select { width: 100%; padding-left: 36px; font-weight: 500; }
+.appliquer { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--lime-200);
+  background: var(--lime-bg); color: var(--lime-text); font-weight: 600; font-size: 14px; cursor: pointer; }
+.appliquer:hover:not(:disabled) { border-color: var(--secondary); }
+.appliquer:disabled { opacity: .6; cursor: default; }
+
+.grille { display: grid; gap: 20px; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); transition: opacity .15s; }
+.grille.trois { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr); }
+.grille.attenue { opacity: .55; }
+
+/* Carte proportionnelle des régions */
+.carte { position: relative; width: 100%; aspect-ratio: 100 / 56; border-radius: 10px; overflow: hidden; }
+.tuile { position: absolute; box-sizing: border-box; border: 2px solid var(--surface); border-radius: 8px; padding: 10px 12px;
+  display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; transition: filter .15s; }
+.tuile:hover { filter: brightness(1.06); }
+.tuile strong { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tuile span { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+[data-niveau="1"] { background: var(--echelle-1); color: var(--echelle-1-texte); }
+[data-niveau="2"] { background: var(--echelle-2); color: var(--echelle-2-texte); }
+[data-niveau="3"] { background: var(--echelle-3); color: var(--echelle-3-texte); }
+[data-niveau="4"] { background: var(--echelle-4); color: var(--echelle-4-texte); }
+[data-niveau="5"] { background: var(--echelle-5); color: var(--echelle-5-texte); }
+.legende-carte { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; font-size: 12px; color: var(--text-2); }
+.echelon { display: inline-flex; align-items: center; gap: 6px; }
+.echelon i { width: 12px; height: 12px; border-radius: 3px; }
+
+/* Pyramide des âges */
+.cles { gap: 14px; color: var(--text-2); }
+.pastille { width: 10px; height: 10px; border-radius: 3px; }
+.hommes { background: var(--primary); }
+.femmes { background: var(--secondary-light); }
+.pyramide { display: flex; flex-direction: column; gap: 14px; padding-top: 6px; }
+.ligne { display: grid; grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr); align-items: center; gap: 10px; }
+.cote { display: flex; align-items: center; gap: 8px; height: 26px; }
+.cote.gauche { justify-content: flex-end; }
+.barre { display: block; height: 100%; min-width: 2px; border-radius: 4px; transition: width .3s; }
+.gauche .barre { border-radius: 4px 0 0 4px; }
+.cote:not(.gauche) .barre { border-radius: 0 4px 4px 0; }
+.pct { font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tranche { text-align: center; font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; }
+
+/* Situation professionnelle */
+.situation { align-items: center; gap: 22px; }
+.legende { width: 100%; display: flex; flex-direction: column; gap: 11px; font-size: 14px; }
+.legende .row { gap: 10px; }
+.legende i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.legende strong { min-width: 44px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Courbe */
+.evolution { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.evolution .row { gap: 8px; }
+
+/* Rapports */
+.rapports { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.rapports li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.rapports li:first-child { padding-top: 0; }
+.rapports li:last-child { border-bottom: 0; padding-bottom: 0; }
+.fichier { width: 38px; height: 38px; flex: none; border-radius: 10px; display: grid; place-items: center; background: var(--lime-bg); color: var(--lime-text); }
+.fichier.pdf { background: var(--red-bg); color: var(--red-text); }
+.info { min-width: 0; gap: 3px; }
+.info strong { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rond { width: 34px; height: 34px; flex: none; border-radius: 9px; border: 1px solid var(--border); background: var(--surface); display: grid; place-items: center; color: var(--text); cursor: pointer; }
+.rond:hover:not(:disabled) { border-color: var(--border-strong); background: var(--bg); }
+.rond:disabled { opacity: .5; cursor: progress; }
+.empty { padding: 32px 12px; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-3); }
+.empty p { color: var(--text-2); }
+
+/* Fenêtre « Générer un rapport » */
+.form { display: flex; flex-direction: column; gap: 16px; }
+.champ { display: flex; flex-direction: column; gap: 8px; }
+.champ .label { font-size: 13px; font-weight: 600; }
+.deux-champs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+@media (max-width: 1280px) {
+  .grille.trois { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .grille.trois > :last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 1000px) {
+  .grille, .grille.trois { grid-template-columns: minmax(0, 1fr); }
+  .filtre, .filtre .select { width: 100%; }
+}

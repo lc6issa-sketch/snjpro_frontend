@@ -10,6 +10,8 @@ const GESTION_MEMBRES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'RO
 const GESTION_MOBILISATIONS: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'];
 // Responsables : actualités limitées à leur région ou à leur cohorte
 const REDACTEURS_ACTUALITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'];
+// Statistiques et rapports (mêmes rôles que l'API /api/statistiques)
+const LECTURE_STATISTIQUES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_DIRECTION', 'ROLE_RESPONSABLE_REGIONAL', 'ROLE_RESPONSABLE_COHORTE'];
 const GESTION_OPPORTUNITES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SNJ', 'ROLE_PARTENAIRE'];
 
 export const routes: Routes = [
@@ -225,6 +227,15 @@ export const routes: Routes = [
         path: 'activites',
         title: 'Activités & présences · SNJPro',
         loadComponent: () => import('./pages/activites/activites').then(m => m.Activites),
+      },
+
+      // ----- Données -----
+      {
+        path: 'statistiques',
+        title: 'Statistiques · SNJPro',
+        canActivate: [roleGuard],
+        data: { roles: LECTURE_STATISTIQUES },
+        loadComponent: () => import('./pages/statistiques/statistiques').then(m => m.Statistiques),
       },
 
       // ----- Administration -----

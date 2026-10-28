@@ -1371,6 +1371,7 @@ export namespace StatistiqueDTOs {
     situationProfessionnelle?: Libelle[];
     profilsAvecSituation?: number;
     completudeParAnnee?: Record<string, number>;
+    competencesParAnnee?: Record<string, number>;
     repartitionSexe?: Libelle[];
     parCohorte?: Libelle[];
   }
