@@ -1,0 +1,238 @@
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Statistiques</h1>
+      <p class="sub">Analyse des membres, de leurs profils et compétences{{ periode() ? ' · ' + periode() : '' }}
+        @if (stats(); as s) { · {{ s.totalMembres | nombre }} membres analysés }</p>
+    </div>
+    <div class="actions">
+      <div class="menu-zone">
+        <button class="btn btn-secondary" type="button" (click)="menuExport.set(!menuExport()); $event.stopPropagation()">
+          <app-icon name="download" [size]="16" />Exporter<app-icon name="chevron-down" [size]="15" />
+        </button>
+        @if (menuExport()) {
+          <div class="menu card" (click)="$event.stopPropagation()">
+            <div class="menu-titre">Statistiques filtrées</div>
+            @for (f of formats; track f.format) {
+              <button type="button" (click)="exporter(f.format)"><app-icon [name]="f.icone" [size]="16" />{{ f.libelle }}</button>
+            }
+          </div>
+        }
+      </div>
+      <button class="btn btn-primary" type="button" (click)="ouvrirGeneration()"><app-icon name="file-text" [size]="16" />Générer un rapport</button>
+    </div>
+  </div>
+
+  <div class="card filtres">
+    <label class="filtre"><app-icon name="calendar" [size]="16" />
+      <select class="select" [(ngModel)]="brouillon.annee" aria-label="Année d'incorporation">
+        <option [ngValue]="undefined">Toutes les années</option>
+        @for (a of annees(); track a) { <option [ngValue]="a">{{ a }}</option> }
+      </select>
+    </label>
+    <label class="filtre"><app-icon name="layers" [size]="16" />
+      <select class="select" [(ngModel)]="brouillon.cohorteId" aria-label="Cohorte">
+        <option [ngValue]="undefined">Toutes les cohortes</option>
+        @for (c of cohortes(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}</option> }
+      </select>
+    </label>
+    <label class="filtre"><app-icon name="map-pin" [size]="16" />
+      <select class="select" [(ngModel)]="brouillon.region" aria-label="Région">
+        <option [ngValue]="undefined">Toutes les régions</option>
+        @for (r of regions(); track r) { <option [ngValue]="r">{{ r }}</option> }
+      </select>
+    </label>
+    <label class="filtre"><app-icon name="users" [size]="16" />
+      <select class="select" [(ngModel)]="brouillon.sexe" aria-label="Sexe">
+        <option [ngValue]="undefined">Tous les sexes</option>
+        <option ngValue="MASCULIN">Hommes</option>
+        <option ngValue="FEMININ">Femmes</option>
+      </select>
+    </label>
+    <span class="grow"></span>
+    @if (filtresActifs()) { <button type="button" class="btn btn-ghost" (click)="reinitialiser()">Réinitialiser</button> }
+    <button type="button" class="appliquer" [disabled]="chargement()" (click)="appliquer()"><app-icon name="filter" [size]="15" />Appliquer</button>
+  </div>
+
+  @if (stats(); as s) {
+    <div class="grille" [class.attenue]="chargement()">
+      <!-- Répartition géographique -->
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Répartition géographique</h3><p class="sub">Membres par région de résidence</p></div>
+          @if (sansRegion()) { <span class="tag">{{ sansRegion() | nombre }} sans région</span> }
+        </div>
+        <div class="card-body">
+          @if (tuiles().length) {
+            <div class="carte" role="img" aria-label="Membres par région">
+              @for (t of tuiles(); track t.libelle) {
+                <div class="tuile" [attr.data-niveau]="t.niveau" [title]="t.libelle + ' : ' + t.valeur + ' membres'"
+                     [style.left.%]="t.x" [style.top.%]="t.y" [style.width.%]="t.l" [style.height.%]="t.h">
+                  @if (t.l * t.h > 90) { <strong>{{ t.libelle }}</strong><span>{{ t.valeur | nombre }}</span> }
+                </div>
+              }
+            </div>
+            <div class="legende-carte">
+              <span class="muted xs">Nombre de membres</span>
+              @for (l of legendeCarte(); track l.niveau) {
+                <span class="echelon"><i [attr.data-niveau]="l.niveau"></i>{{ l.texte }}</span>
+              }
+            </div>
+          } @else {
+            <div class="empty"><app-icon name="map-pin" [size]="28" /><p>Aucune région renseignée pour ces membres.</p></div>
+          }
+        </div>
+      </div>
+
+      <!-- Pyramide des âges -->
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Pyramide des âges</h3><p class="sub">Répartition par tranche d'âge et sexe</p></div>
+          <div class="row small cles">
+            <span class="row"><i class="pastille hommes"></i>Hommes</span>
+            <span class="row"><i class="pastille femmes"></i>Femmes</span>
+          </div>
+        </div>
+        <div class="card-body">
+          @if (ageRenseigne()) {
+            <div class="pyramide">
+              @for (t of pyramide(); track t.tranche) {
+                <div class="ligne" [title]="t.tranche + ' ans : ' + t.hommes + ' hommes, ' + t.femmes + ' femmes'">
+                  <div class="cote gauche">
+                    <span class="pct">{{ t.pourcentageHommes | nombre: 1 }} %</span>
+                    <span class="barre hommes" [style.width.%]="largeur(t.pourcentageHommes)"></span>
+                  </div>
+                  <span class="tranche">{{ t.tranche }}</span>
+                  <div class="cote">
+                    <span class="barre femmes" [style.width.%]="largeur(t.pourcentageFemmes)"></span>
+                    <span class="pct">{{ t.pourcentageFemmes | nombre: 1 }} %</span>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty"><app-icon name="users" [size]="28" /><p>Aucune date de naissance renseignée.</p></div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="grille trois mt-20" [class.attenue]="chargement()">
+      <!-- Situation professionnelle -->
+      <div class="card">
+        <div class="card-head"><div><h3>Situation professionnelle</h3><p class="sub">Répartition des membres actifs</p></div></div>
+        <div class="card-body col situation">
+          @if (segments().length) {
+            <app-donut [segments]="segments()" [centre]="totalSituation()" legende="profils" [taille]="168" [epaisseur]="18" />
+            <div class="legende">
+              @for (x of situations(); track x.libelle) {
+                <div class="row"><i [style.background]="x.couleur"></i><span class="grow">{{ x.libelle }}</span>
+                  <span class="faint small">{{ x.valeur | nombre }}</span><strong>{{ x.pourcentage | nombre }} %</strong></div>
+              }
+            </div>
+          } @else {
+            <div class="empty"><app-icon name="briefcase" [size]="28" /><p>Aucune situation professionnelle renseignée.</p></div>
+          }
+        </div>
+      </div>
+
+      <!-- Compétences déclarées / complétude -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>{{ serie() === 'competences' ? 'Compétences déclarées' : 'Complétude des profils' }}</h3>
+            <p class="sub">{{ serie() === 'competences' ? 'Part des membres ayant déclaré une compétence' : 'Taux moyen de complétude des profils' }}, par année d'incorporation</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="evolution">
+            @if (evolution() !== null) {
+              <span class="small muted row">
+                <span class="pill" [class.green]="evolution()! >= 0" [class.red]="evolution()! < 0">{{ evolution()! >= 0 ? '+' : '' }}{{ evolution() }} pts</span>
+                {{ points()[0].libelle }} → {{ points()[points().length - 1].libelle }}
+              </span>
+            }
+            <span class="grow"></span>
+            <div class="segmented sm">
+              <button type="button" [class.active]="serie() === 'competences'" (click)="serie.set('competences')">Compétences</button>
+              <button type="button" [class.active]="serie() === 'completude'" (click)="serie.set('completude')">Complétude</button>
+            </div>
+          </div>
+          @if (points().length) {
+            <app-area-chart [points]="points()" />
+          } @else {
+            <div class="empty"><app-icon name="trending-up" [size]="28" /><p>Pas encore assez de données.</p></div>
+          }
+        </div>
+      </div>
+
+      <!-- Rapports disponibles -->
+      <div class="card">
+        <div class="card-head">
+          <div><h3>Rapports disponibles</h3><p class="sub">Générés automatiquement chaque mois</p></div>
+          @if (rapports().length > 5) {
+            <button type="button" class="link" (click)="tousRapports.set(!tousRapports())">{{ tousRapports() ? 'Réduire' : 'Tout voir' }}</button>
+          }
+        </div>
+        <div class="card-body">
+          @if (rapports().length) {
+            <ul class="rapports">
+              @for (r of rapportsAffiches(); track r.id) {
+                <li>
+                  <span class="fichier" [class.pdf]="r.format === 'PDF'"><app-icon [name]="r.format === 'PDF' ? 'file-text' : 'file-spreadsheet'" [size]="18" /></span>
+                  <div class="grow col info">
+                    <strong [title]="r.titre ?? ''">{{ r.titre || libelleType(r.type) }}</strong>
+                    <span class="faint xs">{{ libelleFormat(r.format) }} · {{ r.taille | taille }} · {{ r.dateGeneration | dateCourte }}@if (r.automatique) { · auto }</span>
+                  </div>
+                  <button type="button" class="rond" [disabled]="telechargement() === r.id" (click)="telecharger(r)"
+                          [title]="'Télécharger ' + (r.titre ?? '')" [attr.aria-label]="'Télécharger ' + (r.titre ?? '')">
+                    <app-icon name="download" [size]="16" />
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <div class="empty"><app-icon name="file-text" [size]="28" /><p>Aucun rapport pour le moment.</p>
+              <button type="button" class="link" (click)="ouvrirGeneration()">Générer le premier rapport</button></div>
+          }
+        </div>
+      </div>
+    </div>
+  } @else {
+    <p class="muted">Chargement…</p>
+  }
+</div>
+
+@if (generation()) {
+  <app-modal titre="Générer un rapport" sousTitre="Le fichier est produit sur le serveur puis ajouté aux rapports disponibles" icone="file-text" [largeur]="520" (fermer)="generation.set(false)">
+    <div class="form">
+      <label class="champ"><span class="label">Type de rapport</span>
+        <select class="select" [(ngModel)]="demande.type">
+          @for (t of typesRapport; track t.cle) { <option [ngValue]="t.cle">{{ t.libelle }}</option> }
+        </select>
+      </label>
+      <div class="deux-champs">
+        <label class="champ"><span class="label">Du</span><input class="input" type="date" [(ngModel)]="demande.du" /></label>
+        <label class="champ"><span class="label">Au</span><input class="input" type="date" [(ngModel)]="demande.au" /></label>
+      </div>
+      <label class="champ"><span class="label">Région</span>
+        <select class="select" [(ngModel)]="demande.region">
+          <option [ngValue]="undefined">Toutes les régions</option>
+          @for (r of regions(); track r) { <option [ngValue]="r">{{ r }}</option> }
+        </select>
+      </label>
+      <div class="champ"><span class="label">Format</span>
+        <div class="segmented block">
+          @for (f of formats; track f.format) {
+            <button type="button" [class.active]="demande.format === f.format" (click)="demande.format = f.format">{{ f.libelle }}</button>
+          }
+        </div>
+      </div>
+    </div>
+    <div pied>
+      <span class="grow"></span>
+      <button type="button" class="btn btn-ghost" (click)="generation.set(false)">Annuler</button>
+      <button type="button" class="btn btn-primary" [disabled]="!demande.type || envoi()" (click)="generer()">{{ envoi() ? 'Génération…' : 'Générer' }}</button>
+    </div>
+  </app-modal>
+}

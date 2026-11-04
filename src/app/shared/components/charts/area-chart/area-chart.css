@@ -1,4 +1,4 @@
 :host { display: block; position: relative; }
 .chart { width: 100%; height: 260px; display: block; overflow: visible; }
 .axe { font-size: 10px; fill: var(--text-3); }
-.valeur { position: absolute; transform: translate(-80%, -190%); background: var(--primary); color: #fff; font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 6px; }
+.valeur { position: absolute; transform: translate(-80%, -190%); background: var(--primary); color: #fff; font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 6px; white-space: nowrap; }
