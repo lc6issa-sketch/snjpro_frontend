@@ -1,8 +1,5 @@
 :host { position: fixed; inset: 0; overflow: hidden; display: flex; flex-direction: column; color: #fff; padding: 56px 56px 40px;
   background: linear-gradient(135deg, var(--sombre-1) 0%, var(--sombre-2) 55%, var(--sombre-3) 100%); }
-.cercle { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,.07); }
-.c1 { width: 560px; height: 560px; right: -140px; top: -300px; } .c2 { width: 420px; height: 420px; right: -40px; top: -250px; }
-.disque { position: absolute; width: 420px; height: 420px; border-radius: 50%; left: -110px; bottom: -150px; background: color-mix(in srgb, var(--secondary) 12%, transparent); }
 header { position: relative; display: flex; justify-content: space-between; align-items: center; }
 .direct { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; border: 0; background: rgba(255,255,255,.12); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
 .direct i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-sombre); }

@@ -1,11 +1,6 @@
 :host { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; background: var(--surface); }
 .hero { position: relative; overflow: hidden; padding: 64px 56px 56px; color: #fff; display: flex; flex-direction: column;
   background: linear-gradient(135deg, var(--sombre-1) 0%, var(--sombre-2) 60%, var(--sombre-3) 100%); }
-.cercle { position: absolute; border-radius: 50%; border: 1px solid rgba(255,255,255,.07); }
-.c1 { width: 520px; height: 520px; right: -150px; top: -230px; }
-.c2 { width: 380px; height: 380px; right: -80px; top: -150px; }
-.c3 { width: 560px; height: 560px; left: -240px; bottom: -330px; }
-.disque { position: absolute; width: 150px; height: 150px; border-radius: 50%; right: -10px; bottom: 30px; background: color-mix(in srgb, var(--secondary) 18%, transparent); }
 .logo { position: relative; color: #fff; }
 .milieu { position: relative; flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 520px; }
 .badge { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; background: var(--badge-hero-fond); color: var(--badge-hero-texte); font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 999px; }
