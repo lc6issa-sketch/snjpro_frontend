@@ -16,7 +16,7 @@
   <div class="grid grid-3 mt-20">
     @for (c of filtrees(); track c.id) {
       <button type="button" class="card cohorte" (click)="ouvrir(c)">
-        <div><app-pill [dico]="STATUT" [valeur]="c.statut" /></div>
+        <div class="row"><app-pill [dico]="STATUT" [valeur]="c.statut" />@if (c.typeCohorte) { <app-pill [dico]="TYPE" [valeur]="c.typeCohorte" /> }</div>
         <h3>{{ c.nom }}{{ c.numero && !(c.nom ?? '').includes('N°') ? ' — N°' + c.numero : '' }}</h3>
         <p class="muted small">{{ c.centre || c.region || 'Centre non renseigné' }}</p>
         <div class="chiffres">

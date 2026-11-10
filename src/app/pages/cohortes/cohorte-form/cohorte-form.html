@@ -1,6 +1,11 @@
 <app-modal [titre]="cohorte() ? 'Modifier la cohorte' : 'Nouvelle cohorte'"
            [sousTitre]="cohorte() ? cohorte()!.nom : 'Renseignez les informations de la nouvelle promotion.'" [largeur]="568" (fermer)="fermer.emit()">
   <div class="form-grid">
+    <div class="field full"><span class="label">Type de cohorte<span class="req">*</span></span>
+      <div class="segmented block">
+        @for (t of types; track t.cle) { <button type="button" [class.active]="c.typeCohorte === t.cle" (click)="c.typeCohorte = t.cle">Cohorte de {{ t.libelle.toLowerCase() }}</button> }
+      </div>
+      @if (!c.typeCohorte) { <span class="hint">Précisez s'il s'agit d'une cohorte de fonctionnaires ou de non-fonctionnaires.</span> }</div>
     <div class="field" style="grid-column: span 1"><label for="nom">Nom de la cohorte<span class="req">*</span></label>
       <input id="nom" class="input" [(ngModel)]="c.nom" placeholder="Cohorte 2026" /></div>
     <div class="field"><label for="num">Numéro<span class="req">*</span></label>
@@ -22,12 +27,13 @@
           @for (s of statuts; track s.cle) { <button type="button" [class.active]="c.statut === s.cle" (click)="c.statut = s.cle">{{ s.libelle }}</button> }
         </div></div>
     }
-    <div class="field full"><label for="resp">Responsable de la cohorte</label>
-      <select id="resp" class="select" [(ngModel)]="c.responsableId"><option [ngValue]="undefined">Aucun responsable désigné</option>
-        @for (u of responsables(); track u.id) { <option [ngValue]="u.id">{{ u.prenom }} {{ u.nom }} — Responsable de cohorte</option> }</select></div>
+    <div class="field"><label for="dir">Directeur de centre</label>
+      <input id="dir" class="input" maxlength="150" [(ngModel)]="c.directeurCentre" placeholder="Prénom et nom" /></div>
+    <div class="field"><label for="maj">Major de centre</label>
+      <input id="maj" class="input" maxlength="150" [(ngModel)]="c.majorCentre" placeholder="Prénom et nom" /></div>
   </div>
   <div pied>
     <button type="button" class="btn btn-ghost" (click)="fermer.emit()">Annuler</button>
-    <button type="button" class="btn btn-primary" [disabled]="!c.nom?.trim() || envoi()" (click)="enregistrer()">{{ cohorte() ? 'Enregistrer' : 'Créer la cohorte' }}</button>
+    <button type="button" class="btn btn-primary" [disabled]="!valide() || envoi()" (click)="enregistrer()">{{ cohorte() ? 'Enregistrer' : 'Créer la cohorte' }}</button>
   </div>
 </app-modal>

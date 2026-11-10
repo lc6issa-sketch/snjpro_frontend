@@ -38,6 +38,10 @@
             @if (a.lieu) { <span><app-icon name="map-pin" [size]="15" />{{ a.lieu }}</span> }
             <span><app-icon name="users" [size]="15" />{{ c()?.inscrits | nombre }} inscrits</span>
             @if (a.mobilisation) { <span><app-icon name="megaphone" [size]="15" />{{ a.mobilisation }}</span> }
+            @if (a.cohorte) {
+              <span><app-icon name="layers" [size]="15" />{{ a.cohorte }}{{ a.nombreParticipants ? ' · ' + a.nombreParticipants + ' attendus' : '' }}
+                @if (a.cohortesComplementNoms?.length) { · complétée avec {{ a.cohortesComplementNoms!.join(', ') }} }</span>
+            }
           </div>
           @if (a.description) { <p class="description">{{ a.description }}</p> }
         </div>
@@ -115,6 +119,33 @@
       <div class="field"><div class="row-between"><label for="mo">Mobilisation liée</label><span class="hint">Facultatif</span></div>
         <select id="mo" class="select" [(ngModel)]="nouvelle.mobilisationId"><option [ngValue]="undefined">Aucune</option>
           @for (m of mobilisationsDispo(); track m.id) { <option [ngValue]="m.id">{{ m.titre }}</option> }</select></div>
+      <div class="field"><div class="row-between"><label for="co">Cohorte</label><span class="hint">Facultatif</span></div>
+        <select id="co" class="select" [ngModel]="nouvelle.cohorteId" (ngModelChange)="choisirCohorteActivite($event)" [disabled]="!!perimetreCohorte()">
+          <option [ngValue]="undefined">Toutes les cohortes</option>
+          @for (c of cohortes(); track c.id) { <option [ngValue]="c.id">{{ c.nom }}</option> }</select>
+        @if (nouvelle.cohorteId) { <span class="hint">{{ effectifCohorte() | nombre }} membre(s) actif(s)</span> }</div>
+      <div class="field"><div class="row-between"><label for="np">Participants attendus</label><span class="hint">Facultatif</span></div>
+        <div class="input-icon"><app-icon name="users" [size]="16" /><input id="np" type="number" min="1" class="input" [(ngModel)]="nouvelle.nombreParticipants" /></div></div>
+      <!-- Cohorte insuffisante : compléter avec les membres d'autres cohortes -->
+      @if (manque() > 0) {
+        <div class="field full">
+          <div class="notice warn"><app-icon name="alert-triangle" [size]="17" />
+            <div class="grow"><strong>{{ nomCohorte(nouvelle.cohorteId) }} : {{ effectifCohorte() | nombre }} membre(s) pour {{ nouvelle.nombreParticipants | nombre }} participants attendus</strong>
+              <br />Il manque {{ manque() | nombre }} personne(s).
+              @if (perimetreCohorte()) { Le complément avec d'autres cohortes est réservé aux administrateurs. }
+              @else { Cochez les cohortes dont les membres pourront aussi pointer leur présence. }</div></div>
+          @if (!perimetreCohorte()) {
+            <div class="row wrap mt-8" style="gap: 8px 18px">
+              @for (c of autresCohortes(); track c.id) {
+                <label class="checkbox"><input type="checkbox" [checked]="nouvelle.cohortesComplement?.includes(c.id!)" (change)="basculerComplement(c.id!)" />{{ c.nom }} <span class="muted xs">({{ c.membresActifs ?? 0 | nombre }})</span></label>
+              }
+            </div>
+            @if (nouvelle.cohortesComplement?.length) {
+              <span class="hint">{{ effectifCohorte() + apportComplement() | nombre }} membre(s) au total pour {{ nouvelle.nombreParticipants | nombre }} attendus{{ effectifCohorte() + apportComplement() >= (nouvelle.nombreParticipants ?? 0) ? ' : objectif couvert' : '' }}.</span>
+            }
+          }
+        </div>
+      }
       <div class="full qr-option">
         <div class="grow"><strong>{{ enEdition() ? 'QR code de présence actif' : 'Générer un QR code de présence' }}</strong><p class="small">Renouvelé toutes les 30 secondes</p></div>
         <label class="switch"><input type="checkbox" [(ngModel)]="nouvelle.qrActif" aria-label="Générer un QR code" /></label>

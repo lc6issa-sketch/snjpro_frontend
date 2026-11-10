@@ -28,40 +28,40 @@ export const routes: Routes = [
       {
         path: 'connexion',
         canActivate: [invitesGuard],
-        title: 'Connexion · SNJPro',
+        title: 'Connexion · Si-SNJ',
         loadComponent: () => import('./pages/auth/connexion/connexion').then(m => m.Connexion),
       },
       {
         path: 'verification',
-        title: 'Vérification · SNJPro',
+        title: 'Vérification · Si-SNJ',
         loadComponent: () => import('./pages/auth/verification/verification').then(m => m.Verification),
       },
       {
         path: 'mot-de-passe-oublie',
-        title: 'Mot de passe oublié · SNJPro',
+        title: 'Mot de passe oublié · Si-SNJ',
         loadComponent: () => import('./pages/auth/mot-de-passe-oublie/mot-de-passe-oublie').then(m => m.MotDePasseOublie),
       },
       {
         path: 'reinitialiser-mot-de-passe',
-        title: 'Nouveau mot de passe · SNJPro',
+        title: 'Nouveau mot de passe · Si-SNJ',
         loadComponent: () => import('./pages/auth/nouveau-mot-de-passe/nouveau-mot-de-passe').then(m => m.NouveauMotDePasse),
       },
       {
         path: 'invitation',
-        title: 'Activer mon compte · SNJPro',
+        title: 'Activer mon compte · Si-SNJ',
         loadComponent: () => import('./pages/auth/nouveau-mot-de-passe/nouveau-mot-de-passe').then(m => m.NouveauMotDePasse),
       },
     ],
   },
   {
     path: 'acces-refuse',
-    title: 'Accès non autorisé · SNJPro',
+    title: 'Accès non autorisé · Si-SNJ',
     loadComponent: () => import('./pages/acces-refuse/acces-refuse').then(m => m.AccesRefuse),
   },
   {
     path: 'activites/:id/projection',
     canActivate: [authGuard],
-    title: 'Projection · SNJPro',
+    title: 'Projection · Si-SNJ',
     loadComponent: () => import('./pages/activites/projection/projection').then(m => m.Projection),
   },
 
@@ -75,31 +75,31 @@ export const routes: Routes = [
     children: [
       {
         path: 'tableau-de-bord',
-        title: 'Tableau de bord · SNJPro',
+        title: 'Tableau de bord · Si-SNJ',
         loadComponent: () => import('./pages/tableau-de-bord/tableau-de-bord').then(m => m.TableauDeBord),
       },
 
       // ----- Membres -----
       {
         path: 'membres',
-        title: 'Membres · SNJPro',
+        title: 'Membres · Si-SNJ',
         loadComponent: () => import('./pages/membres/liste/membres-liste').then(m => m.MembresListe),
       },
       {
         path: 'membres/nouveau',
-        title: 'Nouveau membre · SNJPro',
+        title: 'Nouveau membre · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: GESTION_MEMBRES },
         loadComponent: () => import('./pages/membres/nouveau/nouveau-membre').then(m => m.NouveauMembre),
       },
       {
         path: 'membres/:id',
-        title: 'Profil du membre · SNJPro',
+        title: 'Profil du membre · Si-SNJ',
         loadComponent: () => import('./pages/membres/profil/profil-membre').then(m => m.ProfilMembre),
       },
       {
         path: 'membres/:id/modifier',
-        title: 'Modifier le profil · SNJPro',
+        title: 'Modifier le profil · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: GESTION_MEMBRES },
         loadComponent: () => import('./pages/membres/modifier/modifier-membre').then(m => m.ModifierMembre),
@@ -108,74 +108,74 @@ export const routes: Routes = [
       // ----- Cohortes & compétences -----
       {
         path: 'cohortes',
-        title: 'Cohortes · SNJPro',
+        title: 'Cohortes · Si-SNJ',
         loadComponent: () => import('./pages/cohortes/liste/cohortes-liste').then(m => m.CohortesListe),
       },
       {
         path: 'cohortes/:id',
-        title: 'Cohorte · SNJPro',
+        title: 'Cohorte · Si-SNJ',
         loadComponent: () => import('./pages/cohortes/detail/cohorte-detail').then(m => m.CohorteDetail),
       },
       {
         path: 'competences',
-        title: 'Compétences · SNJPro',
+        title: 'Compétences · Si-SNJ',
         loadComponent: () => import('./pages/competences/competences').then(m => m.Competences),
       },
 
       // ----- Mobilisations -----
       {
         path: 'mobilisations',
-        title: 'Mobilisation · SNJPro',
+        title: 'Mobilisation · Si-SNJ',
         loadComponent: () => import('./pages/mobilisations/liste/mobilisations-liste').then(m => m.MobilisationsListe),
       },
       {
         path: 'mobilisations/nouvelle',
-        title: 'Nouvelle mobilisation · SNJPro',
+        title: 'Nouvelle mobilisation · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: GESTION_MOBILISATIONS },
         loadComponent: () => import('./pages/mobilisations/assistant/mobilisation-assistant').then(m => m.MobilisationAssistant),
       },
       {
         path: 'mobilisations/:id/edition',
-        title: 'Nouvelle mobilisation · SNJPro',
+        title: 'Nouvelle mobilisation · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: GESTION_MOBILISATIONS },
         loadComponent: () => import('./pages/mobilisations/assistant/mobilisation-assistant').then(m => m.MobilisationAssistant),
       },
       {
         path: 'mobilisations/:id',
-        title: 'Mobilisation · SNJPro',
+        title: 'Mobilisation · Si-SNJ',
         loadComponent: () => import('./pages/mobilisations/detail/mobilisation-detail').then(m => m.MobilisationDetail),
       },
 
       // ----- Notifications -----
       {
         path: 'notifications',
-        title: 'Notifications · SNJPro',
+        title: 'Notifications · Si-SNJ',
         loadComponent: () => import('./pages/notifications/nouvelle/nouvelle-notification').then(m => m.NouvelleNotification),
       },
       {
         path: 'notifications/historique',
-        title: 'Historique des envois · SNJPro',
+        title: 'Historique des envois · Si-SNJ',
         loadComponent: () => import('./pages/notifications/historique/historique-envois').then(m => m.HistoriqueEnvois),
       },
 
       // ----- Actualités -----
       {
         path: 'actualites',
-        title: 'Actualités · SNJPro',
+        title: 'Actualités · Si-SNJ',
         loadComponent: () => import('./pages/actualites/liste/actualites-liste').then(m => m.ActualitesListe),
       },
       {
         path: 'actualites/nouvelle',
-        title: 'Nouvelle actualité · SNJPro',
+        title: 'Nouvelle actualité · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: REDACTEURS_ACTUALITES },
         loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
       },
       {
         path: 'actualites/:id',
-        title: 'Actualité · SNJPro',
+        title: 'Actualité · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: REDACTEURS_ACTUALITES },
         loadComponent: () => import('./pages/actualites/editeur/editeur-actualite').then(m => m.EditeurActualite),
@@ -184,55 +184,55 @@ export const routes: Routes = [
       // ----- Opportunités -----
       {
         path: 'opportunites',
-        title: 'Opportunités · SNJPro',
+        title: 'Opportunités · Si-SNJ',
         loadComponent: () => import('./pages/opportunites/liste/opportunites-liste').then(m => m.OpportunitesListe),
       },
       {
         path: 'opportunites/nouvelle',
-        title: 'Nouvelle opportunité · SNJPro',
+        title: 'Nouvelle opportunité · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: GESTION_OPPORTUNITES },
         loadComponent: () => import('./pages/opportunites/form/opportunite-form').then(m => m.OpportuniteForm),
       },
       {
         path: 'opportunites/:id/modifier',
-        title: 'Modifier l\'opportunité · SNJPro',
+        title: 'Modifier l\'opportunité · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: GESTION_OPPORTUNITES },
         loadComponent: () => import('./pages/opportunites/form/opportunite-form').then(m => m.OpportuniteForm),
       },
       {
         path: 'opportunites/:id',
-        title: 'Opportunité · SNJPro',
+        title: 'Opportunité · Si-SNJ',
         loadComponent: () => import('./pages/opportunites/detail/opportunite-detail').then(m => m.OpportuniteDetail),
       },
 
       // ----- Documents, demandes, souvenirs, activités -----
       {
         path: 'documents',
-        title: 'Documents · SNJPro',
+        title: 'Documents · Si-SNJ',
         loadComponent: () => import('./pages/documents/documents').then(m => m.Documents),
       },
       {
         path: 'demandes',
-        title: 'Demandes · SNJPro',
+        title: 'Demandes · Si-SNJ',
         loadComponent: () => import('./pages/demandes/demandes').then(m => m.Demandes),
       },
       {
         path: 'souvenirs',
-        title: 'Souvenirs de formation · SNJPro',
+        title: 'Souvenirs de formation · Si-SNJ',
         loadComponent: () => import('./pages/souvenirs/souvenirs').then(m => m.Souvenirs),
       },
       {
         path: 'activites',
-        title: 'Activités & présences · SNJPro',
+        title: 'Activités & présences · Si-SNJ',
         loadComponent: () => import('./pages/activites/activites').then(m => m.Activites),
       },
 
       // ----- Données -----
       {
         path: 'statistiques',
-        title: 'Statistiques · SNJPro',
+        title: 'Statistiques · Si-SNJ',
         canActivate: [roleGuard],
         data: { roles: LECTURE_STATISTIQUES },
         loadComponent: () => import('./pages/statistiques/statistiques').then(m => m.Statistiques),
@@ -241,27 +241,27 @@ export const routes: Routes = [
       // ----- Administration -----
       {
         path: 'import',
-        title: 'Import de données · SNJPro',
+        title: 'Import de données · Si-SNJ',
         loadComponent: () => import('./pages/import/import').then(m => m.Import),
       },
       {
         path: 'historique',
-        title: 'Historique · SNJPro',
+        title: 'Historique · Si-SNJ',
         loadComponent: () => import('./pages/historique/historique').then(m => m.HistoriqueOperations),
       },
       {
         path: 'utilisateurs',
-        title: 'Utilisateurs & rôles · SNJPro',
+        title: 'Utilisateurs & rôles · Si-SNJ',
         loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs),
       },
       {
         path: 'parametres',
-        title: 'Paramètres · SNJPro',
+        title: 'Paramètres · Si-SNJ',
         loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres),
       },
       {
         path: 'messagerie',
-        title: 'Messagerie · SNJPro',
+        title: 'Messagerie · Si-SNJ',
         loadComponent: () => import('./pages/messagerie/messagerie').then(m => m.Messagerie),
       },
     ],

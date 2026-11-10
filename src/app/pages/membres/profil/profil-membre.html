@@ -15,6 +15,7 @@
           <div class="row wrap"><h1>{{ nomComplet() }}</h1><span class="tag">{{ m.identifiantSnj }}</span></div>
           <div class="row wrap mt-8">
             <app-pill [dico]="STATUT" [valeur]="m.statut" />
+            <app-pill [dico]="APTITUDE" [valeur]="m.aptitude || 'APTE'" />
             @if (m.cohorteNom) { <a [routerLink]="['/cohortes', m.cohorteId]" class="pill blue dot">{{ m.cohorteNom }}</a> }
             @if (m.telephoneVerifie) { <span class="pill teal dot">Téléphone vérifié</span> }
             @if (cohorte()?.statut; as s) { <app-pill [dico]="STATUT_COHORTE" [valeur]="s" /> }
@@ -58,7 +59,8 @@
                 <div><p class="k">Diplômes</p><p class="v">{{ m.diplomes?.length ? m.diplomes!.join(', ') : (m.dernierDiplome || '—') }}</p></div>
                 <div><p class="k">Catégorie</p><p class="v">{{ m.categorie === 'FONCTIONNAIRE' ? 'Fonctionnaire' : m.categorie ? 'Non fonctionnaire' : '—' }}</p></div>
                 <div><p class="k">E-mail</p><p class="v ellipsis">{{ m.email || '—' }}</p></div>
-                @if (m.compagnie || m.section || m.brigade) { <div><p class="k">Compagnie · Section · Brigade</p><p class="v">{{ m.compagnie || '—' }} · {{ m.section || '—' }} · {{ m.brigade || '—' }}</p></div> }
+                @if (m.compagnie || m.section || m.brigade) { <div><p class="k">Brigade · Compagnie · Section</p><p class="v">{{ m.brigade || '—' }} · {{ m.compagnie || '—' }} · {{ m.section || '—' }}</p></div> }
+                <div><p class="k">Aptitude</p><p class="v">{{ m.aptitude === 'INAPTE' ? 'Inapte' + (m.typeHandicap ? ' · ' + m.typeHandicap : '') : 'Apte' }}</p></div>
                 @if (m.personneAPrevenir || m.personneAPrevenirTelephone) {
                   <div><p class="k">Personne à prévenir</p><p class="v">{{ m.personneAPrevenir || '—' }}@if (m.personneAPrevenirTelephone) { <br /><span class="muted">{{ m.personneAPrevenirTelephone }}</span> }</p></div>
                 }
@@ -105,17 +107,16 @@
             }
 
             <div class="card">
-              <div class="card-head"><h3>Situation professionnelle</h3>
-                @if (m.situationProfessionnelle?.statut; as s) { <app-pill [dico]="STATUT_PRO" [valeur]="s" /> }</div>
+              <div class="card-head"><h3>Situation professionnelle</h3></div>
               <div class="card-body">
-                @if (m.situationProfessionnelle; as sp) {
-                  <dl class="dl">
-                    <dt>Poste</dt><dd>{{ sp.profession || '—' }}</dd>
-                    <dt>Employeur</dt><dd>{{ sp.nomEmployeur || '—' }}</dd>
-                    <dt>Secteur</dt><dd>{{ sp.secteurActivite || '—' }}</dd>
-                    <dt>Depuis</dt><dd>{{ sp.dateDebutActivite ? (sp.dateDebutActivite | dateMoyenne) : '—' }}</dd>
-                  </dl>
-                } @else { <p class="muted small">Situation non renseignée.</p> }
+                <dl class="dl">
+                  <dt>Profession</dt><dd>{{ m.situationProfessionnelle?.profession || '—' }}</dd>
+                  <dt>Mobilisations</dt><dd>{{ m.disponibleMobilisation === false ? 'Non disponible' : 'Disponible' }}</dd>
+                  <!-- Champs de l'ancien formulaire : affichés seulement s'ils ont été renseignés -->
+                  @if (m.situationProfessionnelle?.nomEmployeur; as emp) { <dt>Employeur</dt><dd>{{ emp }}</dd> }
+                  @if (m.situationProfessionnelle?.secteurActivite; as sec) { <dt>Secteur</dt><dd>{{ sec }}</dd> }
+                  @if (m.situationProfessionnelle?.dateDebutActivite; as dep) { <dt>Depuis</dt><dd>{{ dep | dateMoyenne }}</dd> }
+                </dl>
               </div>
             </div>
 
@@ -153,7 +154,7 @@
               @for (d of documents()?.documents; track d.id) {
                 <tr>
                   <td><span class="row"><strong>{{ d.titre || d.nomFichier }}</strong></span></td>
-                  <td class="muted">{{ d.typeDocument === 'ATTESTATION' ? 'Généré par SNJPro' : typesDocument[d.typeDocument ?? 'AUTRE'] }}</td>
+                  <td class="muted">{{ d.typeDocument === 'ATTESTATION' ? 'Généré par Si-SNJ' : typesDocument[d.typeDocument ?? 'AUTRE'] }}</td>
                   <td class="muted">{{ d.dateAjout | dateCourte }}</td>
                   <td>@if (d.verifie) { <span class="pill green dot">Vérifié</span> } @else { <span class="pill green dot">Disponible</span> }</td>
                   <td class="text-right"><button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="telecharger(d)" aria-label="Télécharger"><app-icon name="download" [size]="17" /></button></td>

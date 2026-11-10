@@ -13,8 +13,8 @@ export const STATUT_MEMBRE: Record<string, Etiquette> = {
 };
 
 export const STATUT_COHORTE: Record<string, Etiquette> = {
-  EN_FORMATION: e('En formation', 'blue'), EN_RESERVE: e('En réserve', 'violet'), LIBEREE: e('Libérée', 'green'),
-  ACTIVE: e('Active', 'green'), TERMINEE: e('Terminée', 'grey'), ARCHIVEE: e('Archivée', 'grey')
+  EN_FORMATION: e('En formation', 'blue'), INCORPOREE: e('Incorporée', 'violet'), EN_FONCTION: e('En fonction', 'green'),
+  ARCHIVEE: e('Archivée', 'grey')
 };
 
 export const STATUT_MOBILISATION: Record<string, Etiquette> = {
@@ -130,3 +130,17 @@ export const LIBELLES_ROLES: Record<RoleEnum, string> = {
   ROLE_MEMBRE: 'Membre',
   ROLE_PARTENAIRE: 'Partenaire'
 };
+
+/** Nature d'une cohorte (Si-SNJ). */
+export const TYPE_COHORTE: Record<string, Etiquette> = {
+  FONCTIONNAIRE: e('Fonctionnaires', 'dark'), NON_FONCTIONNAIRE: e('Non-fonctionnaires', 'teal')
+};
+
+/** Aptitude d'un membre (Si-SNJ) : remplace Actif / Inactif dans les formulaires. */
+export const APTITUDE: Record<string, Etiquette> = {
+  APTE: e('Apte', 'green'), INAPTE: e('Inapte', 'gold')
+};
+
+/** Types de handicap proposés quand un membre est déclaré inapte (saisie libre possible). */
+export const TYPES_HANDICAP = ['Handicap moteur', 'Handicap visuel', 'Handicap auditif', 'Handicap mental / intellectuel',
+  'Handicap psychique', 'Maladie chronique invalidante', 'Polyhandicap', 'Autre'];

@@ -59,7 +59,7 @@ export function enregistrerFichier(r: HttpResponse<Blob>): void {
 /** Message lisible à partir d'une erreur renvoyée par le backend ({ error, message, details }). */
 export function messageErreur(err: unknown, defaut = 'Une erreur est survenue. Réessayez.'): string {
   if (err instanceof HttpErrorResponse) {
-    if (err.status === 0) return 'Impossible de joindre le serveur SNJPro. Vérifiez que le backend est démarré.';
+    if (err.status === 0) return 'Impossible de joindre le serveur Si-SNJ. Vérifiez que le backend est démarré.';
     const corps = err.error;
     if (corps && typeof corps === 'object') {
       if (corps.errors && typeof corps.errors === 'object') {

@@ -7,7 +7,8 @@ import { MembreService } from '../../core/services/membre.service';
 import { ReferentielService } from '../../core/services/referentiel.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
-import { ActiviteDTOs, MembreResponseDTO, MobilisationDTOs } from '../../models/api.models';
+import { ActiviteDTOs, CohorteDTO, MembreResponseDTO, MobilisationDTOs } from '../../models/api.models';
+import { CohorteService } from '../../core/services/cohorte.service';
 import { Icon } from '../../shared/components/icon/icon';
 import { Avatar } from '../../shared/components/avatar/avatar';
 import { Pill } from '../../shared/components/pill/pill';
@@ -45,6 +46,10 @@ export class Activites implements OnInit, OnDestroy {
   private readonly confirmation = inject(ConfirmationService);
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
+  private readonly cohorteService = inject(CohorteService);
+  protected readonly cohortes = signal<CohorteDTO[]>([]);
+  /** Responsable de cohorte : l'activité est réservée à sa cohorte (imposé par le serveur). */
+  protected readonly perimetreCohorte = computed(() => { const p = this.auth.perimetre(); return p?.type === 'COHORTE' ? p.cohorteId : null; });
 
   protected readonly STATUT = STATUT_ACTIVITE;
   protected readonly MODE = MODE_PRESENCE;
@@ -91,6 +96,7 @@ export class Activites implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.charger();
     this.referentiel.regionsMali().subscribe(r => this.regions.set(r));
+    this.cohorteService.lister().subscribe(c => this.cohortes.set(c.filter(x => x.statut !== 'ARCHIVEE')));
     this.mobilisations.lister().subscribe(l => this.mobilisationsDispo.set(l.filter(m => m.statut === 'EN_COURS' || m.statut === 'PLANIFIEE')));
   }
 
@@ -117,7 +123,7 @@ export class Activites implements OnInit, OnDestroy {
   // ------------------------------------------------------------ création
   protected ouvrirCreation(): void {
     this.enEdition.set(null);
-    this.nouvelle = { qrActif: true, date: aujourdhuiIso(), heureDebut: '08:00', heureFin: '13:00' };
+    this.nouvelle = { qrActif: true, date: aujourdhuiIso(), heureDebut: '08:00', heureFin: '13:00', cohorteId: this.perimetreCohorte() ?? undefined, cohortesComplement: [] };
     this.creation.set(true);
   }
   protected ouvrirModification(): void {
@@ -127,16 +133,42 @@ export class Activites implements OnInit, OnDestroy {
     this.nouvelle = {
       titre: a.titre, description: a.description, date: a.date, dateFin: a.dateFin,
       heureDebut: a.heureDebut ? heure(a.heureDebut) : undefined, heureFin: a.heureFin ? heure(a.heureFin) : undefined,
-      lieu: a.lieu, region: a.region, mobilisationId: a.mobilisationId, qrActif: a.qrActif
+      lieu: a.lieu, region: a.region, mobilisationId: a.mobilisationId, qrActif: a.qrActif,
+      cohorteId: a.cohorteId, nombreParticipants: a.nombreParticipants, cohortesComplement: [...(a.cohortesComplement ?? [])]
     };
     this.creation.set(true);
   }
+  // ------------------------------------------------------------ cohorte et complément
+  private effectif(id?: number): number { return this.cohortes().find(c => c.id === id)?.membresActifs ?? 0; }
+  protected nomCohorte(id?: number): string { return this.cohortes().find(c => c.id === id)?.nom ?? ''; }
+  /** Membres actifs de la cohorte choisie pour l'activité. */
+  protected effectifCohorte(): number { return this.effectif(this.nouvelle.cohorteId); }
+  /** Places manquantes dans la cohorte choisie par rapport au nombre de participants attendus. */
+  protected manque(): number {
+    const n = this.nouvelle.nombreParticipants;
+    return this.nouvelle.cohorteId && n ? Math.max(0, n - this.effectifCohorte()) : 0;
+  }
+  /** Membres actifs apportés par les cohortes de complément cochées. */
+  protected apportComplement(): number { return (this.nouvelle.cohortesComplement ?? []).reduce((t, id) => t + this.effectif(id), 0); }
+  protected autresCohortes(): CohorteDTO[] { return this.cohortes().filter(c => c.id !== this.nouvelle.cohorteId); }
+  protected choisirCohorteActivite(id: number | undefined): void {
+    this.nouvelle.cohorteId = id;
+    this.nouvelle.cohortesComplement = (this.nouvelle.cohortesComplement ?? []).filter(x => x !== id);
+  }
+  protected basculerComplement(id: number): void {
+    const l = this.nouvelle.cohortesComplement ?? [];
+    this.nouvelle.cohortesComplement = l.includes(id) ? l.filter(x => x !== id) : [...l, id];
+  }
+
   protected creer(): void {
     if (!this.nouvelle.titre?.trim() || !this.nouvelle.date) { this.toast.error('Le titre et la date sont obligatoires.'); return; }
     const id = this.enEdition();
     const donnees: ActiviteDTOs.Edition = {
       ...this.nouvelle, titre: this.nouvelle.titre.trim(), description: this.nouvelle.description?.trim() || undefined,
-      dateFin: this.nouvelle.dateFin || undefined, heureDebut: this.nouvelle.heureDebut || undefined, heureFin: this.nouvelle.heureFin || undefined
+      dateFin: this.nouvelle.dateFin || undefined, heureDebut: this.nouvelle.heureDebut || undefined, heureFin: this.nouvelle.heureFin || undefined,
+      nombreParticipants: this.nouvelle.nombreParticipants || undefined,
+      // pas de complément sans cohorte, ni pour un responsable de cohorte
+      cohortesComplement: this.nouvelle.cohorteId && !this.perimetreCohorte() ? this.nouvelle.cohortesComplement ?? [] : []
     };
     this.envoi.set(true);
     (id ? this.service.modifier(id, donnees) : this.service.creer(donnees)).subscribe({

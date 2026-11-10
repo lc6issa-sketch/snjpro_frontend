@@ -3,7 +3,7 @@
   <div class="pastille"><app-icon [name]="invitation ? 'user-plus' : 'lock'" [size]="22" /></div>
   <h1>{{ invitation ? 'Activez votre compte' : 'Nouveau mot de passe' }}</h1>
   @if (invitation && info(); as i) {
-    <p class="intro">Bienvenue {{ i.prenom }} ! Vous avez été invité(e) comme <strong>{{ role(i.role) }}</strong>{{ i.perimetre ? ' · ' + i.perimetre : '' }}. Choisissez votre mot de passe pour accéder à SNJPro.</p>
+    <p class="intro">Bienvenue {{ i.prenom }} ! Vous avez été invité(e) comme <strong>{{ role(i.role) }}</strong>{{ i.perimetre ? ' · ' + i.perimetre : '' }}. Choisissez votre mot de passe pour accéder à Si-SNJ.</p>
   } @else {
     <p class="intro">Choisissez un mot de passe d'au moins 8 caractères, avec des lettres et des chiffres.</p>
   }

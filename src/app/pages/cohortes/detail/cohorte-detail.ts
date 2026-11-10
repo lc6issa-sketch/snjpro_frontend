@@ -13,7 +13,7 @@ import { Avatar } from '../../../shared/components/avatar/avatar';
 import { Pill } from '../../../shared/components/pill/pill';
 import { Modal } from '../../../shared/components/modal/modal';
 import { DateCourtePipe, NombrePipe } from '../../../shared/pipes/format.pipes';
-import { STATUT_COHORTE, STATUT_MEMBRE, STATUT_PROFESSIONNEL } from '../../../shared/utils/libelles';
+import { STATUT_COHORTE, STATUT_MEMBRE, TYPE_COHORTE, STATUT_PROFESSIONNEL } from '../../../shared/utils/libelles';
 import { aujourdhuiIso, nombre } from '../../../shared/utils/format';
 import { CohorteForm } from '../cohorte-form/cohorte-form';
 import { ExportMembres } from '../../membres/export-membres/export-membres';
@@ -25,11 +25,11 @@ import { messageErreur } from '../../../shared/utils/http';
 const COULEURS_SITUATION = ['var(--primary)', 'var(--secondary)', 'var(--blue)', 'var(--gold)', 'var(--violet)', 'var(--border-strong)'];
 const STATUTS: { cle: StatutCohorteEnum; libelle: string; detail: string }[] = [
   { cle: 'EN_FORMATION', libelle: 'En formation', detail: 'Les recrues suivent la formation initiale' },
-  { cle: 'EN_RESERVE', libelle: 'En réserve', detail: 'Mobilisables en priorité par le SNJ' },
-  { cle: 'LIBEREE', libelle: 'Libérée', detail: 'Formation terminée, membres rendus à la vie civile' },
+  { cle: 'INCORPOREE', libelle: 'Incorporée', detail: 'Formation initiale terminée, recrues incorporées' },
+  { cle: 'EN_FONCTION', libelle: 'En fonction', detail: 'Membres affectés et en service' },
   { cle: 'ARCHIVEE', libelle: 'Archivée', detail: 'Consultation uniquement, plus de mise à jour' }
 ];
-const MOTIFS = ['Fin de la formation initiale', 'Rappel des réservistes', 'Libération de la cohorte', 'Archivage administratif', 'Autre'];
+const MOTIFS = ['Fin de la formation initiale', 'Incorporation de la cohorte', 'Prise de fonction', 'Archivage administratif', 'Autre'];
 
 /** Écrans web 24 (Détail de la cohorte) et 26 (Changer le statut). */
 @Component({
@@ -49,6 +49,7 @@ export class CohorteDetail implements OnInit {
   private readonly auth = inject(AuthService);
 
   protected readonly STATUT_COHORTE = STATUT_COHORTE;
+  protected readonly TYPE_COHORTE = TYPE_COHORTE;
   protected readonly STATUT_MEMBRE = STATUT_MEMBRE;
   protected readonly statuts = STATUTS;
   protected readonly motifs = MOTIFS;
@@ -61,7 +62,7 @@ export class CohorteDetail implements OnInit {
   protected readonly exporter = signal(false);
   protected readonly changement = signal(false);
   protected readonly envoi = signal(false);
-  protected nouveauStatut: StatutCohorteEnum = 'EN_RESERVE';
+  protected nouveauStatut: StatutCohorteEnum = 'INCORPOREE';
   protected dateEffet = aujourdhuiIso();
   protected motif = MOTIFS[0];
   protected notifier = true;
@@ -94,7 +95,7 @@ export class CohorteDetail implements OnInit {
   protected situation(m: MembreResponseDTO): string { return STATUT_PROFESSIONNEL[m.situationProfessionnelle?.statut ?? '']?.libelle ?? '—'; }
 
   protected ouvrirStatut(): void {
-    this.nouveauStatut = STATUTS.find(s => s.cle !== this.c()?.statut)?.cle ?? 'EN_RESERVE';
+    this.nouveauStatut = STATUTS.find(s => s.cle !== this.c()?.statut)?.cle ?? 'INCORPOREE';
     this.changement.set(true);
   }
 

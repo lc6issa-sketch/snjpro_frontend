@@ -1,4 +1,4 @@
-// Fichier genere automatiquement depuis les DTO Java du backend SNJPro (scripts/generer-modeles.js).
+// Fichier genere automatiquement depuis les DTO Java du backend Si-SNJ (scripts/generer-modeles.js).
 // Ne pas modifier a la main : relancer le generateur apres un changement cote backend.
 
 export interface Page<T> {
@@ -99,8 +99,14 @@ export const RoleEnum_VALUES: RoleEnum[] = ['ROLE_ADMIN_SYSTEME', 'ROLE_ADMIN_SN
 export type SexeEnum = 'MASCULIN' | 'FEMININ';
 export const SexeEnum_VALUES: SexeEnum[] = ['MASCULIN', 'FEMININ'];
 
-export type StatutCohorteEnum = 'EN_FORMATION' | 'EN_RESERVE' | 'LIBEREE' | 'ACTIVE' | 'TERMINEE' | 'ARCHIVEE';
-export const StatutCohorteEnum_VALUES: StatutCohorteEnum[] = ['EN_FORMATION', 'EN_RESERVE', 'LIBEREE', 'ACTIVE', 'TERMINEE', 'ARCHIVEE'];
+export type StatutCohorteEnum = 'EN_FORMATION' | 'INCORPOREE' | 'EN_FONCTION' | 'ARCHIVEE';
+export const StatutCohorteEnum_VALUES: StatutCohorteEnum[] = ['EN_FORMATION', 'INCORPOREE', 'EN_FONCTION', 'ARCHIVEE'];
+
+export type TypeCohorteEnum = 'FONCTIONNAIRE' | 'NON_FONCTIONNAIRE';
+export const TypeCohorteEnum_VALUES: TypeCohorteEnum[] = ['FONCTIONNAIRE', 'NON_FONCTIONNAIRE'];
+
+export type AptitudeEnum = 'APTE' | 'INAPTE';
+export const AptitudeEnum_VALUES: AptitudeEnum[] = ['APTE', 'INAPTE'];
 
 export type StatutMembreEnum = 'ACTIF' | 'INACTIF' | 'ARCHIVE' | 'DECEDE' | 'SUSPENDU';
 export const StatutMembreEnum_VALUES: StatutMembreEnum[] = ['ACTIF', 'INACTIF', 'ARCHIVE', 'DECEDE', 'SUSPENDU'];
@@ -148,6 +154,9 @@ export interface CohorteDTO {
   dateDebut?: string;
   dateFin?: string;
   statut?: StatutCohorteEnum;
+  typeCohorte?: TypeCohorteEnum;
+  directeurCentre?: string;
+  majorCentre?: string;
   region?: string;
   responsable?: string;
   numero?: number;
@@ -252,6 +261,8 @@ export interface MembreDTO {
   dateIncorporation?: string;
   disponibleMobilisation?: boolean;
   statut?: StatutMembreEnum;
+  aptitude?: AptitudeEnum;
+  typeHandicap?: string;
   cohorteId?: number;
 }
 
@@ -295,8 +306,11 @@ export interface MembreResponseDTO {
   dateIncorporation?: string;
   disponibleMobilisation?: boolean;
   statut?: StatutMembreEnum;
+  aptitude?: AptitudeEnum;
+  typeHandicap?: string;
   cohorteId?: number;
   cohorteNom?: string;
+  cohorteType?: TypeCohorteEnum;
   userId?: number;
   situationProfessionnelle?: SituationProfessionnelleDTO;
   localisation?: LocalisationDTO;
@@ -391,6 +405,9 @@ export namespace ActiviteDTOs {
     region?: string;
     mobilisationId?: number;
     qrActif?: boolean;
+    cohorteId?: number;
+    nombreParticipants?: number;
+    cohortesComplement?: number[];
   }
   export interface SaisieManuelle {
     membreId?: number;
@@ -424,6 +441,12 @@ export namespace ActiviteDTOs {
     mobilisationId?: number;
     mobilisation?: string;
     qrActif?: boolean;
+    cohorteId?: number;
+    cohorte?: string;
+    nombreParticipants?: number;
+    effectifCohorte?: number;
+    cohortesComplement?: number[];
+    cohortesComplementNoms?: string[];
     compteurs?: Compteurs;
   }
   export interface PresenceDTO {
@@ -988,6 +1011,8 @@ export namespace MobilisationDTOs {
     ageMax?: number;
     telephoneVerifieUniquement?: boolean;
     exclureDejaMobilises?: boolean;
+    completerAvecAutresCohortes?: boolean;
+    cohortesComplement?: number[];
   }
   export interface Envoi {
     message?: string;
@@ -1060,6 +1085,7 @@ export namespace MobilisationDTOs {
     cohorte?: string;
     competencesCorrespondantes?: string[];
     telephoneVerifie?: boolean;
+    complement?: boolean;
   }
   export interface Apercu {
     total?: number;
@@ -1068,6 +1094,11 @@ export namespace MobilisationDTOs {
     pourcentageTelephoneVerifie?: number;
     estimationSms?: number;
     membres?: MembreSelectionne[];
+    objectif?: number;
+    totalCohortesChoisies?: number;
+    manque?: number;
+    complementDisponible?: number;
+    complementRetenu?: number;
   }
   export interface Participant {
     participationId?: number;

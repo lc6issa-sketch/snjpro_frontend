@@ -66,18 +66,24 @@
           <div class="card-head"><h3>Informations</h3></div>
           <div class="card-body infos">
             <div class="row"><app-icon name="building" [size]="17" class="faint" /><div><p class="faint xs">Centre</p><p class="strong">{{ c()?.centre || '—' }}</p></div></div>
+            <div class="row"><app-icon name="users" [size]="17" class="faint" /><div><p class="faint xs">Type de cohorte</p><p class="strong">{{ c()?.typeCohorte ? TYPE_COHORTE[c()!.typeCohorte!].libelle : 'Non précisé' }}</p></div></div>
             <div class="row"><app-icon name="calendar" [size]="17" class="faint" /><div><p class="faint xs">Période</p><p class="strong">{{ c()?.dateDebut | dateCourte }} – {{ c()?.dateFin | dateCourte }}</p></div></div>
             <div class="row"><app-icon name="clock" [size]="17" class="faint" /><div><p class="faint xs">Durée</p><p class="strong">{{ t.dureeMois ? t.dureeMois + ' mois' : '—' }}</p></div></div>
             <div class="row"><app-icon name="layers" [size]="17" class="faint" /><div><p class="faint xs">Organisation</p>
               <p class="strong">{{ c()?.nombreCompagnies ?? t.compagnies.length }} compagnies{{ c()?.nombreSections ? ' · ' + c()?.nombreSections + ' sections' : '' }}</p></div></div>
           </div>
           <div class="card-foot" style="flex-direction: column; align-items: stretch; gap: 10px">
-            <span class="faint xs">Responsable</span>
-            @if (c()?.responsableNom || c()?.responsable) {
-              <div class="row"><app-avatar [nom]="c()?.responsableNom || c()?.responsable" [size]="34" />
-                <div class="grow"><p class="strong" style="color: var(--text)">{{ c()?.responsableNom || c()?.responsable }}</p><p class="xs">Responsable de cohorte</p></div>
-                @if (c()?.responsableId) { <button type="button" class="btn btn-ghost btn-icon btn-sm" (click)="ecrire()" aria-label="Écrire au responsable"><app-icon name="mail" [size]="17" /></button> }</div>
-            } @else { <p class="small">Aucun responsable désigné.</p> }
+            <span class="faint xs">Encadrement du centre</span>
+            @if (c()?.directeurCentre || c()?.majorCentre) {
+              @if (c()?.directeurCentre) {
+                <div class="row"><app-avatar [nom]="c()?.directeurCentre" [size]="34" />
+                  <div class="grow"><p class="strong" style="color: var(--text)">{{ c()?.directeurCentre }}</p><p class="xs">Directeur de centre</p></div></div>
+              }
+              @if (c()?.majorCentre) {
+                <div class="row"><app-avatar [nom]="c()?.majorCentre" [size]="34" />
+                  <div class="grow"><p class="strong" style="color: var(--text)">{{ c()?.majorCentre }}</p><p class="xs">Major de centre</p></div></div>
+              }
+            } @else { <p class="small">Directeur et major de centre non renseignés.</p> }
           </div>
         </div>
         <div class="card">
