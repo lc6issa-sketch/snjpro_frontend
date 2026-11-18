@@ -9,11 +9,8 @@
 }
 @if (avecNom()) {
   <div class="txt">
-    @if (ecusson()) {
-      <span class="nom-texte" [class.sur-sombre]="fond() === 'sombre'" [style.font-size.px]="taille() * 0.56">SNJ<em>Pro</em></span>
-    } @else {
-      <img class="nom" [src]="fond() === 'sombre' ? 'logo_nom_app_blanc.png' : 'logo_nom_app.png'" alt="SNJPro" [style.height.px]="taille() * 0.46" />
-    }
+    <!-- Nom de l'application en texte (Si-SNJ) : remplace les images logo_nom_app*.png qui portaient l'ancien nom -->
+    <span class="nom-texte" [class.vert]="!ecusson()" [class.sur-sombre]="fond() === 'sombre'" [style.font-size.px]="taille() * 0.56">Si-<em>SNJ</em></span>
     @if (sousTitre()) { <span>{{ sousTitre() }}</span> }
   </div>
 }

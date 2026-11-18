@@ -7,10 +7,10 @@ import { MembreService } from '../../../core/services/membre.service';
 import { CohorteService } from '../../../core/services/cohorte.service';
 import { ReferentielService } from '../../../core/services/referentiel.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { CohorteDTO, CompetenceReferentielDTOs, MembreDTO, NiveauCompetenceEnum, ParcoursSNJDTO, SexeEnum, StatutProfessionnelEnum } from '../../../models/api.models';
+import { AptitudeEnum, CohorteDTO, CompetenceReferentielDTOs, MembreDTO, NiveauCompetenceEnum, ParcoursSNJDTO, SexeEnum } from '../../../models/api.models';
 import { Icon } from '../../../shared/components/icon/icon';
 import { dateCourte, dateMoyenne } from '../../../shared/utils/format';
-import { NIVEAU_COMPETENCE, STATUT_PROFESSIONNEL } from '../../../shared/utils/libelles';
+import { NIVEAU_COMPETENCE, TYPE_COHORTE, TYPES_HANDICAP } from '../../../shared/utils/libelles';
 import { CompetenceService } from '../../../core/services/competence.service';
 import { messageErreur } from '../../../shared/utils/http';
 import { ConfirmationService } from '../../../core/services/confirmation.service';
@@ -34,38 +34,31 @@ interface Formulaire {
   groupeSanguin: string; taille: string; poids: string; categorie: 'FONCTIONNAIRE' | 'NON_FONCTIONNAIRE'; diplomes: string[];
   telephone: string; email: string; telephoneSecondaire: string; personneAPrevenir: string; personneAPrevenirTelephone: string;
   region: string; cercle: string; commune: string; quartier: string; adresseComplete: string;
-  cohorteId: number | null; dateIncorporation: string; compagnie: string; section: string; brigade: string; affectation: string; statut: 'ACTIF' | 'INACTIF';
-  statutPro: StatutProfessionnelEnum | 'FONCTIONNAIRE' | null; profession: string; employeur: string; secteur: string; depuis: string;
-  lieuTravail: string; contrat: string; disponible: boolean;
+  cohorteId: number | null; dateIncorporation: string; brigade: string; compagnie: string; section: string; affectation: string;
+  aptitude: AptitudeEnum; typeHandicap: string;
+  profession: string; disponible: boolean;
   competences: CompetenceChoisie[];
 }
 
 const VIDE: Formulaire = {
   nom: '', prenom: '', dateNaissance: '', lieuNaissance: '', sexe: 'FEMININ', nationalite: 'Malienne', groupeSanguin: '', taille: '', poids: '',
   categorie: 'NON_FONCTIONNAIRE', diplomes: [], telephone: '', email: '', telephoneSecondaire: '', personneAPrevenir: '', personneAPrevenirTelephone: '',
-  region: '', cercle: '', commune: '', quartier: '', adresseComplete: '', cohorteId: null, dateIncorporation: '', compagnie: '', section: '', brigade: '',
-  affectation: '', statut: 'ACTIF', statutPro: null, profession: '', employeur: '', secteur: '', depuis: '', lieuTravail: '', contrat: '',
-  disponible: true, competences: []
+  region: '', cercle: '', commune: '', quartier: '', adresseComplete: '', cohorteId: null, dateIncorporation: '', brigade: '', compagnie: '', section: '',
+  affectation: '', aptitude: 'APTE', typeHandicap: '', profession: '', disponible: true, competences: []
 };
+
+/** Dernière étape de l'assistant (Vérification). */
+const DERNIERE = 5;
 
 const ETAPES = [
   { titre: 'Identité', detail: 'Nom, prénom, naissance', icone: 'user' },
   { titre: 'Contact & localisation', detail: 'Téléphone, adresse', icone: 'map-pin' },
-  { titre: 'Cohorte & parcours', detail: 'Incorporation, affectation', icone: 'layers' },
-  { titre: 'Situation professionnelle', detail: 'Statut, emploi actuel', icone: 'briefcase' },
-  { titre: 'Compétences', detail: 'Savoir-faire et niveaux', icone: 'award' },
+  { titre: 'Cohorte & parcours', detail: 'Incorporation, affectation, aptitude', icone: 'layers' },
+  { titre: 'Situation professionnelle & compétences', detail: 'Profession, disponibilité, savoir-faire', icone: 'briefcase' },
   { titre: 'Vérification', detail: 'Contrôle et création', icone: 'check-circle' }
 ];
 
-const STATUTS_PRO: { cle: StatutProfessionnelEnum | 'FONCTIONNAIRE'; libelle: string }[] = [
-  { cle: 'EMPLOYE', libelle: 'Salarié(e)' }, { cle: 'FONCTIONNAIRE', libelle: 'Fonctionnaire' }, { cle: 'AUTO_EMPLOYE', libelle: 'Entrepreneur(e)' },
-  { cle: 'ETUDIANT', libelle: 'Étudiant(e)' }, { cle: 'CHOMEUR', libelle: 'Sans emploi' }, { cle: 'AUTRE', libelle: 'Autre' }
-];
-
-const SECTEURS = ['Administration publique', 'Agriculture & élevage', 'Artisanat', 'BTP', 'Commerce', 'Éducation', 'Énergie', 'Finance & comptabilité',
-  'Industrie', 'Informatique & numérique', 'Mines', 'ONG & associations', 'Santé', 'Sécurité', 'Télécommunications', 'Transport & logistique', 'Autre'];
-
-/** Écrans web 11 à 16 — Nouveau membre (assistant en 6 étapes). */
+/** Écrans web 11 à 16 — Nouveau membre (assistant en 5 étapes). */
 @Component({
   selector: 'app-nouveau-membre',
   imports: [FormsModule, RouterLink, Icon],
@@ -84,8 +77,9 @@ export class NouveauMembre implements OnInit {
   private readonly shell = inject(ShellService);
 
   protected readonly etapes = ETAPES;
-  protected readonly statutsPro = STATUTS_PRO;
-  protected readonly secteurs = SECTEURS;
+  protected readonly derniere = DERNIERE;
+  protected readonly typesHandicap = TYPES_HANDICAP;
+  protected readonly TYPE_COHORTE = TYPE_COHORTE;
   protected readonly niveaux = Object.entries(NIVEAU_COMPETENCE).map(([cle, v]) => ({ cle: cle as NiveauCompetenceEnum, libelle: v.libelle }));
 
   protected f: Formulaire = structuredClone(VIDE);
@@ -143,7 +137,7 @@ export class NouveauMembre implements OnInit {
     const actuelle = this.etape();
     this.fait.update(f => Math.max(f, actuelle));
     if (actuelle === 1 || actuelle === 2) this.verifierDoublons();
-    this.etape.set(Math.min(6, actuelle + 1));
+    this.etape.set(Math.min(DERNIERE, actuelle + 1));
     this.sauverBrouillon(false);
   }
 
@@ -166,6 +160,7 @@ export class NouveauMembre implements OnInit {
     if (etape === 3) {
       if (!this.f.cohorteId) e['cohorteId'] = 'Choisissez une cohorte';
       requis('dateIncorporation', 'La date d\'incorporation est obligatoire');
+      if (this.f.aptitude === 'INAPTE' && !this.f.typeHandicap.trim()) e['typeHandicap'] = 'Précisez le type de handicap';
     }
     this.erreurs.set(e);
     return !Object.keys(e).length;
@@ -178,6 +173,14 @@ export class NouveauMembre implements OnInit {
     this.f.cohorteId = id;
     const c = this.cohortes().find(x => x.id === id);
     if (c?.dateDebut && !this.f.dateIncorporation) this.f.dateIncorporation = c.dateDebut;
+    // Cohorte de fonctionnaires / non-fonctionnaires : la catégorie du membre en découle
+    if (c?.typeCohorte) this.f.categorie = c.typeCohorte;
+    this.maj();
+  }
+
+  protected choisirAptitude(a: AptitudeEnum): void {
+    this.f.aptitude = a;
+    if (a === 'APTE') this.f.typeHandicap = '';
     this.maj();
   }
 
@@ -234,7 +237,8 @@ export class NouveauMembre implements OnInit {
   protected readonly texte = {
     sexe: () => (this.f.sexe === 'FEMININ' ? 'Femme' : 'Homme'),
     naissance: () => `${this.f.sexe === 'FEMININ' ? 'Née' : 'Né'} le ${dateCourte(this.f.dateNaissance)} à ${this.f.lieuNaissance}`,
-    statutPro: () => STATUTS_PRO.find(s => s.cle === this.f.statutPro)?.libelle ?? 'Non renseignée',
+    aptitude: () => (this.f.aptitude === 'INAPTE' ? `Inapte · ${this.f.typeHandicap}` : 'Apte'),
+    categorie: () => (this.f.categorie === 'FONCTIONNAIRE' ? 'Fonctionnaire' : 'Non fonctionnaire'),
     niveau: (n: NiveauCompetenceEnum) => NIVEAU_COMPETENCE[n].libelle,
     periode: (p: ParcoursSNJDTO) => `${dateMoyenne(p.dateDebut)}${p.dateFin ? ' – ' + dateMoyenne(p.dateFin) : ' – aujourd\'hui'}`
   };
@@ -274,14 +278,9 @@ export class NouveauMembre implements OnInit {
       pays: 'Mali', region: this.f.region, cercle: this.f.cercle || undefined, commune: this.f.commune || undefined,
       quartier: this.f.quartier || undefined, adresseComplete: this.f.adresseComplete || undefined
     })));
-    if (this.f.statutPro) {
-      const fonctionnaire = this.f.statutPro === 'FONCTIONNAIRE';
-      const description = [fonctionnaire ? 'Fonctionnaire' : '', this.f.contrat, this.f.lieuTravail].filter(Boolean).join(' · ');
-      appels.push(ok(this.membres.creerSituation(id, {
-        statut: fonctionnaire ? 'EMPLOYE' : (this.f.statutPro as StatutProfessionnelEnum), profession: this.f.profession || undefined,
-        nomEmployeur: this.f.employeur || undefined, secteurActivite: this.f.secteur || undefined,
-        dateDebutActivite: this.f.depuis ? this.f.depuis + '-01' : undefined, description: description || undefined
-      })));
+    // Situation professionnelle : seule la profession est saisie (le statut est fixé côté serveur)
+    if (this.f.profession.trim()) {
+      appels.push(ok(this.membres.creerSituation(id, { profession: this.f.profession.trim() })));
     }
     this.f.competences.forEach(c => appels.push(ok(this.membres.ajouterCompetence(id, { intitule: c.intitule, categorie: c.categorie, niveau: c.niveau }))));
     this.parcours().forEach(p => appels.push(ok(this.membres.ajouterParcours(id, p))));
@@ -305,7 +304,8 @@ export class NouveauMembre implements OnInit {
       diplomes: this.f.diplomes, categorie: this.f.categorie,
       compagnie: this.f.compagnie || undefined, section: this.f.section || undefined, brigade: this.f.brigade.trim() || undefined,
       dateIncorporation: this.f.dateIncorporation || undefined,
-      disponibleMobilisation: this.f.disponible, statut: this.f.statut, cohorteId: this.f.cohorteId ?? undefined
+      disponibleMobilisation: this.f.disponible, cohorteId: this.f.cohorteId ?? undefined,
+      aptitude: this.f.aptitude, typeHandicap: this.f.aptitude === 'INAPTE' ? this.f.typeHandicap.trim() : undefined
     };
   }
 
@@ -333,8 +333,10 @@ export class NouveauMembre implements OnInit {
       this.f = { ...structuredClone(VIDE), ...b.f };
       // Brouillon enregistré avant la saisie de plusieurs diplômes
       if (!Array.isArray(this.f.diplomes)) this.f.diplomes = b.f.dernierDiplome ? [b.f.dernierDiplome] : [];
-      this.etape.set(b.etape || 1);
-      this.fait.set(b.fait || 0);
+      // Brouillon de l'ancien assistant en 6 étapes : situation pro et compétences sont désormais réunies
+      this.etape.set(Math.min(DERNIERE, b.etape > 4 ? b.etape - 1 : b.etape || 1));
+      this.fait.set(Math.min(DERNIERE - 1, b.fait || 0));
+      if (this.f.aptitude !== 'INAPTE') this.f.aptitude = 'APTE';
       this.maj();
       this.toast.info('Brouillon restauré.');
     } catch { /* brouillon illisible : ignoré */ }
@@ -346,5 +348,4 @@ export class NouveauMembre implements OnInit {
 
   protected joindre(valeurs: (string | null | undefined)[], sep: string): string { return valeurs.filter(v => !!v).join(sep); }
   protected chiffres(t: string): string { return (t ?? '').replace(/\D/g, '').replace(/^223(?=\d{8}$)/, ''); }
-  protected libelleStatutPro(cle: string): string { return STATUT_PROFESSIONNEL[cle]?.libelle ?? cle; }
 }

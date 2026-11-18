@@ -60,7 +60,7 @@
 </div>
 
 @if (edition()) {
-  <app-modal [titre]="enCours() ? 'Modifier la compétence' : 'Nouvelle compétence'" sousTitre="Ajoutez une compétence au référentiel SNJPro" icone="award" [largeur]="532" (fermer)="edition.set(false)">
+  <app-modal [titre]="enCours() ? 'Modifier la compétence' : 'Nouvelle compétence'" sousTitre="Ajoutez une compétence au référentiel Si-SNJ" icone="award" [largeur]="532" (fermer)="edition.set(false)">
     <div class="stack" style="gap: 18px">
       <div class="field"><label for="nom">Nom de la compétence<span class="req">*</span></label><input id="nom" class="input" [(ngModel)]="form.nom" /></div>
       <div class="field"><label for="cat">Catégorie</label>

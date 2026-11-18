@@ -12,3 +12,8 @@ span { font-size: 12px; opacity: .8; }
 .nom-texte em { font-style: normal; color: #A97415; }
 .nom-texte.sur-sombre { color: #fff; }
 .nom-texte.sur-sombre em { color: #F4BC2C; }
+/* Variante verte (logo VERT) du nom Si-SNJ, aux couleurs de l'ancien logotype */
+.nom-texte.vert { color: #1F5A2A; }
+.nom-texte.vert em { color: #6AB43E; }
+.nom-texte.vert.sur-sombre { color: #fff; }
+.nom-texte.vert.sur-sombre em { color: #9BD46F; }

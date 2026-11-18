@@ -37,9 +37,9 @@
     @case (2) {
       <div class="mise mt-20">
         <section class="card">
-          <div class="card-head"><div><h3>Correspondance des colonnes</h3><p class="sub">Associez chaque colonne du fichier à un champ SNJPro</p></div></div>
+          <div class="card-head"><div><h3>Correspondance des colonnes</h3><p class="sub">Associez chaque colonne du fichier à un champ Si-SNJ</p></div></div>
           <table class="table mt-12">
-            <thead><tr><th>Colonne du fichier</th><th>Exemple</th><th></th><th>Champ SNJPro</th><th>État</th></tr></thead>
+            <thead><tr><th>Colonne du fichier</th><th>Exemple</th><th></th><th>Champ Si-SNJ</th><th>État</th></tr></thead>
             <tbody>
               @for (c of colonnes(); track c.entete) {
                 <tr>
@@ -198,7 +198,7 @@
       <div class="card mt-20 fin">
         <div class="succes"><span><i><app-icon name="check" [size]="28" [stroke]="3" /></i></span></div>
         <h2>Import terminé avec succès</h2>
-        <p class="muted">Les membres importés sont maintenant disponibles dans SNJPro.</p>
+        <p class="muted">Les membres importés sont maintenant disponibles dans Si-SNJ.</p>
         <div class="chiffres">
           <div><strong class="vert">{{ session()?.importes | nombre }}</strong><span>membres importés</span></div>
           <div><strong class="or">{{ session()?.fusionnes | nombre }}</strong><span>doublons fusionnés</span></div>

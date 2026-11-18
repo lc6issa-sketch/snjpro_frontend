@@ -182,7 +182,7 @@ export class Import implements OnInit {
   protected decisionTexte(d?: DecisionDoublon): string { return d === 'FUSIONNER' ? 'Fusionner' : d === 'CONSERVER_LES_DEUX' ? 'Conserver les deux' : d === 'IGNORER' ? 'Ignorer' : ''; }
   protected sousTitre(): string {
     const s = this.session();
-    if (!s) return 'Intégrez les anciens fichiers Excel ou CSV dans la base SNJPro';
+    if (!s) return 'Intégrez les anciens fichiers Excel ou CSV dans la base Si-SNJ';
     if (this.etape() === 4 && s.dateImport) return `${s.nomFichier} · import terminé le ${dateCourte(s.dateImport)} à ${heure(s.dateImport)}`;
     return `${s.nomFichier} · ${nombre(s.totalLignes)} lignes · ${this.analyse()?.colonnes?.length ?? 0} colonnes détectées`;
   }

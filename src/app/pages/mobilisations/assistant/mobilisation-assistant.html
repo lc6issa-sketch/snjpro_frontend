@@ -97,7 +97,38 @@
               <select id="coh" class="select" [ngModel]="criteres.cohorteIds?.[0] ?? ''" (ngModelChange)="choisirCohorte($event)" [disabled]="perimetre()?.type === 'COHORTE'">
                 @if (perimetre()?.type !== 'COHORTE') { <option value="">Toutes les cohortes</option> }
                 @for (c of cohortes(); track c.id) { <option [value]="c.id">{{ c.nom }}</option> }</select>
-              @if (perimetre()?.type === 'COHORTE') { <span class="hint">Limitée à votre cohorte</span> }</div>
+              @if (perimetre()?.type === 'COHORTE') { <span class="hint">Limitée à votre cohorte</span> }
+              @if (criteres.cohorteIds?.length && !info.nombreVolontaires) {
+                <span class="hint">Indiquez le nombre de volontaires (étape 1) pour pouvoir compléter avec d'autres cohortes.</span>
+              }</div>
+            <!-- Cohorte insuffisante : proposer de compléter avec les membres d'autres cohortes -->
+            @if (manqueCohorte() > 0) {
+              <div class="field full">
+                <div class="notice warn"><app-icon name="alert-triangle" [size]="17" />
+                  <div class="grow">
+                    <strong>{{ nomCohorte() }} : {{ apercu()?.totalCohortesChoisies ?? 0 | nombre }} membre(s) pour {{ apercu()?.objectif | nombre }} volontaires recherchés</strong>
+                    <br />Il manque {{ manqueCohorte() | nombre }} personne(s).
+                    @if (perimetre()?.type === 'COHORTE') {
+                      Le complément avec d'autres cohortes est réservé aux administrateurs.
+                    } @else if (apercu()?.complementDisponible) {
+                      {{ apercu()?.complementDisponible | nombre }} membre(s) d'autres cohortes correspondent aux critères.
+                      <label class="checkbox mt-8"><input type="checkbox" [checked]="criteres.completerAvecAutresCohortes" (change)="basculerComplement()" />
+                        Compléter avec les membres d'autres cohortes</label>
+                    } @else {
+                      Aucun membre d'une autre cohorte ne correspond aux critères : élargissez-les.
+                    }
+                  </div></div>
+                @if (criteres.completerAvecAutresCohortes && perimetre()?.type !== 'COHORTE') {
+                  <span class="label mt-12">Cohortes de complément <span class="hint">(aucune cochée = toutes les autres)</span></span>
+                  <div class="row wrap" style="gap: 8px 18px">
+                    @for (c of cohortesComplementPossibles(); track c.id) {
+                      <label class="checkbox"><input type="checkbox" [checked]="criteres.cohortesComplement?.includes(c.id!)" (change)="basculerCohorteComplement(c.id!)" />{{ c.nom }}</label>
+                    }
+                  </div>
+                  <span class="hint">{{ apercu()?.complementRetenu ?? 0 | nombre }} membre(s) ajouté(s), les plus pertinents d'abord (compétences).</span>
+                }
+              </div>
+            }
             <div class="field"><span class="label">Statut du membre</span>
               <div class="row" style="gap: 22px">
                 @for (s of statutsMembre; track s.cle) { <label class="checkbox"><input type="checkbox" [checked]="criteres.statutsMembre?.includes(s.cle)" (change)="basculerStatut(s.cle)" />{{ s.libelle }}</label> }
@@ -140,6 +171,7 @@
                 <span class="checkbox"><input type="checkbox" [checked]="!exclus().has(m.membreId!)" (change)="basculerMembre(m.membreId!)" [attr.aria-label]="'Sélectionner ' + m.prenom" /></span>
                 <app-avatar [nom]="m.prenom + ' ' + m.nom" [size]="28" />
                 <div class="grow"><strong class="small">{{ m.prenom }} {{ m.nom }}</strong><p class="muted xs">{{ m.region }} · {{ m.cohorte }}</p></div>
+                @if (m.complement) { <span class="pill gold" title="Ajouté depuis une autre cohorte">Complément</span> }
                 <div class="row wrap" style="gap: 6px">@for (c of m.competencesCorrespondantes; track c) { <span class="pill green">{{ c }}</span> }</div>
               </div>
             }
@@ -179,7 +211,7 @@
             <div class="row-between"><h4>Critères</h4><button type="button" class="link" (click)="etape.set(2)">Modifier</button></div>
             <dl class="dl-gauche"><dt>Régions</dt><dd>{{ criteres.regions?.length ? criteres.regions?.join(', ') : 'Toutes' }}</dd>
               <dt>Compétences</dt><dd>{{ criteres.competences?.length ? criteres.competences?.join(', ') : 'Toutes' }}</dd>
-              <dt>Cohortes</dt><dd>{{ nomCohorte() }}</dd>
+              <dt>Cohortes</dt><dd>{{ nomCohorte() }}@if (apercu()?.complementRetenu) { · complétée avec {{ apercu()?.complementRetenu | nombre }} membre(s) d'autres cohortes }</dd>
               <dt>Âge</dt><dd>{{ criteres.ageMin }} – {{ criteres.ageMax }} ans{{ criteres.telephoneVerifieUniquement ? ' · téléphone vérifié' : '' }}</dd></dl>
           </div>
           <div class="recap">

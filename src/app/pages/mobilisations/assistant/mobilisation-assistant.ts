@@ -56,7 +56,7 @@ export class MobilisationAssistant implements OnInit {
   protected readonly version = signal(0);
 
   protected info: MobilisationDTOs.Informations = { priseEnCharge: [], urgent: false };
-  protected criteres: MobilisationDTOs.Criteres = { regions: [], competences: [], toutesCompetences: false, cohorteIds: [], statutsMembre: ['ACTIF'], ageMin: 18, ageMax: 35, telephoneVerifieUniquement: false, exclureDejaMobilises: false };
+  protected criteres: MobilisationDTOs.Criteres = { regions: [], competences: [], toutesCompetences: false, cohorteIds: [], statutsMembre: ['ACTIF'], ageMin: 18, ageMax: 35, telephoneVerifieUniquement: false, exclureDejaMobilises: false, completerAvecAutresCohortes: false, cohortesComplement: [] };
   protected envoiForm: MobilisationDTOs.Envoi = { canalApplication: true, canalSms: true, canalEmail: false };
   protected programmer = false;
   protected dateProgrammee = '';
@@ -97,7 +97,7 @@ export class MobilisationAssistant implements OnInit {
           if (d.statut !== 'BROUILLON') { this.router.navigate(['/mobilisations', id]); return; }
           this.mobilisationId.set(+id);
           this.info = { ...d.informations, priseEnCharge: d.informations?.priseEnCharge ?? [] };
-          this.criteres = { ...this.criteres, ...d.criteres, regions: d.criteres?.regions ?? [], competences: d.criteres?.competences ?? [], cohorteIds: d.criteres?.cohorteIds ?? [], statutsMembre: d.criteres?.statutsMembre?.length ? d.criteres.statutsMembre : ['ACTIF'], ageMin: d.criteres?.ageMin ?? 18, ageMax: d.criteres?.ageMax ?? 35, sexe: d.criteres?.sexe ?? undefined, toutesCompetences: !!d.criteres?.toutesCompetences };
+          this.criteres = { ...this.criteres, ...d.criteres, regions: d.criteres?.regions ?? [], competences: d.criteres?.competences ?? [], cohorteIds: d.criteres?.cohorteIds ?? [], cohortesComplement: d.criteres?.cohortesComplement ?? [], statutsMembre: d.criteres?.statutsMembre?.length ? d.criteres.statutsMembre : ['ACTIF'], ageMin: d.criteres?.ageMin ?? 18, ageMax: d.criteres?.ageMax ?? 35, sexe: d.criteres?.sexe ?? undefined, toutesCompetences: !!d.criteres?.toutesCompetences };
           this.verrouillerPerimetre();
           this.envoiForm = { ...this.envoiForm, ...(d.envoi ?? {}) };
           if (!this.envoiForm.message) this.envoiForm.message = this.messageParDefaut();
@@ -159,7 +159,28 @@ export class MobilisationAssistant implements OnInit {
     this.maj();
   }
   protected retirerCompetence(c: string): void { this.criteres.competences = this.criteres.competences!.filter(x => x !== c); this.maj(); }
-  protected choisirCohorte(id: string): void { this.criteres.cohorteIds = id ? [+id] : []; this.maj(); }
+  protected choisirCohorte(id: string): void {
+    this.criteres.cohorteIds = id ? [+id] : [];
+    // la cohorte choisie ne peut pas servir de complément à elle-même
+    this.criteres.cohortesComplement = (this.criteres.cohortesComplement ?? []).filter(x => x !== +id);
+    this.maj();
+  }
+
+  /** Places manquantes dans la cohorte choisie par rapport au nombre de volontaires recherchés. */
+  protected readonly manqueCohorte = computed(() => {
+    this.version();
+    return this.criteres.cohorteIds?.length ? (this.apercu()?.manque ?? 0) : 0;
+  });
+  protected readonly cohortesComplementPossibles = computed(() => {
+    this.version();
+    return this.cohortes().filter(c => !this.criteres.cohorteIds?.includes(c.id!));
+  });
+  protected basculerComplement(): void { this.criteres.completerAvecAutresCohortes = !this.criteres.completerAvecAutresCohortes; this.maj(); }
+  protected basculerCohorteComplement(id: number): void {
+    const l = this.criteres.cohortesComplement ?? [];
+    this.criteres.cohortesComplement = l.includes(id) ? l.filter(x => x !== id) : [...l, id];
+    this.maj();
+  }
   protected basculerStatut(s: StatutMembreEnum): void {
     const l = this.criteres.statutsMembre ?? [];
     this.criteres.statutsMembre = l.includes(s) ? l.filter(x => x !== s) : [...l, s];
@@ -167,7 +188,7 @@ export class MobilisationAssistant implements OnInit {
   }
   protected sexe(s: SexeEnum | undefined): void { this.criteres.sexe = s; this.maj(); }
   protected reinitialiser(): void {
-    this.criteres = { regions: [], competences: [], toutesCompetences: false, cohorteIds: [], statutsMembre: ['ACTIF'], ageMin: 18, ageMax: 35, telephoneVerifieUniquement: false, exclureDejaMobilises: false };
+    this.criteres = { regions: [], competences: [], toutesCompetences: false, cohorteIds: [], statutsMembre: ['ACTIF'], ageMin: 18, ageMax: 35, telephoneVerifieUniquement: false, exclureDejaMobilises: false, completerAvecAutresCohortes: false, cohortesComplement: [] };
     this.verrouillerPerimetre();
     this.exclus.set(new Set());
     this.maj();
@@ -227,7 +248,7 @@ export class MobilisationAssistant implements OnInit {
     const lieu = this.info.region || this.info.lieu || '';
     const lim = this.info.dateLimiteReponse ? ` avant le ${dateMoyenne(this.info.dateLimiteReponse).replace(/ \d{4}$/, '')}` : '';
     return `Bonjour {prénom}, le SNJ organise ${this.info.titre ? '« ' + this.info.titre + ' »' : 'une mobilisation'}${lieu ? ' à ' + lieu : ''} (${this.periode()}). `
-      + `Votre profil correspond au besoin. Confirmez votre disponibilité dans l'application SNJPro${lim}.`;
+      + `Votre profil correspond au besoin. Confirmez votre disponibilité dans l'application Si-SNJ${lim}.`;
   }
 
   private criteresNettoyes(): MobilisationDTOs.Criteres {

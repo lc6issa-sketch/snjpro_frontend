@@ -6,10 +6,10 @@ import { MembreService } from '../../../core/services/membre.service';
 import { CohorteService } from '../../../core/services/cohorte.service';
 import { ReferentielService } from '../../../core/services/referentiel.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { CohorteDTO, LocalisationDTO, MembreDTO, MembreResponseDTO, SituationProfessionnelleDTO, StatutMembreEnum, StatutProfessionnelEnum } from '../../../models/api.models';
+import { CohorteDTO, LocalisationDTO, MembreDTO, MembreResponseDTO, SituationProfessionnelleDTO, StatutMembreEnum } from '../../../models/api.models';
 import { Icon } from '../../../shared/components/icon/icon';
 import { RelatifPipe } from '../../../shared/pipes/format.pipes';
-import { STATUT_PROFESSIONNEL } from '../../../shared/utils/libelles';
+import { TYPES_HANDICAP } from '../../../shared/utils/libelles';
 import { messageErreur } from '../../../shared/utils/http';
 
 /** Écran web 20 — Modifier le profil d'un membre (chaque modification est tracée dans l'historique). */
@@ -28,10 +28,13 @@ export class ModifierMembre implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
-  protected readonly statuts: { cle: StatutMembreEnum; libelle: string }[] = [
-    { cle: 'ACTIF', libelle: 'Actif' }, { cle: 'INACTIF', libelle: 'Inactif' }, { cle: 'SUSPENDU', libelle: 'Suspendu' }, { cle: 'ARCHIVE', libelle: 'Archivé' }
-  ];
-  protected readonly statutsPro = Object.entries(STATUT_PROFESSIONNEL).map(([cle, e]) => ({ cle: cle as StatutProfessionnelEnum, libelle: e.libelle }));
+  /** Statut administratif (Actif / Inactif est remplacé par l'aptitude) ; « Inactif » n'apparaît que pour une fiche déjà inactive. */
+  protected readonly statuts = computed<{ cle: StatutMembreEnum; libelle: string }[]>(() => [
+    { cle: 'ACTIF', libelle: 'Actif' },
+    ...(this.original()?.statut === 'INACTIF' ? [{ cle: 'INACTIF' as StatutMembreEnum, libelle: 'Inactif' }] : []),
+    { cle: 'SUSPENDU', libelle: 'Suspendu' }, { cle: 'ARCHIVE', libelle: 'Archivé' }
+  ]);
+  protected readonly typesHandicap = TYPES_HANDICAP;
   protected readonly original = signal<MembreResponseDTO | null>(null);
   protected readonly cohortes = signal<CohorteDTO[]>([]);
   protected readonly regions = signal<string[]>([]);
@@ -54,7 +57,8 @@ export class ModifierMembre implements OnInit {
           email: r.email, photoUrl: r.photoUrl, telephoneSecondaire: r.telephoneSecondaire, personneAPrevenir: r.personneAPrevenir,
           personneAPrevenirTelephone: r.personneAPrevenirTelephone, nationalite: r.nationalite, groupeSanguin: r.groupeSanguin, taille: r.taille, poids: r.poids,
           dernierDiplome: r.dernierDiplome, diplomes: r.diplomes, categorie: r.categorie, compagnie: r.compagnie,
-          section: r.section, brigade: r.brigade, dateIncorporation: r.dateIncorporation, disponibleMobilisation: r.disponibleMobilisation !== false, statut: r.statut, cohorteId: r.cohorteId
+          section: r.section, brigade: r.brigade, dateIncorporation: r.dateIncorporation, disponibleMobilisation: r.disponibleMobilisation !== false, statut: r.statut, cohorteId: r.cohorteId,
+          aptitude: r.aptitude ?? 'APTE', typeHandicap: r.typeHandicap
         };
         this.loc = { ...(r.localisation ?? { pays: 'Mali' }) };
         this.sit = { ...(r.situationProfessionnelle ?? {}) };
@@ -73,7 +77,13 @@ export class ModifierMembre implements OnInit {
     if (this.loc.region || this.loc.cercle || this.loc.commune || this.loc.quartier) {
       appels.push(o?.localisation ? this.service.localisation(id, this.loc) : this.service.creerLocalisation(id, { pays: 'Mali', ...this.loc }));
     }
-    if (this.sit.statut) appels.push(o?.situationProfessionnelle ? this.service.situation(id, this.sit) : this.service.creerSituation(id, this.sit));
+    // Seule la profession est saisie ; les autres champs existants (statut, employeur…) sont renvoyés tels quels
+    const profession = this.sit.profession?.trim() || undefined;
+    if (o?.situationProfessionnelle) {
+      if (profession !== (o.situationProfessionnelle.profession || undefined)) appels.push(this.service.situation(id, { ...this.sit, profession }));
+    } else if (profession) {
+      appels.push(this.service.creerSituation(id, { profession }));
+    }
     concat(...appels).pipe(toArray()).subscribe({
       next: () => { this.toast.success('Profil mis à jour.'); this.router.navigate(['/membres', id]); },
       error: e => { this.envoi.set(false); this.toast.error(messageErreur(e)); }

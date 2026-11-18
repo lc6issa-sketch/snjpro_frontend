@@ -13,7 +13,7 @@ import { Pill } from '../../../shared/components/pill/pill';
 import { Ring } from '../../../shared/components/charts/ring/ring';
 import { Modal } from '../../../shared/components/modal/modal';
 import { DateCourtePipe, DateHeurePipe, DateMoyennePipe, TelephonePipe } from '../../../shared/pipes/format.pipes';
-import { NIVEAU_COMPETENCE, STATUT_COHORTE, STATUT_MEMBRE, STATUT_PROFESSIONNEL, TYPE_DOCUMENT, etiquetteAction } from '../../../shared/utils/libelles';
+import { NIVEAU_COMPETENCE, APTITUDE, STATUT_COHORTE, STATUT_MEMBRE, STATUT_PROFESSIONNEL, TYPE_DOCUMENT, etiquetteAction } from '../../../shared/utils/libelles';
 import { AjoutParcours } from '../ajout-parcours/ajout-parcours';
 import { DocumentService } from '../../../core/services/document.service';
 import { MessagerieService } from '../../../core/services/messagerie.service';
@@ -42,6 +42,7 @@ export class ProfilMembre implements OnInit, OnDestroy {
   protected readonly auth = inject(AuthService);
 
   protected readonly STATUT = STATUT_MEMBRE;
+  protected readonly APTITUDE = APTITUDE;
   protected readonly STATUT_COHORTE = STATUT_COHORTE;
   protected readonly STATUT_PRO = STATUT_PROFESSIONNEL;
   protected readonly NIVEAU = NIVEAU_COMPETENCE;

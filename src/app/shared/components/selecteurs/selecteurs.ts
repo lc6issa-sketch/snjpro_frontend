@@ -25,7 +25,7 @@ const heureActuelle = () => { const d = new Date(); return `${pad(d.getHours())}
 
 /**
  * Remplace, pour toute l'application, les popups natives des listes déroulantes (<select>)
- * et des champs date / mois / date-heure / heure par des panneaux aux couleurs SNJPro.
+ * et des champs date / mois / date-heure / heure par des panneaux aux couleurs Si-SNJ.
  * Le contrôle natif reste en place (ngModel, validation, clavier) : seule sa popup est interceptée,
  * et la valeur choisie lui est réécrite avec les événements input/change habituels.
  */

@@ -1,6 +1,6 @@
 <div class="haut">
   <h1>Connexion</h1>
-  <p class="intro">Accédez à votre espace de gestion SNJPro.</p>
+  <p class="intro">Accédez à votre espace de gestion Si-SNJ.</p>
   @if (expire) { <div class="notice warn mt-16"><app-icon name="clock" [size]="16" />Votre session a expiré. Reconnectez-vous.</div> }
   <form (ngSubmit)="seConnecter()" #f="ngForm">
     <div class="field">
@@ -8,7 +8,7 @@
       <div class="input-icon">
         <app-icon name="mail" [size]="17" />
         <input id="identifiant" name="identifiant" class="input" [(ngModel)]="identifiant" required autocomplete="username"
-               placeholder="prenom.nom@snj-pro.ml" />
+               placeholder="prenom.nom@si-snj.ml" />
       </div>
     </div>
     <div class="field">

@@ -7,15 +7,15 @@ import { CohorteDTO, StatutCohorteEnum } from '../../../models/api.models';
 import { Icon } from '../../../shared/components/icon/icon';
 import { Pill } from '../../../shared/components/pill/pill';
 import { NombrePipe } from '../../../shared/pipes/format.pipes';
-import { STATUT_COHORTE } from '../../../shared/utils/libelles';
+import { STATUT_COHORTE, TYPE_COHORTE } from '../../../shared/utils/libelles';
 import { CohorteForm } from '../cohorte-form/cohorte-form';
 import { periodeCohorte } from '../cohorte-visuel';
 
 const ONGLETS: { cle: StatutCohorteEnum | null; libelle: string; compteur: string }[] = [
   { cle: null, libelle: 'Toutes', compteur: 'TOUTES' },
   { cle: 'EN_FORMATION', libelle: 'En formation', compteur: 'EN_FORMATION' },
-  { cle: 'LIBEREE', libelle: 'Libérées', compteur: 'LIBEREE' },
-  { cle: 'EN_RESERVE', libelle: 'En réserve', compteur: 'EN_RESERVE' },
+  { cle: 'INCORPOREE', libelle: 'Incorporées', compteur: 'INCORPOREE' },
+  { cle: 'EN_FONCTION', libelle: 'En fonction', compteur: 'EN_FONCTION' },
   { cle: 'ARCHIVEE', libelle: 'Archivées', compteur: 'ARCHIVEE' }
 ];
 
@@ -32,6 +32,7 @@ export class CohortesListe implements OnInit {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   protected readonly STATUT = STATUT_COHORTE;
+  protected readonly TYPE = TYPE_COHORTE;
   protected readonly onglets = ONGLETS;
   protected readonly cohortes = signal<CohorteDTO[]>([]);
   protected readonly compteurs = signal<Record<string, number | undefined>>({});
