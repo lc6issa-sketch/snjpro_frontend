@@ -1,4 +1,5 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';   // ← CHANGEMENT 1 : ajout de PLATFORM_ID
+import { isPlatformBrowser } from '@angular/common';                        // ← CHANGEMENT 1 : nouvel import
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environments } from '../../../environments/environments';
@@ -20,6 +21,7 @@ export const LOGOS: Record<LogoApplication, { libelle: string; detail: string; e
 @Injectable({ providedIn: 'root' })
 export class ApparenceService {
   private readonly http = inject(HttpClient);
+  private readonly navigateur = isPlatformBrowser(inject(PLATFORM_ID));    // ← CHANGEMENT 2 : détecte navigateur vs serveur
   private readonly apiUrl = `${environments.apiUrl}/apparence`;
 
   readonly logo = signal<LogoApplication>(lireMemorise());
@@ -27,6 +29,8 @@ export class ApparenceService {
   /** Applique le choix mémorisé tout de suite, puis celui du serveur. */
   initialiser(): void {
     this.appliquer(this.logo());
+    // ← CHANGEMENT 3 : pas d'appel réseau pendant le build / SSR (la requête ne se terminait jamais)
+    if (!this.navigateur) return;
     this.http.get<ApparenceDTO>(this.apiUrl).subscribe({ next: a => this.appliquer(a.logo ?? 'VERT'), error: () => undefined });
   }
 
